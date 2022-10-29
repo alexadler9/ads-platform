@@ -3,10 +3,11 @@ import lombok.Data;
 import java.util.List;
 
 /**
- * ResponseWrapperAds
+ * ResponseWrapperAdsComment
  */
 @Data
-public class ResponseWrapperAds   {
+public class ResponseWrapperAdsCommentDto {
   private Integer count;
-  private List<Ads> results;
+  private List<AdsCommentDto> results;
+
 }

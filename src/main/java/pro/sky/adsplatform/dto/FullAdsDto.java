@@ -5,7 +5,7 @@ import lombok.Data;
  * FullAds
  */
 @Data
-public class FullAds   {
+public class FullAdsDto {
   private String authorFirstName;
   private String authorLastName ;
   private String description;
