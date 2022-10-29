@@ -5,7 +5,7 @@ import lombok.Data;
  * CreateAds
  */
 @Data
-public class CreateAds   {
+public class CreateAdsDto {
   private String description;
   private String image;
   private Integer pk;

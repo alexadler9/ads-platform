@@ -6,7 +6,7 @@ import java.time.OffsetDateTime;
  * AdsComment
  */
 @Data
-public class AdsComment   {
+public class AdsCommentDto {
   private Integer author;
   private OffsetDateTime createdAt;
   private Integer pk;

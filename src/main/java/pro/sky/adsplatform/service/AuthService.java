@@ -6,8 +6,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
-import pro.sky.adsplatform.dto.RegisterReq;
-import pro.sky.adsplatform.dto.Role;
+import pro.sky.adsplatform.dto.RegisterReqDto;
+import pro.sky.adsplatform.dto.RoleDto;
 
 @Service
 public class AuthService {
@@ -30,7 +30,7 @@ public class AuthService {
         return encoder.matches(password, encryptedPasswordWithoutEncryptionType);
     }
 
-    public boolean register(RegisterReq registerReq, Role role) {
+    public boolean register(RegisterReqDto registerReq, RoleDto role) {
         if (manager.userExists(registerReq.getUsername())) {
             return false;
         }
