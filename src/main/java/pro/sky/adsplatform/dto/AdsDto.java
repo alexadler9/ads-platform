@@ -1,9 +1,6 @@
 package pro.sky.adsplatform.dto;
 import lombok.Data;
 
-/**
- * Ads
- */
 @Data
 public class AdsDto {
   private Integer author;
@@ -11,5 +8,4 @@ public class AdsDto {
   private Integer pk;
   private Integer price;
   private String title;
-
 }

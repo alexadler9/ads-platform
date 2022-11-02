@@ -1,9 +1,6 @@
 package pro.sky.adsplatform.dto;
 import lombok.Data;
 
-/**
- * CreateUser
- */
 @Data
 public class CreateUserDto {
   private String firstName;
