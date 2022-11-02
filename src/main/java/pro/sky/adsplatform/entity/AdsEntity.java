@@ -4,7 +4,7 @@ import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
-import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -25,6 +25,9 @@ public class AdsEntity {
     private String description;
 
     private BigDecimal price;
+
+    @OneToMany(mappedBy = "ads", fetch = FetchType.EAGER)
+    private List<AdsImageEntity> images;
 
     public AdsEntity() {
     }
@@ -69,6 +72,18 @@ public class AdsEntity {
         this.price = price;
     }
 
+    public List<AdsImageEntity> getImages() {
+        return images;
+    }
+
+    public void setImages(List<AdsImageEntity> images) {
+        this.images = images;
+    }
+
+    public AdsImageEntity getLastImage() {
+        return (images.size() == 0) ? null : images.get(images.size() - 1);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -90,6 +105,7 @@ public class AdsEntity {
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
                 ", price=" + price +
+                ", images=" + images +
                 '}';
     }
 }
