@@ -21,8 +21,15 @@ CREATE TABLE ads
     id_author       bigint          REFERENCES users (id),
     title           text            NOT NULL,
     description     text            NOT NULL,
-    price           decimal(17, 2)  NOT NULL CHECK (price > 0::decimal),
-    image           bytea
+    price           decimal(17, 2)  NOT NULL CHECK (price > 0::decimal)
+);
+
+-- создать таблицу "Изображения"
+CREATE TABLE ads_images
+(
+    id              bigserial   PRIMARY KEY,
+    id_ads          bigint      REFERENCES ads (id),
+    image           bytea       NOT NULL
 );
 
 -- создать таблицу "Отзывы"

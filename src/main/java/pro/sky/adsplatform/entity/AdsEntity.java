@@ -26,8 +26,6 @@ public class AdsEntity {
 
     private BigDecimal price;
 
-    private byte[] image;
-
     public AdsEntity() {
     }
 
@@ -71,14 +69,6 @@ public class AdsEntity {
         this.price = price;
     }
 
-    public byte[] getImage() {
-        return image;
-    }
-
-    public void setImage(byte[] image) {
-        this.image = image;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -100,7 +90,6 @@ public class AdsEntity {
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
                 ", price=" + price +
-                ", image=" + Arrays.toString(image) +
                 '}';
     }
 }
