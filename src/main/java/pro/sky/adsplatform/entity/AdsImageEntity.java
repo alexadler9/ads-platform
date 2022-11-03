@@ -17,7 +17,7 @@ public class AdsImageEntity {
 
     @ManyToOne
     @JoinColumn(name = "id_ads")
-    private UserEntity ads;
+    private AdsEntity ads;
 
     private byte[] image;
 
@@ -32,11 +32,11 @@ public class AdsImageEntity {
         this.id = id;
     }
 
-    public UserEntity getAds() {
+    public AdsEntity getAds() {
         return ads;
     }
 
-    public void setAds(UserEntity ads) {
+    public void setAds(AdsEntity ads) {
         this.ads = ads;
     }
 
