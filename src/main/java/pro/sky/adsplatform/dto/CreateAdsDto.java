@@ -1,9 +1,6 @@
 package pro.sky.adsplatform.dto;
 import lombok.Data;
 
-/**
- * CreateAds
- */
 @Data
 public class CreateAdsDto {
   private String description;
@@ -11,5 +8,4 @@ public class CreateAdsDto {
   private Integer pk;
   private Integer price;
   private String title;
-
 }
