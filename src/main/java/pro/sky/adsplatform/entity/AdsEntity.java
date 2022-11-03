@@ -1,5 +1,6 @@
 package pro.sky.adsplatform.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.*;
@@ -26,6 +27,7 @@ public class AdsEntity {
 
     private BigDecimal price;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "ads", fetch = FetchType.EAGER)
     private List<AdsImageEntity> images;
 
@@ -81,7 +83,7 @@ public class AdsEntity {
     }
 
     public AdsImageEntity getLastImage() {
-        return (images.size() == 0) ? null : images.get(images.size() - 1);
+        return ((images == null) || (images.size()) == 0) ? null : images.get(images.size() - 1);
     }
 
     @Override

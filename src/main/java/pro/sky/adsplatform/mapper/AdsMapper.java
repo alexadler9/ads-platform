@@ -8,7 +8,7 @@ import pro.sky.adsplatform.dto.AdsDto;
 import pro.sky.adsplatform.entity.AdsEntity;
 import pro.sky.adsplatform.entity.AdsImageEntity;
 
-import java.util.Arrays;
+import java.nio.charset.StandardCharsets;
 
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface AdsMapper {
@@ -20,7 +20,8 @@ public interface AdsMapper {
     @Named("getLastImageString")
     default String getLastImageString(AdsEntity entity) {
         AdsImageEntity lastImage = entity.getLastImage();
-        return (lastImage == null) ? null : Arrays.toString(lastImage.getImage());
+        return ((lastImage == null) || (lastImage.getImage() == null)) ? null :
+                new String(lastImage.getImage(), StandardCharsets.UTF_8);
     }
 
     @Mapping(target = "id", source = "pk")
