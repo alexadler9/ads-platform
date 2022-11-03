@@ -1,11 +1,12 @@
 package pro.sky.adsplatform.mapper;
 
+import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import pro.sky.adsplatform.dto.AdsCommentDto;
 import pro.sky.adsplatform.entity.AdsCommentEntity;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface AdsCommentMapper {
     @Mapping(target = "pk", source = "id")
     @Mapping(target = "author", source = "author.id")

@@ -1,5 +1,6 @@
 package pro.sky.adsplatform.mapper;
 
+import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -9,7 +10,7 @@ import pro.sky.adsplatform.entity.AdsImageEntity;
 
 import java.util.Arrays;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface AdsMapper {
     @Mapping(target = "pk", source = "id")
     @Mapping(target = "author", source = "author.id")
