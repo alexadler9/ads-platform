@@ -24,6 +24,6 @@ public interface AdsMapper {
 
     @Mapping(target = "id", source = "pk")
     @Mapping(target = "author.id", source = "author")
-//    @Mapping(target = "image", source = "entity", qualifiedByName = "getLastImageString")
+    @Mapping(target = "images", ignore = true)
     AdsEntity adsDtoToAds(AdsDto ads);
 }

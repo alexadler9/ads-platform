@@ -8,6 +8,6 @@ import pro.sky.adsplatform.entity.AdsEntity;
 @Mapper(componentModel = "spring")
 public interface CreateAdsMapper {
     @Mapping(target = "id", source = "pk")
-//    @Mapping(target = "image", source = "entity", qualifiedByName = "getLastImageString")
+    @Mapping(target = "images", ignore = true)
     AdsEntity createAdsDtoToAds(CreateAdsDto dto);
 }
