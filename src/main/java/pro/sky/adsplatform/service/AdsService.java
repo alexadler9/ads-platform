@@ -40,33 +40,4 @@ public class AdsService {
     public List<AdsEntity> getAllAds() {
         return adsRepository.findAll();
     }
-
-    /**
-     * Добавить новое объявление.
-     *
-     * @param ads новое объявление.
-     */
-    public void addAds(AdsEntity ads) {
-        throw new UnsupportedOperationException("ads add is not supported");
-    }
-
-    /**
-     * Обновить данные объявления.
-     *
-     * @param id ID объявления.
-     * @param ads новые данные объявления.
-     */
-    public void updateAds(long id, AdsEntity ads) {
-        throw new UnsupportedOperationException("ads update is not supported");
-    }
-
-    /**
-     * Удалить объявление.
-     *
-     * @param id ID объявления.
-     */
-    @Transactional
-    public void deleteAds(Long id) {
-        adsRepository.deleteById(id);
-    }
 }

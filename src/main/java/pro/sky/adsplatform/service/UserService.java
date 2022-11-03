@@ -39,23 +39,4 @@ public class UserService {
     public List<UserEntity> getAllUsers() {
         return userRepository.findAll();
     }
-
-    /**
-     * Обновить данные пользователя.
-     *
-     * @param user новые данные пользователя.
-     */
-    public void updateUser(UserEntity user) {
-        throw new UnsupportedOperationException("user update is not supported");
-    }
-
-    /**
-     * Обновить пароль пользователя.
-     *
-     * @param currentPassword текущий пароль пользователя.
-     * @param newPassword новый пароль пользователя.
-     */
-    public void updateUserPassword(String currentPassword, String newPassword) {
-        throw new UnsupportedOperationException("user password update is not supported");
-    }
 }
