@@ -28,10 +28,6 @@ public class MapperTestConstants {
 
     public static final AdsCommentDto ADS_COMMENT_DTO;
 
-    public static final LoginReqDto LOGIN_REQ_DTO;
-
-    public static final NewPasswordDto NEW_PASSWORD_DTO;
-
     public static final RegisterReqDto REGISTER_REQ_DTO;
 
     static {
@@ -89,14 +85,6 @@ public class MapperTestConstants {
         ADS_COMMENT_DTO.setCreatedAt(LocalDateTime.of(2022, Month.JANUARY, 1, 12, 0, 0));
         ADS_COMMENT_DTO.setPk(1);
         ADS_COMMENT_DTO.setText("text");
-
-        LOGIN_REQ_DTO = new LoginReqDto();
-        LOGIN_REQ_DTO.setPassword("password");
-        LOGIN_REQ_DTO.setUsername("username");
-
-        NEW_PASSWORD_DTO = new NewPasswordDto();
-        NEW_PASSWORD_DTO.setCurrentPassword("currentPassword");
-        NEW_PASSWORD_DTO.setNewPassword("newPassword");
 
         REGISTER_REQ_DTO = new RegisterReqDto();
         REGISTER_REQ_DTO.setUsername("username");
