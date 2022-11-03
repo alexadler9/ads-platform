@@ -11,11 +11,11 @@ import java.util.Arrays;
 
 @Mapper(componentModel = "spring")
 public interface FullAdsMapper {
-    @Mapping(target = "authorFirstName", source = "entity.author.firstName")
-    @Mapping(target = "authorLastName", source = "entity.author.lastName")
-    @Mapping(target = "email", source = "entity.author.email")
-    @Mapping(target = "phone", source = "entity.author.phone")
-    @Mapping(target = "pk", source = "entity.id")
+    @Mapping(target = "authorFirstName", source = "author.firstName")
+    @Mapping(target = "authorLastName", source = "author.lastName")
+    @Mapping(target = "email", source = "author.email")
+    @Mapping(target = "phone", source = "author.phone")
+    @Mapping(target = "pk", source = "id")
     @Mapping(target = "image", source = "entity", qualifiedByName = "getLastImageString")
     FullAdsDto adsToFullAdsDto(AdsEntity entity);
 

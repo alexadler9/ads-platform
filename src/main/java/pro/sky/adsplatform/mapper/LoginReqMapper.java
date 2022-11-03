@@ -7,6 +7,6 @@ import pro.sky.adsplatform.entity.UserEntity;
 
 @Mapper(componentModel = "spring")
 public interface LoginReqMapper {
-    @Mapping(target = "email", source = "dto.username")
+    @Mapping(target = "email", source = "username")
     UserEntity loginReqDtoToUser(LoginReqDto dto);
 }

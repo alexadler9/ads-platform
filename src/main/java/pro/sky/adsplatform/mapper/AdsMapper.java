@@ -11,8 +11,8 @@ import java.util.Arrays;
 
 @Mapper(componentModel = "spring")
 public interface AdsMapper {
-    @Mapping(target = "pk", source = "entity.id")
-    @Mapping(target = "author", source = "entity.author.id")
+    @Mapping(target = "pk", source = "id")
+    @Mapping(target = "author", source = "author.id")
     @Mapping(target = "image", source = "entity", qualifiedByName = "getLastImageString")
     AdsDto adsToAdsDto(AdsEntity entity);
 
@@ -22,8 +22,8 @@ public interface AdsMapper {
         return (lastImage == null) ? null : Arrays.toString(lastImage.getImage());
     }
 
-    @Mapping(target = "id", source = "ads.pk")
-    @Mapping(target = "author.id", source = "ads.author")
+    @Mapping(target = "id", source = "pk")
+    @Mapping(target = "author.id", source = "author")
 //    @Mapping(target = "image", source = "entity", qualifiedByName = "getLastImageString")
     AdsEntity adsDtoToAds(AdsDto ads);
 }

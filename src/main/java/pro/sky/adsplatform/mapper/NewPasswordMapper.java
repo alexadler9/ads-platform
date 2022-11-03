@@ -7,6 +7,6 @@ import pro.sky.adsplatform.entity.UserEntity;
 
 @Mapper(componentModel = "spring")
 public interface NewPasswordMapper {
-    @Mapping(target = "password", source = "dto.newPassword")
+    @Mapping(target = "password", source = "newPassword")
     UserEntity newPasswordDtoToUser(NewPasswordDto dto);
 }

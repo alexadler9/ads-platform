@@ -7,13 +7,13 @@ import pro.sky.adsplatform.entity.AdsCommentEntity;
 
 @Mapper(componentModel = "spring")
 public interface AdsCommentMapper {
-    @Mapping(target = "pk", source = "entity.id")
-    @Mapping(target = "author", source = "entity.author.id")
-    @Mapping(target = "createdAt", source = "entity.dateTime")
+    @Mapping(target = "pk", source = "id")
+    @Mapping(target = "author", source = "author.id")
+    @Mapping(target = "createdAt", source = "dateTime")
     AdsCommentDto adsCommentToAdsCommentDto(AdsCommentEntity entity);
 
-    @Mapping(target = "id", source = "dto.pk")
-    @Mapping(target = "author.id", source = "dto.author")
-    @Mapping(target = "dateTime", source = "dto.createdAt")
+    @Mapping(target = "id", source = "pk")
+    @Mapping(target = "author.id", source = "author")
+    @Mapping(target = "dateTime", source = "createdAt")
     AdsCommentEntity adsCommentDtoToAdsComment(AdsCommentDto dto);
 }
