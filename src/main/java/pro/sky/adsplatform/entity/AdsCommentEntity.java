@@ -21,7 +21,7 @@ public class AdsCommentEntity {
 
     @ManyToOne
     @JoinColumn(name = "id_ads")
-    private UserEntity ads;
+    private AdsEntity ads;
 
     @Column(name = "comment_time")
     private LocalDateTime dateTime;
@@ -48,11 +48,11 @@ public class AdsCommentEntity {
         this.author = author;
     }
 
-    public UserEntity getAds() {
+    public AdsEntity getAds() {
         return ads;
     }
 
-    public void setAds(UserEntity ads) {
+    public void setAds(AdsEntity ads) {
         this.ads = ads;
     }
 

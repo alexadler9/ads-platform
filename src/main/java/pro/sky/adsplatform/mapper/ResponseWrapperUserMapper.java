@@ -1,5 +1,6 @@
 package pro.sky.adsplatform.mapper;
 
+import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import pro.sky.adsplatform.dto.ResponseWrapperUserDto;
@@ -7,7 +8,7 @@ import pro.sky.adsplatform.entity.UserEntity;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring", uses = UserListMapper.class)
+@Mapper(componentModel = "spring", uses = UserListMapper.class, injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface ResponseWrapperUserMapper {
     @Mapping(target = "count", source = "sizeList")
     @Mapping(target = "results", source = "entityList")

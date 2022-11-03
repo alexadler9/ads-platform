@@ -1,5 +1,6 @@
 package pro.sky.adsplatform.mapper;
 
+import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -7,23 +8,24 @@ import pro.sky.adsplatform.dto.AdsDto;
 import pro.sky.adsplatform.entity.AdsEntity;
 import pro.sky.adsplatform.entity.AdsImageEntity;
 
-import java.util.Arrays;
+import java.nio.charset.StandardCharsets;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface AdsMapper {
-    @Mapping(target = "pk", source = "entity.id")
-    @Mapping(target = "author", source = "entity.author.id")
+    @Mapping(target = "pk", source = "id")
+    @Mapping(target = "author", source = "author.id")
     @Mapping(target = "image", source = "entity", qualifiedByName = "getLastImageString")
     AdsDto adsToAdsDto(AdsEntity entity);
 
     @Named("getLastImageString")
     default String getLastImageString(AdsEntity entity) {
         AdsImageEntity lastImage = entity.getLastImage();
-        return (lastImage == null) ? null : Arrays.toString(lastImage.getImage());
+        return ((lastImage == null) || (lastImage.getImage() == null)) ? null :
+                new String(lastImage.getImage(), StandardCharsets.UTF_8);
     }
 
-    @Mapping(target = "id", source = "ads.pk")
-    @Mapping(target = "author.id", source = "ads.author")
-//    @Mapping(target = "image", source = "entity", qualifiedByName = "getLastImageString")
+    @Mapping(target = "id", source = "pk")
+    @Mapping(target = "author.id", source = "author")
+    @Mapping(target = "images", ignore = true)
     AdsEntity adsDtoToAds(AdsDto ads);
 }
