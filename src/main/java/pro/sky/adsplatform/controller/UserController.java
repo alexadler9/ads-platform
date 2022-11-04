@@ -34,34 +34,6 @@ public class UserController {
         this.request = request;
     }
 
-    @Operation(
-            summary = "addUser",
-            description = "Добавить пользователя",
-            tags = {"Пользователи"},
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "OK"),
-                    @ApiResponse(responseCode = "201", description = "Created"),
-                    @ApiResponse(responseCode = "401", description = "Unauthorized"),
-                    @ApiResponse(responseCode = "403", description = "Forbidden"),
-                    @ApiResponse(responseCode = "404", description = "Not Found")
-            }
-    )
-    @PostMapping
-    public ResponseEntity<CreateUserDto> addUser(@Parameter(in = ParameterIn.DEFAULT, description = "user", required = true, schema = @Schema()) @Valid @RequestBody CreateUserDto body) {
-        log.debug("CreateUserDto is running");
-        String accept = request.getHeader("Accept");
-        if (accept != null && accept.contains("application/json")) {
-            try {
-                return new ResponseEntity<CreateUserDto>(objectMapper.readValue("{\n  \"firstName\" : \"firstName\",\n  \"lastName\" : \"lastName\",\n  \"password\" : \"password\",\n  \"phone\" : \"phone\",\n  \"email\" : \"email\"\n}", CreateUserDto.class), HttpStatus.NOT_IMPLEMENTED);
-            } catch (IOException e) {
-                log.error("Couldn't serialize response for content type application/json", e);
-                return new ResponseEntity<CreateUserDto>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        }
-
-        return new ResponseEntity<CreateUserDto>(HttpStatus.NOT_IMPLEMENTED);
-    }
-
     /**
      * Возвращает список всех пользователей.
      */
