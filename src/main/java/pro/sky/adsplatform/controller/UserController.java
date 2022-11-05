@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pro.sky.adsplatform.dto.*;
+import pro.sky.adsplatform.entity.UserEntity;
+import pro.sky.adsplatform.mapper.UserMapper;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -22,6 +24,7 @@ import java.io.IOException;
 @RequestMapping("/users")
 public class UserController {
 
+    private final UserMapper userMapper;
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
 
     private final ObjectMapper objectMapper;
@@ -29,7 +32,8 @@ public class UserController {
     private final HttpServletRequest request;
 
     @org.springframework.beans.factory.annotation.Autowired
-    public UserController(ObjectMapper objectMapper, HttpServletRequest request) {
+    public UserController(UserMapper userMapper, ObjectMapper objectMapper, HttpServletRequest request) {
+        this.userMapper = userMapper;
         this.objectMapper = objectMapper;
         this.request = request;
     }
@@ -81,16 +85,10 @@ public class UserController {
 
     @PatchMapping("/me")
     public ResponseEntity<UserDto> updateUserUsingPATCH(@Parameter(in = ParameterIn.DEFAULT, description = "user", required = true, schema = @Schema()) @Valid @RequestBody UserDto body) {
-        log.debug("updateUserUsingPATCH is running");
-        String accept = request.getHeader("Accept");
-        if (accept != null && accept.contains("application/json")) {
-            try {
-                return new ResponseEntity<UserDto>(objectMapper.readValue("{\n  \"firstName\" : \"firstName\",\n  \"lastName\" : \"lastName\",\n  \"phone\" : \"phone\",\n  \"id\" : 6,\n  \"email\" : \"email\"\n}", UserDto.class), HttpStatus.NOT_IMPLEMENTED);
-            } catch (IOException e) {
-                log.error("Couldn't serialize response for content type application/json", e);
-                return new ResponseEntity<UserDto>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        }
+        log.info("body {}", body.toString());
+
+        UserEntity userEntity = userMapper.userDtoToUser(body);
+        log.info("user {}", userEntity.toString());
 
         return new ResponseEntity<UserDto>(HttpStatus.NOT_IMPLEMENTED);
     }
