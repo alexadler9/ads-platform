@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import pro.sky.adsplatform.entity.AdsCommentEntity;
+import pro.sky.adsplatform.mapper.AdsCommentMapper;
 import pro.sky.adsplatform.repository.AdsCommentRepository;
 
 import java.util.List;
@@ -17,7 +18,8 @@ public class AdsCommentService {
 
     private final AdsCommentRepository adsCommentRepository;
 
-    public AdsCommentService(AdsCommentRepository adsCommentRepository) {
+
+    public AdsCommentService(AdsCommentRepository adsCommentRepository, AdsCommentMapper adsCommentMapper) {
         this.adsCommentRepository = adsCommentRepository;
     }
 
@@ -40,5 +42,13 @@ public class AdsCommentService {
      */
     public List<AdsCommentEntity> getAllAdsComments(long idAds) {
         return adsCommentRepository.findAllByAds_Id(idAds);
+    }
+
+    /**
+     * Сохраняет комментарий.
+     */
+    public void saveAddAdsCommentsUsingPOST(AdsCommentEntity adsCommentEntity) {
+        adsCommentRepository.save(adsCommentEntity);
+
     }
 }

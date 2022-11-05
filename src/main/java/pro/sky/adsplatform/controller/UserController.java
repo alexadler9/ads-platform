@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import pro.sky.adsplatform.dto.*;
 import pro.sky.adsplatform.entity.UserEntity;
 import pro.sky.adsplatform.mapper.UserMapper;
+import pro.sky.adsplatform.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -25,6 +26,8 @@ import java.io.IOException;
 public class UserController {
 
     private final UserMapper userMapper;
+    private final UserService userService;
+
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
 
     private final ObjectMapper objectMapper;
@@ -32,8 +35,9 @@ public class UserController {
     private final HttpServletRequest request;
 
     @org.springframework.beans.factory.annotation.Autowired
-    public UserController(UserMapper userMapper, ObjectMapper objectMapper, HttpServletRequest request) {
+    public UserController(UserMapper userMapper, UserService userService, ObjectMapper objectMapper, HttpServletRequest request) {
         this.userMapper = userMapper;
+        this.userService = userService;
         this.objectMapper = objectMapper;
         this.request = request;
     }
