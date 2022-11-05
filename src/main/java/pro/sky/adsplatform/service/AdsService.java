@@ -3,6 +3,7 @@ package pro.sky.adsplatform.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import pro.sky.adsplatform.entity.AdsCommentEntity;
 import pro.sky.adsplatform.entity.AdsEntity;
 import pro.sky.adsplatform.repository.AdsRepository;
 
@@ -39,5 +40,13 @@ public class AdsService {
      */
     public List<AdsEntity> getAllAds() {
         return adsRepository.findAll();
+    }
+
+    /**
+     * Сохраняет обьявление.
+     */
+    public void saveAddAdsUsingPOST(AdsEntity adsEntity) {
+        adsRepository.save(adsEntity);
+
     }
 }
