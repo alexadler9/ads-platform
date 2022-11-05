@@ -3,8 +3,8 @@ package pro.sky.adsplatform.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import pro.sky.adsplatform.dto.NewPasswordDto;
 import pro.sky.adsplatform.entity.UserEntity;
+import pro.sky.adsplatform.exception.NotFoundException;
 import pro.sky.adsplatform.repository.UserRepository;
 
 import java.util.List;
@@ -42,39 +42,34 @@ public class UserService {
     }
 
     /**
-     *Обновление данные пользователя.
+     * Обновление данные пользователя.
+     *
      * @return
      */
     public UserEntity updateUser(UserEntity userEntity) {
         LOGGER.info("Обновление данных пользователя");
-/*        if (userEntity.getId() != null) {
+        if (userEntity.getId() != null) {
             userRepository.findById(userEntity.getId())
-                            .ifPresent(user -> {
-                                user.setFirstName(userEntity.getFirstName());
-                                user.setLastName(userEntity.getLastName());
-                                user.setPhone(userEntity.getPhone());
-                                user.setId(userEntity.getId());
-                                user.setEmail(userEntity.getEmail());
-                            });
-           }*/
+                    .ifPresent(user -> {
+                        user.setFirstName(userEntity.getFirstName());
+                        user.setLastName(userEntity.getLastName());
+                        user.setPhone(userEntity.getPhone());
+                        user.setId(userEntity.getId());
+                        user.setEmail(userEntity.getEmail());
+                    });
+        } else {
+            LOGGER.error("В базе такой пользователь отстустсвует");
+            throw new NotFoundException("В базе такой пользователь отстустсвует");
+        }
         return userRepository.save(userEntity);
     }
 
     /**
-     *Обновление пароля пользователя.
+     * Обновление пароля пользователя.
+     *
      * @return
      */
-    public UserEntity setPassword(UserEntity newPasswordDto) {
+    public void setPassword() {
         LOGGER.info("Обновление пароля пользователя");
-/*                if (newPasswordDto.getId() != null) {
-            userRepository.findById(newPasswordDto.getId())
-                            .ifPresent(user -> {
-                                user.setPassword(newPasswordDto.getPassword());
-                            });
-           }*/
-        return userRepository.save(newPasswordDto);
     }
-
-
-
 }
