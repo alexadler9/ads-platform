@@ -16,10 +16,8 @@ import org.springframework.web.bind.annotation.*;
 import pro.sky.adsplatform.dto.*;
 import pro.sky.adsplatform.entity.AdsCommentEntity;
 import pro.sky.adsplatform.entity.AdsEntity;
-import pro.sky.adsplatform.mapper.AdsCommentMapper;
-import pro.sky.adsplatform.mapper.AdsMapper;
-import pro.sky.adsplatform.mapper.CreateAdsMapper;
-import pro.sky.adsplatform.mapper.ResponseWrapperAdsCommentMapper;
+import pro.sky.adsplatform.exception.NotFoundException;
+import pro.sky.adsplatform.mapper.*;
 import pro.sky.adsplatform.service.AdsCommentService;
 import pro.sky.adsplatform.service.AdsService;
 
@@ -38,6 +36,8 @@ public class AdsController {
     private final AdsMapper adsMapper;
     private final CreateAdsMapper createAdsMapper;
     private final AdsService adsService;
+    private final ResponseWrapperAdsMapper responseWrapperAdsMapper;
+    private final FullAdsMapper fullAdsMapper;
 
 
     private static final Logger log = LoggerFactory.getLogger(AdsController.class);
@@ -47,20 +47,22 @@ public class AdsController {
     private final HttpServletRequest request;
 
     @org.springframework.beans.factory.annotation.Autowired
-    public AdsController(AdsCommentService adsCommentService, AdsCommentMapper adsCommentMapper, ResponseWrapperAdsCommentMapper responseWrapperAdsCommentMapper, AdsMapper adsMapper, CreateAdsMapper createAdsMapper, AdsService adsService, ObjectMapper objectMapper, HttpServletRequest request) {
+    public AdsController(AdsCommentService adsCommentService, AdsCommentMapper adsCommentMapper, ResponseWrapperAdsCommentMapper responseWrapperAdsCommentMapper, AdsMapper adsMapper, CreateAdsMapper createAdsMapper, AdsService adsService, ResponseWrapperAdsMapper responseWrapperAdsMapper, FullAdsMapper fullAdsMapper, ObjectMapper objectMapper, HttpServletRequest request) {
         this.adsCommentService = adsCommentService;
         this.adsCommentMapper = adsCommentMapper;
         this.responseWrapperAdsCommentMapper = responseWrapperAdsCommentMapper;
         this.adsMapper = adsMapper;
         this.createAdsMapper = createAdsMapper;
         this.adsService = adsService;
+        this.responseWrapperAdsMapper = responseWrapperAdsMapper;
+        this.fullAdsMapper = fullAdsMapper;
         this.objectMapper = objectMapper;
         this.request = request;
     }
 
     @Operation(
             summary = "addAdsComments",
-            description = "Проверить имплиментацию",
+            description = "",
             tags = {"Объявления"},
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
@@ -96,7 +98,7 @@ public class AdsController {
         AdsEntity adsEntity = createAdsMapper.createAdsDtoToAds(body);
         adsService.saveAddAdsUsingPOST(adsEntity);
 
-        return  ResponseEntity.ok(createAdsMapper.adsToCreateAdsDto(adsEntity));
+        return ResponseEntity.ok(createAdsMapper.adsToCreateAdsDto(adsEntity));
     }
 
     @Operation(
@@ -111,9 +113,17 @@ public class AdsController {
     )
     @DeleteMapping("/ads/{ad_pk}/comment/{id}")
     public ResponseEntity<Void> deleteAdsCommentUsingDELETE(@Parameter(in = ParameterIn.PATH, description = "ad_pk", required = true, schema = @Schema()) @PathVariable("ad_pk") String adPk, @Parameter(in = ParameterIn.PATH, description = "id", required = true, schema = @Schema()) @PathVariable("id") Integer id) {
-        String accept = request.getHeader("Accept");
-        return new ResponseEntity<Void>(HttpStatus.NOT_IMPLEMENTED);
+        AdsCommentEntity adsCommentEntity = adsCommentService.getAdsComment(id, Long.parseLong(adPk));
+
+        if (adsCommentEntity != null) {
+            adsCommentService.deleteAdsCommentUsingDELETE(adsCommentEntity);
+            return ResponseEntity.ok(null);
+
+        } else {
+            throw new NotFoundException("Комментарии отсутствуют");
+        }
     }
+
 
     @Operation(
             summary = "getALLAds",
@@ -129,17 +139,21 @@ public class AdsController {
     @GetMapping("/ads")
     public ResponseEntity<ResponseWrapperAdsDto> getALLAdsUsingGET() {
         String accept = request.getHeader("Accept");
-        if (accept != null && accept.contains("application/json")) {
-            try {
-                return new ResponseEntity<ResponseWrapperAdsDto>(objectMapper.readValue("{\n  \"count\" : 0,\n  \"results\" : [ {\n    \"image\" : \"image\",\n    \"author\" : 6,\n    \"price\" : 5,\n    \"pk\" : 1,\n    \"title\" : \"title\"\n  }, {\n    \"image\" : \"image\",\n    \"author\" : 6,\n    \"price\" : 5,\n    \"pk\" : 1,\n    \"title\" : \"title\"\n  } ]\n}", ResponseWrapperAdsDto.class), HttpStatus.NOT_IMPLEMENTED);
-            } catch (IOException e) {
-                log.error("Couldn't serialize response for content type application/json", e);
-                return new ResponseEntity<ResponseWrapperAdsDto>(HttpStatus.INTERNAL_SERVER_ERROR);
+        if (accept != null && accept.contains("*/*")) {
+            List<AdsEntity> adsEntitys = adsService.getAllAds();
+            Integer count = adsEntitys.size();
+            if (count > 0) {
+                ResponseWrapperAdsDto responseWrapperAdsDto = responseWrapperAdsMapper
+                        .adsListToResponseWrapperAdsDto(count, adsEntitys);
+                return ResponseEntity.ok(responseWrapperAdsDto);
+            } else {
+                return new ResponseEntity<ResponseWrapperAdsDto>(HttpStatus.NOT_FOUND);
             }
         }
-
         return new ResponseEntity<ResponseWrapperAdsDto>(HttpStatus.NOT_IMPLEMENTED);
+
     }
+
 
     @Operation(
             summary = "getAdsComments",
@@ -227,18 +241,12 @@ public class AdsController {
     )
     @GetMapping("/ads/{id}")
     public ResponseEntity<FullAdsDto> getAdsUsingGET(@Parameter(in = ParameterIn.PATH, description = "id", required = true, schema = @Schema()) @PathVariable("id") Integer id) {
-        String accept = request.getHeader("Accept");
-        if (accept != null && accept.contains("application/json")) {
-            try {
-                return new ResponseEntity<FullAdsDto>(objectMapper.readValue("{\n  \"image\" : \"image\",\n  \"authorLastName\" : \"authorLastName\",\n  \"authorFirstName\" : \"authorFirstName\",\n  \"phone\" : \"phone\",\n  \"price\" : 6,\n  \"description\" : \"description\",\n  \"pk\" : 0,\n  \"title\" : \"title\",\n  \"email\" : \"email\"\n}", FullAdsDto.class), HttpStatus.NOT_IMPLEMENTED);
-            } catch (IOException e) {
-                log.error("Couldn't serialize response for content type application/json", e);
-                return new ResponseEntity<FullAdsDto>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        }
 
-        return new ResponseEntity<FullAdsDto>(HttpStatus.NOT_IMPLEMENTED);
+        AdsEntity adsEntity = adsService.getAds(id);
+        return ResponseEntity.ok(fullAdsMapper.adsToFullAdsDto(adsEntity));
+
     }
+
 
     @Operation(
             summary = "removeAds",
@@ -253,7 +261,14 @@ public class AdsController {
     @DeleteMapping("/ads/{id}")
     public ResponseEntity<Void> removeAdsUsingDELETE(@Parameter(in = ParameterIn.PATH, description = "id", required = true, schema = @Schema()) @PathVariable("id") Integer id) {
         String accept = request.getHeader("Accept");
-        return new ResponseEntity<Void>(HttpStatus.NOT_IMPLEMENTED);
+        AdsEntity adsEntity = adsService.getAds(id);
+        if (adsEntity != null) {
+            adsService.removeAdsUsingDELETE(adsEntity);
+            return ResponseEntity.ok(null);
+
+        } else {
+            throw new NotFoundException("Нечего удалчть");
+        }
     }
 
     @Operation(
@@ -273,17 +288,17 @@ public class AdsController {
             method = RequestMethod.PATCH)
     //@PutMapping("/ads/{ad_pk}/comment/{id}")
     public ResponseEntity<AdsCommentDto> updateAdsCommentUsingPATCH(@Parameter(in = ParameterIn.PATH, description = "ad_pk", required = true, schema = @Schema()) @PathVariable("ad_pk") String adPk, @Parameter(in = ParameterIn.PATH, description = "id", required = true, schema = @Schema()) @PathVariable("id") Integer id, @Parameter(in = ParameterIn.DEFAULT, description = "comment", required = true, schema = @Schema()) @Valid @RequestBody AdsCommentDto body) {
-        String accept = request.getHeader("Accept");
-        if (accept != null && accept.contains("application/json")) {
-            try {
-                return new ResponseEntity<AdsCommentDto>(objectMapper.readValue("{\n  \"createdAt\" : \"2000-01-23T04:56:07.000+00:00\",\n  \"author\" : 6,\n  \"pk\" : 1,\n  \"text\" : \"text\"\n}", AdsCommentDto.class), HttpStatus.NOT_IMPLEMENTED);
-            } catch (IOException e) {
-                log.error("Couldn't serialize response for content type application/json", e);
-                return new ResponseEntity<AdsCommentDto>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        }
 
-        return new ResponseEntity<AdsCommentDto>(HttpStatus.NOT_IMPLEMENTED);
+        AdsCommentEntity adsCommentEntity = adsCommentService.getAdsComment(id, Long.parseLong(adPk));
+        AdsCommentEntity adsCommentEntity1 = adsCommentMapper.adsCommentDtoToAdsComment(body);
+
+        if (adsCommentEntity != null) {
+            adsCommentEntity = adsCommentEntity1;
+
+            return ResponseEntity.ok(adsCommentMapper.adsCommentToAdsCommentDto(adsCommentEntity));
+        } else {
+            return new ResponseEntity<AdsCommentDto>(HttpStatus.NOT_FOUND);
+        }
     }
 
     @Operation(
@@ -303,17 +318,18 @@ public class AdsController {
             method = RequestMethod.PATCH)
     //@PutMapping("/updateAds")
     public ResponseEntity<AdsDto> updateAdsUsingPATCH(@Parameter(in = ParameterIn.PATH, description = "id", required = true, schema = @Schema()) @PathVariable("id") Integer id, @Parameter(in = ParameterIn.DEFAULT, description = "ads", required = true, schema = @Schema()) @Valid @RequestBody AdsDto body) {
-        String accept = request.getHeader("Accept");
-        if (accept != null && accept.contains("application/json")) {
-            try {
-                return new ResponseEntity<AdsDto>(objectMapper.readValue("{\n  \"image\" : \"image\",\n  \"author\" : 6,\n  \"price\" : 5,\n  \"pk\" : 1,\n  \"title\" : \"title\"\n}", AdsDto.class), HttpStatus.NOT_IMPLEMENTED);
-            } catch (IOException e) {
-                log.error("Couldn't serialize response for content type application/json", e);
-                return new ResponseEntity<AdsDto>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
+
+        AdsEntity adsEntity = adsService.getAds(id);
+        AdsEntity adsEntity1 = adsMapper.adsDtoToAds(body);
+
+        if (adsEntity != null) {
+            adsEntity = adsEntity1;
+
+            return ResponseEntity.ok(adsMapper.adsToAdsDto(adsEntity));
+        } else {
+            return new ResponseEntity<AdsDto>(HttpStatus.NOT_FOUND);
         }
 
-        return new ResponseEntity<AdsDto>(HttpStatus.NOT_IMPLEMENTED);
     }
 
 }

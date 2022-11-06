@@ -49,4 +49,12 @@ public class AdsService {
         adsRepository.save(adsEntity);
 
     }
+
+    /**
+     * удаляет обьявление.
+     */
+    public void removeAdsUsingDELETE(AdsEntity adsEntity) {
+        adsRepository.delete(adsEntity);
+
+    }
 }

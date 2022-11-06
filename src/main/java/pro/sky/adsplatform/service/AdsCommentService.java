@@ -51,4 +51,12 @@ public class AdsCommentService {
         adsCommentRepository.save(adsCommentEntity);
 
     }
+
+    /**
+     * Удаляет обьявление.
+     */
+    public void deleteAdsCommentUsingDELETE(AdsCommentEntity adsCommentEntity) {
+        adsCommentRepository.delete(adsCommentEntity);
+    }
+
 }
