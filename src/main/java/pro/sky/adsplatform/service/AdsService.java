@@ -57,4 +57,14 @@ public class AdsService {
         adsRepository.delete(adsEntity);
 
     }
+
+    /**
+     * Возвращает все объявления по шаблону
+     *
+     * @return список всех объявлений.
+     */
+    public List<AdsEntity> findAllByTitleLike(String title) {
+        return adsRepository.findAllByTitleLike(title);
+    }
+
 }

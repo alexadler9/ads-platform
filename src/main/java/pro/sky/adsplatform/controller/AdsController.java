@@ -28,6 +28,7 @@ import java.util.List;
 
 @CrossOrigin(value = "http://localhost:3000")
 @RestController
+@RequestMapping("/ads/")
 public class AdsController {
 
     private final AdsCommentService adsCommentService;
@@ -72,13 +73,16 @@ public class AdsController {
                     @ApiResponse(responseCode = "404", description = "Not Found")
             }
     )
-    @PostMapping("/ads/{ad_pk}/comment")
-    public ResponseEntity<AdsCommentDto> addAdsCommentsUsingPOST(@Parameter(in = ParameterIn.PATH, description = "ad_pk", required = true, schema = @Schema()) @PathVariable("ad_pk") String adPk, @Parameter(in = ParameterIn.DEFAULT, description = "comment", required = true, schema = @Schema()) @Valid @RequestBody AdsCommentDto body) {
-
+    @PostMapping("{ad_pk}/comment")
+    public ResponseEntity<AdsCommentDto> addAdsCommentsUsingPOST(@PathVariable("ad_pk") String adPk,@RequestBody AdsCommentDto body) {
         AdsCommentEntity adsCommentEntity = adsCommentMapper.adsCommentDtoToAdsComment(body);
-        adsCommentService.saveAddAdsCommentsUsingPOST(adsCommentEntity);
-
-        return new ResponseEntity<AdsCommentDto>(HttpStatus.NOT_IMPLEMENTED);
+        try {
+            adsCommentService.saveAddAdsCommentsUsingPOST(adsCommentEntity);
+            return ResponseEntity.ok(body);
+        }
+catch (NotFoundException e){
+    throw new NotFoundException("Не сохранили");
+}
     }
 
     @Operation(
@@ -93,8 +97,8 @@ public class AdsController {
                     @ApiResponse(responseCode = "404", description = "Not Found")
             }
     )
-    @PostMapping("/ads")
-    public ResponseEntity<CreateAdsDto> addAdsUsingPOST(@Parameter(in = ParameterIn.DEFAULT, description = "createAds", required = true, schema = @Schema()) @Valid @RequestBody CreateAdsDto body) {
+    @PostMapping("")
+    public ResponseEntity<CreateAdsDto> addAdsUsingPOST(@RequestBody CreateAdsDto body) {
         AdsEntity adsEntity = createAdsMapper.createAdsDtoToAds(body);
         adsService.saveAddAdsUsingPOST(adsEntity);
 
@@ -111,8 +115,8 @@ public class AdsController {
                     @ApiResponse(responseCode = "403", description = "Forbidden")
             }
     )
-    @DeleteMapping("/ads/{ad_pk}/comment/{id}")
-    public ResponseEntity<Void> deleteAdsCommentUsingDELETE(@Parameter(in = ParameterIn.PATH, description = "ad_pk", required = true, schema = @Schema()) @PathVariable("ad_pk") String adPk, @Parameter(in = ParameterIn.PATH, description = "id", required = true, schema = @Schema()) @PathVariable("id") Integer id) {
+    @DeleteMapping("{ad_pk}/comment/{id}")
+    public ResponseEntity<Void> deleteAdsCommentUsingDELETE(@PathVariable("ad_pk") String adPk, @PathVariable("id") Integer id) {
         AdsCommentEntity adsCommentEntity = adsCommentService.getAdsComment(id, Long.parseLong(adPk));
 
         if (adsCommentEntity != null) {
@@ -136,7 +140,7 @@ public class AdsController {
                     @ApiResponse(responseCode = "404", description = "Not Found")
             }
     )
-    @GetMapping("/ads")
+    @GetMapping("")
     public ResponseEntity<ResponseWrapperAdsDto> getALLAdsUsingGET() {
         String accept = request.getHeader("Accept");
         if (accept != null && accept.contains("*/*")) {
@@ -166,8 +170,8 @@ public class AdsController {
                     @ApiResponse(responseCode = "404", description = "Not Found")
             }
     )
-    @GetMapping("/ads/{ad_pk}/comment/{id}")
-    public ResponseEntity<AdsCommentDto> getAdsCommentUsingGET(@Parameter(in = ParameterIn.PATH, description = "ad_pk", required = true, schema = @Schema()) @PathVariable("ad_pk") String adPk, @Parameter(in = ParameterIn.PATH, description = "id", required = true, schema = @Schema()) @PathVariable("id") Integer id) {
+    @GetMapping("{ad_pk}/comment/{id}")
+    public ResponseEntity<AdsCommentDto> getAdsCommentUsingGET(@PathVariable("ad_pk") String adPk, @PathVariable("id") Integer id) {
         AdsCommentEntity adsCommentEntity = adsCommentService.getAdsComment(id, Long.parseLong(adPk));
 
         if (adsCommentEntity != null) {
@@ -188,8 +192,8 @@ public class AdsController {
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema()))
     }
     )
-    @GetMapping("/ads/{ad_pk}/comment")
-    public ResponseEntity<ResponseWrapperAdsCommentDto> getAdsCommentsUsingGET(@Parameter(in = ParameterIn.PATH, description = "ad_pk", required = true, schema = @Schema()) @PathVariable("ad_pk") String adPk) {
+    @GetMapping("{ad_pk}/comment")
+    public ResponseEntity<ResponseWrapperAdsCommentDto> getAdsCommentsUsingGET(@PathVariable("ad_pk") String adPk) {
         List<AdsCommentEntity> adsCommentEntity = adsCommentService.getAllAdsComments(Long.parseLong(adPk));
 
         Integer count = adsCommentEntity.size();
@@ -213,8 +217,12 @@ public class AdsController {
                     @ApiResponse(responseCode = "404", description = "Not Found")
             }
     )
-    @GetMapping("/ads/me")
-    public ResponseEntity<ResponseWrapperAdsDto> getAdsMeUsingGET(@Parameter(in = ParameterIn.QUERY, description = "", schema = @Schema()) @Valid @RequestParam(value = "authenticated", required = false) Boolean authenticated, @Parameter(in = ParameterIn.QUERY, description = "", schema = @Schema()) @Valid @RequestParam(value = "authorities[0].authority", required = false) String authorities0Authority, @Parameter(in = ParameterIn.QUERY, description = "", schema = @Schema()) @Valid @RequestParam(value = "credentials", required = false) Object credentials, @Parameter(in = ParameterIn.QUERY, description = "", schema = @Schema()) @Valid @RequestParam(value = "details", required = false) Object details, @Parameter(in = ParameterIn.QUERY, description = "", schema = @Schema()) @Valid @RequestParam(value = "principal", required = false) Object principal) {
+    @GetMapping("me")
+    public ResponseEntity<ResponseWrapperAdsDto> getAdsMeUsingGET(@RequestParam(required = false) Boolean authenticated,
+                                                                  @RequestParam(required = false) String authorities0Authority,
+                                                                  @RequestParam(required = false) Object credentials,
+                                                                  @RequestParam(required = false) Object details,
+                                                                  @RequestParam(required = false) Object principal) {
         String accept = request.getHeader("Accept");
         if (accept != null && accept.contains("application/json")) {
             try {
@@ -239,8 +247,8 @@ public class AdsController {
                     @ApiResponse(responseCode = "404", description = "Not Found")
             }
     )
-    @GetMapping("/ads/{id}")
-    public ResponseEntity<FullAdsDto> getAdsUsingGET(@Parameter(in = ParameterIn.PATH, description = "id", required = true, schema = @Schema()) @PathVariable("id") Integer id) {
+    @GetMapping("{id}")
+    public ResponseEntity<FullAdsDto> getAdsUsingGET(@PathVariable("id") Integer id) {
 
         AdsEntity adsEntity = adsService.getAds(id);
         return ResponseEntity.ok(fullAdsMapper.adsToFullAdsDto(adsEntity));
@@ -258,8 +266,8 @@ public class AdsController {
                     @ApiResponse(responseCode = "403", description = "Forbidden")
             }
     )
-    @DeleteMapping("/ads/{id}")
-    public ResponseEntity<Void> removeAdsUsingDELETE(@Parameter(in = ParameterIn.PATH, description = "id", required = true, schema = @Schema()) @PathVariable("id") Integer id) {
+    @DeleteMapping("{id}")
+    public ResponseEntity<Void> removeAdsUsingDELETE(@PathVariable("id") Integer id) {
         String accept = request.getHeader("Accept");
         AdsEntity adsEntity = adsService.getAds(id);
         if (adsEntity != null) {
@@ -282,12 +290,12 @@ public class AdsController {
                     @ApiResponse(responseCode = "403", description = "Forbidden")
             }
     )
-    @RequestMapping(value = "/ads/{ad_pk}/comment/{id}",
+    @RequestMapping(value = "{ad_pk}/comment/{id}",
             produces = {"*/*"},
             consumes = {"application/json"},
             method = RequestMethod.PATCH)
     //@PutMapping("/ads/{ad_pk}/comment/{id}")
-    public ResponseEntity<AdsCommentDto> updateAdsCommentUsingPATCH(@Parameter(in = ParameterIn.PATH, description = "ad_pk", required = true, schema = @Schema()) @PathVariable("ad_pk") String adPk, @Parameter(in = ParameterIn.PATH, description = "id", required = true, schema = @Schema()) @PathVariable("id") Integer id, @Parameter(in = ParameterIn.DEFAULT, description = "comment", required = true, schema = @Schema()) @Valid @RequestBody AdsCommentDto body) {
+    public ResponseEntity<AdsCommentDto> updateAdsCommentUsingPATCH(@PathVariable("ad_pk") String adPk, Integer id, @RequestBody AdsCommentDto body) {
 
         AdsCommentEntity adsCommentEntity = adsCommentService.getAdsComment(id, Long.parseLong(adPk));
         AdsCommentEntity adsCommentEntity1 = adsCommentMapper.adsCommentDtoToAdsComment(body);
@@ -312,12 +320,12 @@ public class AdsController {
                     @ApiResponse(responseCode = "403", description = "Forbidden")
             }
     )
-    @RequestMapping(value = "/ads/{id}",
+    @RequestMapping(value = "{id}",
             produces = {"*/*"},
             consumes = {"application/json"},
             method = RequestMethod.PATCH)
     //@PutMapping("/updateAds")
-    public ResponseEntity<AdsDto> updateAdsUsingPATCH(@Parameter(in = ParameterIn.PATH, description = "id", required = true, schema = @Schema()) @PathVariable("id") Integer id, @Parameter(in = ParameterIn.DEFAULT, description = "ads", required = true, schema = @Schema()) @Valid @RequestBody AdsDto body) {
+    public ResponseEntity<AdsDto> updateAdsUsingPATCH(@PathVariable("id") Integer id, @RequestBody AdsDto body) {
 
         AdsEntity adsEntity = adsService.getAds(id);
         AdsEntity adsEntity1 = adsMapper.adsDtoToAds(body);
