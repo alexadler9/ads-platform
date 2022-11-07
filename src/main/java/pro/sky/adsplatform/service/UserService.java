@@ -47,7 +47,7 @@ public class UserService {
      *
      * @return
      */
-    public UserEntity updateUser(UserEntity userEntity) {
+    public UserEntity updateUserUsingPATCH(UserEntity userEntity) {
         LOGGER.info("Обновление данных пользователя");
         UserEntity userBD = getUser(userEntity.getId());
 /*        if (userEntity.getId() != null) {

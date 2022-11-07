@@ -13,12 +13,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pro.sky.adsplatform.dto.*;
 import pro.sky.adsplatform.entity.UserEntity;
+import pro.sky.adsplatform.exception.NotFoundException;
+import pro.sky.adsplatform.mapper.ResponseWrapperUserMapper;
+import pro.sky.adsplatform.mapper.UserListMapper;
 import pro.sky.adsplatform.mapper.UserMapper;
 import pro.sky.adsplatform.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.IOException;
+import java.util.List;
 
 @CrossOrigin(value = "http://localhost:3000")
 @RestController
@@ -26,6 +30,8 @@ import java.io.IOException;
 public class UserController {
 
     private final UserMapper userMapper;
+
+/*    private final ResponseWrapperUserMapper responseWrapperUserMapper;*/
     private final UserService userService;
 
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
@@ -35,8 +41,9 @@ public class UserController {
     private final HttpServletRequest request;
 
     @org.springframework.beans.factory.annotation.Autowired
-    public UserController(UserMapper userMapper, UserService userService, ObjectMapper objectMapper, HttpServletRequest request) {
+    public UserController(UserMapper userMapper, UserListMapper userListMapper, ResponseWrapperUserMapper responseWrapperUserMapper, UserService userService, ObjectMapper objectMapper, HttpServletRequest request) {
         this.userMapper = userMapper;
+/*      this.responseWrapperUserMapper = responseWrapperUserMapper;*/
         this.userService = userService;
         this.objectMapper = objectMapper;
         this.request = request;
@@ -59,6 +66,7 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<ResponseWrapperUserDto> getUsersUsingGET() {
         log.debug("ResponseWrapperUserDto is running");
+
         String accept = request.getHeader("Accept");
         if (accept != null && accept.contains("application/json")) {
             try {
@@ -68,8 +76,23 @@ public class UserController {
                 return new ResponseEntity<ResponseWrapperUserDto>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
-
         return new ResponseEntity<ResponseWrapperUserDto>(HttpStatus.NOT_IMPLEMENTED);
+
+/*
+        String accept = request.getHeader("Accept");
+        if (accept != null) {
+            List<UserEntity> userEntities = userService.getAllUsers();
+            if (userEntities.size() != 0) {
+                ResponseWrapperUserDto responseWrapperUserDto = ResponseWrapperUserMapper
+                        .userListToUserDtoList;
+                return ResponseEntity.ok(UserListMapper);
+            } else {
+                return new ResponseEntity<ResponseWrapperAdsDto>(HttpStatus.NOT_FOUND);
+            }
+        }
+        return new ResponseEntity<ResponseWrapperAdsDto>(HttpStatus.NOT_IMPLEMENTED);
+*/
+
     }
 
     /**
@@ -89,12 +112,22 @@ public class UserController {
 
     @PatchMapping("/me")
     public ResponseEntity<UserDto> updateUserUsingPATCH(@Parameter(in = ParameterIn.DEFAULT, description = "user", required = true, schema = @Schema()) @Valid @RequestBody UserDto body) {
+/*
         log.info("body {}", body.toString());
-
         UserEntity userEntity = userMapper.userDtoToUser(body);
         log.info("user {}", userEntity.toString());
-
+        userService.updateUserUsingPATCH(userEntity);
         return new ResponseEntity<UserDto>(HttpStatus.NOT_IMPLEMENTED);
+*/
+
+        UserEntity userEntity = userMapper.userDtoToUser(body);
+        try {
+            userService.updateUserUsingPATCH(userEntity);
+            return ResponseEntity.ok(body);
+        }
+        catch (NotFoundException e){
+            throw new NotFoundException("Данные пользователя не обновлены");
+        }
     }
 
     /**
@@ -145,16 +178,12 @@ public class UserController {
     @GetMapping(path = "{id}")
     public ResponseEntity<UserDto> getUserUsingGET(@Parameter(in = ParameterIn.PATH, description = "id", required = true, schema = @Schema()) @PathVariable("id") Integer id) {
         log.debug("getUserUsingGET is running");
-        String accept = request.getHeader("Accept");
-        if (accept != null && accept.contains("application/json")) {
-            try {
-                return new ResponseEntity<UserDto>(objectMapper.readValue("{\n  \"firstName\" : \"firstName\",\n  \"lastName\" : \"lastName\",\n  \"phone\" : \"phone\",\n  \"id\" : 6,\n  \"email\" : \"email\"\n}", UserDto.class), HttpStatus.NOT_IMPLEMENTED);
-            } catch (IOException e) {
-                log.error("Couldn't serialize response for content type application/json", e);
-                return new ResponseEntity<UserDto>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        }
 
-        return new ResponseEntity<UserDto>(HttpStatus.NOT_IMPLEMENTED);
+        if (id != null) {
+            UserEntity userEntity = userService.getUser(id);
+            return ResponseEntity.ok(userMapper.userToUserDto(userEntity);
+        } else {
+            return new ResponseEntity<UserDto>(HttpStatus.NOT_FOUND);
+        }
     }
 }
