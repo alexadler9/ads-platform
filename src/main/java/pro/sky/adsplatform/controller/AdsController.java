@@ -3,22 +3,26 @@ package pro.sky.adsplatform.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import pro.sky.adsplatform.dto.*;
 import pro.sky.adsplatform.entity.AdsCommentEntity;
 import pro.sky.adsplatform.entity.AdsEntity;
+import pro.sky.adsplatform.entity.AdsImageEntity;
 import pro.sky.adsplatform.exception.NotFoundException;
 import pro.sky.adsplatform.mapper.*;
 import pro.sky.adsplatform.service.AdsCommentService;
+import pro.sky.adsplatform.service.AdsImageService;
 import pro.sky.adsplatform.service.AdsService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -37,6 +41,7 @@ public class AdsController {
     private final AdsMapper adsMapper;
     private final CreateAdsMapper createAdsMapper;
     private final AdsService adsService;
+    private final AdsImageService adsImageService;
     private final ResponseWrapperAdsMapper responseWrapperAdsMapper;
     private final FullAdsMapper fullAdsMapper;
 
@@ -48,13 +53,14 @@ public class AdsController {
     private final HttpServletRequest request;
 
     @org.springframework.beans.factory.annotation.Autowired
-    public AdsController(AdsCommentService adsCommentService, AdsCommentMapper adsCommentMapper, ResponseWrapperAdsCommentMapper responseWrapperAdsCommentMapper, AdsMapper adsMapper, CreateAdsMapper createAdsMapper, AdsService adsService, ResponseWrapperAdsMapper responseWrapperAdsMapper, FullAdsMapper fullAdsMapper, ObjectMapper objectMapper, HttpServletRequest request) {
+    public AdsController(AdsCommentService adsCommentService, AdsCommentMapper adsCommentMapper, ResponseWrapperAdsCommentMapper responseWrapperAdsCommentMapper, AdsMapper adsMapper, CreateAdsMapper createAdsMapper, AdsService adsService, AdsImageService adsImageService, ResponseWrapperAdsMapper responseWrapperAdsMapper, FullAdsMapper fullAdsMapper, ObjectMapper objectMapper, HttpServletRequest request) {
         this.adsCommentService = adsCommentService;
         this.adsCommentMapper = adsCommentMapper;
         this.responseWrapperAdsCommentMapper = responseWrapperAdsCommentMapper;
         this.adsMapper = adsMapper;
         this.createAdsMapper = createAdsMapper;
         this.adsService = adsService;
+        this.adsImageService = adsImageService;
         this.responseWrapperAdsMapper = responseWrapperAdsMapper;
         this.fullAdsMapper = fullAdsMapper;
         this.objectMapper = objectMapper;
@@ -97,13 +103,38 @@ catch (NotFoundException e){
                     @ApiResponse(responseCode = "404", description = "Not Found")
             }
     )
-    @PostMapping("")
-    public ResponseEntity<CreateAdsDto> addAdsUsingPOST(@RequestBody CreateAdsDto body) {
-        AdsEntity adsEntity = createAdsMapper.createAdsDtoToAds(body);
-        adsService.saveAddAdsUsingPOST(adsEntity);
 
-        return ResponseEntity.ok(createAdsMapper.adsToCreateAdsDto(adsEntity));
+
+    //IMAGE
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ResponseStatus(HttpStatus.CREATED)
+        public ResponseEntity<AdsDto> addAdsUsingPOST(@Valid @RequestPart("properties")
+                                                                @Parameter(schema =  @Schema(type = "string", format = "binary"))  CreateAdsDto body,
+                                                            @RequestPart("image")MultipartFile file) {
+        AdsEntity adsEntity = createAdsMapper.createAdsDtoToAds(body);
+
+//Part 1
+        adsService.saveAddAds(adsEntity);
+
+//Part2
+        adsImageService.saveAddFile(adsEntity,file);
+
+        return ResponseEntity.ok(adsMapper.adsToAdsDto(adsEntity));
     }
+
+    //IMAGE
+    @GetMapping("image/{no}")
+    public ResponseEntity<byte[]> getImage(@PathVariable("adsImageId") Long adsImageId){
+        AdsImageEntity adsImageEntity = adsImageService.getImageEntity(adsImageId);
+        if (adsImageEntity == null) throw new org.webjars.NotFoundException("Не найдена картинка");
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.parseMediaType(MediaType.MULTIPART_FORM_DATA_VALUE));
+        httpHeaders.setContentLength(adsImageEntity.getImage().length);
+
+       return ResponseEntity.status(HttpStatus.OK).headers(httpHeaders).body(adsImageEntity.getImage());
+    }
+
+
 
     @Operation(
             summary = "deleteAdsComment",
