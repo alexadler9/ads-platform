@@ -24,6 +24,7 @@ import javax.validation.Valid;
 import java.io.IOException;
 import java.util.List;
 
+
 @CrossOrigin(value = "http://localhost:3000")
 @RestController
 @RequestMapping("/users")
@@ -31,7 +32,7 @@ public class UserController {
 
     private final UserMapper userMapper;
 
-/*    private final ResponseWrapperUserMapper responseWrapperUserMapper;*/
+    private final ResponseWrapperUserMapper responseWrapperUserMapper;
     private final UserService userService;
 
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
@@ -43,7 +44,7 @@ public class UserController {
     @org.springframework.beans.factory.annotation.Autowired
     public UserController(UserMapper userMapper, UserListMapper userListMapper, ResponseWrapperUserMapper responseWrapperUserMapper, UserService userService, ObjectMapper objectMapper, HttpServletRequest request) {
         this.userMapper = userMapper;
-/*      this.responseWrapperUserMapper = responseWrapperUserMapper;*/
+        this.responseWrapperUserMapper = responseWrapperUserMapper;
         this.userService = userService;
         this.objectMapper = objectMapper;
         this.request = request;
@@ -67,7 +68,7 @@ public class UserController {
     public ResponseEntity<ResponseWrapperUserDto> getUsersUsingGET() {
         log.debug("ResponseWrapperUserDto is running");
 
-        String accept = request.getHeader("Accept");
+/*        String accept = request.getHeader("Accept");
         if (accept != null && accept.contains("application/json")) {
             try {
                 return new ResponseEntity<ResponseWrapperUserDto>(objectMapper.readValue("{\n  \"count\" : 0,\n  \"results\" : [ {\n    \"firstName\" : \"firstName\",\n    \"lastName\" : \"lastName\",\n    \"phone\" : \"phone\",\n    \"id\" : 6,\n    \"email\" : \"email\"\n  }, {\n    \"firstName\" : \"firstName\",\n    \"lastName\" : \"lastName\",\n    \"phone\" : \"phone\",\n    \"id\" : 6,\n    \"email\" : \"email\"\n  } ]\n}", ResponseWrapperUserDto.class), HttpStatus.NOT_IMPLEMENTED);
@@ -77,22 +78,20 @@ public class UserController {
             }
         }
         return new ResponseEntity<ResponseWrapperUserDto>(HttpStatus.NOT_IMPLEMENTED);
-
-/*
+*/
         String accept = request.getHeader("Accept");
-        if (accept != null) {
+        if (accept != null && accept.contains("application/json")) {
             List<UserEntity> userEntities = userService.getAllUsers();
-            if (userEntities.size() != 0) {
+            Integer count = userEntities.size();
+            if (userEntities.size() > 0) {
                 ResponseWrapperUserDto responseWrapperUserDto = ResponseWrapperUserMapper
-                        .userListToUserDtoList;
-                return ResponseEntity.ok(UserListMapper);
+                        .userListToResponseWrapperUserDto(count, userEntities);
+                return ResponseEntity.ok(responseWrapperUserDto);
             } else {
                 return new ResponseEntity<ResponseWrapperAdsDto>(HttpStatus.NOT_FOUND);
             }
         }
         return new ResponseEntity<ResponseWrapperAdsDto>(HttpStatus.NOT_IMPLEMENTED);
-*/
-
     }
 
     /**
@@ -124,8 +123,7 @@ public class UserController {
         try {
             userService.updateUserUsingPATCH(userEntity);
             return ResponseEntity.ok(body);
-        }
-        catch (NotFoundException e){
+        } catch (NotFoundException e) {
             throw new NotFoundException("Данные пользователя не обновлены");
         }
     }
@@ -181,7 +179,7 @@ public class UserController {
 
         if (id != null) {
             UserEntity userEntity = userService.getUser(id);
-            return ResponseEntity.ok(userMapper.userToUserDto(userEntity);
+            return ResponseEntity.ok(userMapper.userToUserDto(userEntity));
         } else {
             return new ResponseEntity<UserDto>(HttpStatus.NOT_FOUND);
         }
