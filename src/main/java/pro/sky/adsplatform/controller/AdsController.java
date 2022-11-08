@@ -80,15 +80,14 @@ public class AdsController {
             }
     )
     @PostMapping("{ad_pk}/comment")
-    public ResponseEntity<AdsCommentDto> addAdsCommentsUsingPOST(@PathVariable("ad_pk") String adPk,@RequestBody AdsCommentDto body) {
+    public ResponseEntity<AdsCommentDto> addAdsCommentsUsingPOST(@PathVariable("ad_pk") String adPk, @RequestBody AdsCommentDto body) {
         AdsCommentEntity adsCommentEntity = adsCommentMapper.adsCommentDtoToAdsComment(body);
         try {
             adsCommentService.saveAddAdsCommentsUsingPOST(adsCommentEntity);
             return ResponseEntity.ok(body);
+        } catch (NotFoundException e) {
+            throw new NotFoundException("Не сохранили");
         }
-catch (NotFoundException e){
-    throw new NotFoundException("Не сохранили");
-}
     }
 
     @Operation(
@@ -108,32 +107,31 @@ catch (NotFoundException e){
     //IMAGE
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-        public ResponseEntity<AdsDto> addAdsUsingPOST(@Valid @RequestPart("properties")
-                                                                @Parameter(schema =  @Schema(type = "string", format = "binary"))  CreateAdsDto body,
-                                                            @RequestPart("image")MultipartFile file) {
+    public ResponseEntity<AdsDto> addAdsUsingPOST(@Valid @RequestPart("properties")
+                                                  @Parameter(schema = @Schema(type = "string", format = "binary")) CreateAdsDto body,
+                                                  @RequestPart("image") MultipartFile file) {
         AdsEntity adsEntity = createAdsMapper.createAdsDtoToAds(body);
 
 //Part 1
         adsService.saveAddAds(adsEntity);
 
 //Part2
-        adsImageService.saveAddFile(adsEntity,file);
+        adsImageService.saveAddFile(adsEntity, file);
 
         return ResponseEntity.ok(adsMapper.adsToAdsDto(adsEntity));
     }
 
     //IMAGE
     @GetMapping("image/{no}")
-    public ResponseEntity<byte[]> getImage(@PathVariable("adsImageId") Long adsImageId){
+    public ResponseEntity<byte[]> getImage(@PathVariable("adsImageId") Long adsImageId) {
         AdsImageEntity adsImageEntity = adsImageService.getImageEntity(adsImageId);
         if (adsImageEntity == null) throw new org.webjars.NotFoundException("Не найдена картинка");
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.parseMediaType(MediaType.MULTIPART_FORM_DATA_VALUE));
         httpHeaders.setContentLength(adsImageEntity.getImage().length);
 
-       return ResponseEntity.status(HttpStatus.OK).headers(httpHeaders).body(adsImageEntity.getImage());
+        return ResponseEntity.status(HttpStatus.OK).headers(httpHeaders).body(adsImageEntity.getImage());
     }
-
 
 
     @Operation(
@@ -371,4 +369,8 @@ catch (NotFoundException e){
 
     }
 
+    @GetMapping("search{title}")
+    public List<AdsEntity> findAllByTitleLike(@PathVariable("title") String title) {
+        return adsService.findAllByTitleLike(title);
+    }
 }

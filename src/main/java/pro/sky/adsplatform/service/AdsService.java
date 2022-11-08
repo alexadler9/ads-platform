@@ -68,7 +68,7 @@ public class AdsService {
      * @return список всех объявлений.
      */
     public List<AdsEntity> findAllByTitleLike(String title) {
-        return adsRepository.findAllByTitleLike(title);
+        return adsRepository.findAllByTitleLike("%"+title+"%");
     }
 
 
