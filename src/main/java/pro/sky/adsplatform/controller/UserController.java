@@ -68,30 +68,19 @@ public class UserController {
     public ResponseEntity<ResponseWrapperUserDto> getUsersUsingGET() {
         log.debug("ResponseWrapperUserDto is running");
 
-/*        String accept = request.getHeader("Accept");
-        if (accept != null && accept.contains("application/json")) {
-            try {
-                return new ResponseEntity<ResponseWrapperUserDto>(objectMapper.readValue("{\n  \"count\" : 0,\n  \"results\" : [ {\n    \"firstName\" : \"firstName\",\n    \"lastName\" : \"lastName\",\n    \"phone\" : \"phone\",\n    \"id\" : 6,\n    \"email\" : \"email\"\n  }, {\n    \"firstName\" : \"firstName\",\n    \"lastName\" : \"lastName\",\n    \"phone\" : \"phone\",\n    \"id\" : 6,\n    \"email\" : \"email\"\n  } ]\n}", ResponseWrapperUserDto.class), HttpStatus.NOT_IMPLEMENTED);
-            } catch (IOException e) {
-                log.error("Couldn't serialize response for content type application/json", e);
-                return new ResponseEntity<ResponseWrapperUserDto>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        }
-        return new ResponseEntity<ResponseWrapperUserDto>(HttpStatus.NOT_IMPLEMENTED);
-*/
         String accept = request.getHeader("Accept");
         if (accept != null && accept.contains("application/json")) {
             List<UserEntity> userEntities = userService.getAllUsers();
             Integer count = userEntities.size();
             if (userEntities.size() > 0) {
-                ResponseWrapperUserDto responseWrapperUserDto = ResponseWrapperUserMapper
+                ResponseWrapperUserDto responseWrapperUserDto = responseWrapperUserMapper
                         .userListToResponseWrapperUserDto(count, userEntities);
                 return ResponseEntity.ok(responseWrapperUserDto);
             } else {
-                return new ResponseEntity<ResponseWrapperAdsDto>(HttpStatus.NOT_FOUND);
+                return new ResponseEntity<ResponseWrapperUserDto>(HttpStatus.NOT_FOUND);
             }
         }
-        return new ResponseEntity<ResponseWrapperAdsDto>(HttpStatus.NOT_IMPLEMENTED);
+        return new ResponseEntity<ResponseWrapperUserDto>(HttpStatus.NOT_IMPLEMENTED);
     }
 
     /**
@@ -111,13 +100,6 @@ public class UserController {
 
     @PatchMapping("/me")
     public ResponseEntity<UserDto> updateUserUsingPATCH(@Parameter(in = ParameterIn.DEFAULT, description = "user", required = true, schema = @Schema()) @Valid @RequestBody UserDto body) {
-/*
-        log.info("body {}", body.toString());
-        UserEntity userEntity = userMapper.userDtoToUser(body);
-        log.info("user {}", userEntity.toString());
-        userService.updateUserUsingPATCH(userEntity);
-        return new ResponseEntity<UserDto>(HttpStatus.NOT_IMPLEMENTED);
-*/
 
         UserEntity userEntity = userMapper.userDtoToUser(body);
         try {
