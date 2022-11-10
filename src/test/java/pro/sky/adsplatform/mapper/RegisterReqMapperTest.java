@@ -17,8 +17,7 @@ class RegisterReqMapperTest {
         Assertions.assertEquals(REGISTER_REQ_DTO.getFirstName(), user.getFirstName());
         Assertions.assertEquals(REGISTER_REQ_DTO.getLastName(), user.getLastName());
         Assertions.assertEquals(REGISTER_REQ_DTO.getPhone(), user.getPhone());
-        Assertions.assertEquals(REGISTER_REQ_DTO.getUsername(), user.getEmail());
+        Assertions.assertEquals(REGISTER_REQ_DTO.getUsername(), user.getUsername());
         Assertions.assertEquals(REGISTER_REQ_DTO.getPassword(), user.getPassword());
-        Assertions.assertEquals(REGISTER_REQ_DTO.getRole().toString(), user.getRole().toString());
     }
 }

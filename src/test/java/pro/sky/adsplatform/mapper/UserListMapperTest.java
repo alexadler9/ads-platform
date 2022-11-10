@@ -21,7 +21,7 @@ class UserListMapperTest {
 
         Assertions.assertNotNull(userDtoList);
         Assertions.assertEquals(1, userDtoList.size());
-        Assertions.assertEquals(USER.getEmail(), userDtoList.get(0).getEmail());
+        Assertions.assertEquals(USER.getUsername(), userDtoList.get(0).getEmail());
         Assertions.assertEquals(USER.getFirstName(), userDtoList.get(0).getFirstName());
         Assertions.assertEquals(USER.getId(), userDtoList.get(0).getId().longValue());
         Assertions.assertEquals(USER.getLastName(), userDtoList.get(0).getLastName());

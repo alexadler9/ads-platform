@@ -28,13 +28,11 @@ public class UserEntity {
 
     private String phone;
 
-    private String email;
+    private String username;
 
     private String password;
 
-    @Enumerated(EnumType.STRING)
-    @ColumnDefault("'USER'")
-    private UserRole role;
+    private Boolean enabled;
 
     public UserEntity() {
     }
@@ -71,12 +69,12 @@ public class UserEntity {
         this.phone = phone;
     }
 
-    public String getEmail() {
-        return email;
+    public String getUsername() {
+        return username;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getPassword() {
@@ -87,12 +85,12 @@ public class UserEntity {
         this.password = password;
     }
 
-    public UserRole getRole() {
-        return role;
+    public Boolean getEnabled() {
+        return enabled;
     }
 
-    public void setRole(UserRole role) {
-        this.role = role;
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
     }
 
     @Override
@@ -115,8 +113,8 @@ public class UserEntity {
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", phone='" + phone + '\'' +
-                ", email='" + email + '\'' +
-                ", role=" + role +
+                ", username='" + username + '\'' +
+                ", enabled=" + enabled +
                 '}';
     }
 }

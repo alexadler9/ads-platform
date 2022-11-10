@@ -16,7 +16,7 @@ class UserMapperTest {
         UserDto userDto = userMapper.userToUserDto(USER);
 
         Assertions.assertNotNull(userDto);
-        Assertions.assertEquals(USER.getEmail(), userDto.getEmail());
+        Assertions.assertEquals(USER.getUsername(), userDto.getEmail());
         Assertions.assertEquals(USER.getFirstName(), userDto.getFirstName());
         Assertions.assertEquals(USER.getId(), userDto.getId().longValue());
         Assertions.assertEquals(USER.getLastName(), userDto.getLastName());
@@ -32,6 +32,6 @@ class UserMapperTest {
         Assertions.assertEquals(USER_DTO.getFirstName(), user.getFirstName());
         Assertions.assertEquals(USER_DTO.getLastName(), user.getLastName());
         Assertions.assertEquals(USER_DTO.getPhone(), user.getPhone());
-        Assertions.assertEquals(USER_DTO.getEmail(), user.getEmail());
+        Assertions.assertEquals(USER_DTO.getEmail(), user.getUsername());
     }
 }

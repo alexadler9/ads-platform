@@ -36,9 +36,9 @@ public class MapperTestConstants {
         USER.setFirstName("firstName");
         USER.setLastName("lastName");
         USER.setPhone("phone");
-        USER.setEmail("email");
+        USER.setUsername("username");
         USER.setPassword("password");
-        USER.setRole(UserEntity.UserRole.USER);
+        USER.setEnabled(true);
 
         USER_DTO = new UserDto();
         USER_DTO.setEmail("email");
