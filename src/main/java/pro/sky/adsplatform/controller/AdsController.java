@@ -37,21 +37,46 @@ import java.util.List;
 @RestController
 @RequestMapping("/ads")
 public class AdsController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AdsController.class);
 
-    private final AdsCommentService adsCommentService;
-    private final AdsCommentMapper adsCommentMapper;
-    private final ResponseWrapperAdsCommentMapper responseWrapperAdsCommentMapper;
     private final AdsMapper adsMapper;
-    private final CreateAdsMapper createAdsMapper;
-    private final AdsService adsService;
-    private final AdsImageService adsImageService;
-    private final ResponseWrapperAdsMapper responseWrapperAdsMapper;
     private final FullAdsMapper fullAdsMapper;
-
-
-    private static final Logger log = LoggerFactory.getLogger(AdsController.class);
-
+    private final CreateAdsMapper createAdsMapper;
+    private final AdsCommentMapper adsCommentMapper;
+    private final ResponseWrapperAdsMapper responseWrapperAdsMapper;
+    private final ResponseWrapperAdsCommentMapper responseWrapperAdsCommentMapper;
     private final ObjectMapper objectMapper;
+
+    private final AdsService adsService;
+    private final AdsCommentService adsCommentService;
+    private final AdsImageService adsImageService;
+
+    private final HttpServletRequest request;
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public AdsController(AdsMapper adsMapper,
+                         FullAdsMapper fullAdsMapper,
+                         AdsCommentMapper adsCommentMapper,
+                         CreateAdsMapper createAdsMapper,
+                         ResponseWrapperAdsMapper responseWrapperAdsMapper,
+                         ResponseWrapperAdsCommentMapper responseWrapperAdsCommentMapper,
+                         ObjectMapper objectMapper,
+                         AdsService adsService,
+                         AdsCommentService adsCommentService,
+                         AdsImageService adsImageService,
+                         HttpServletRequest request) {
+        this.adsMapper = adsMapper;
+        this.fullAdsMapper = fullAdsMapper;
+        this.adsCommentMapper = adsCommentMapper;
+        this.createAdsMapper = createAdsMapper;
+        this.responseWrapperAdsMapper = responseWrapperAdsMapper;
+        this.responseWrapperAdsCommentMapper = responseWrapperAdsCommentMapper;
+        this.objectMapper = objectMapper;
+        this.adsService = adsService;
+        this.adsCommentService = adsCommentService;
+        this.adsImageService = adsImageService;
+        this.request = request;
+    }
 
     @Operation(
             summary = "addAds",
@@ -93,23 +118,6 @@ public class AdsController {
 
         return ResponseEntity.ok(adsMapper.adsToAdsDto(adsEntity));
 
-    }
-
-    private final HttpServletRequest request;
-
-    @org.springframework.beans.factory.annotation.Autowired
-    public AdsController(AdsCommentService adsCommentService, AdsCommentMapper adsCommentMapper, ResponseWrapperAdsCommentMapper responseWrapperAdsCommentMapper, AdsMapper adsMapper, CreateAdsMapper createAdsMapper, AdsService adsService, AdsImageService adsImageService, ResponseWrapperAdsMapper responseWrapperAdsMapper, FullAdsMapper fullAdsMapper, ObjectMapper objectMapper, HttpServletRequest request) {
-        this.adsCommentService = adsCommentService;
-        this.adsCommentMapper = adsCommentMapper;
-        this.responseWrapperAdsCommentMapper = responseWrapperAdsCommentMapper;
-        this.adsMapper = adsMapper;
-        this.createAdsMapper = createAdsMapper;
-        this.adsService = adsService;
-        this.adsImageService = adsImageService;
-        this.responseWrapperAdsMapper = responseWrapperAdsMapper;
-        this.fullAdsMapper = fullAdsMapper;
-        this.objectMapper = objectMapper;
-        this.request = request;
     }
 
     @Operation(
@@ -257,7 +265,6 @@ public class AdsController {
 
     }
 
-
     @Operation(
             summary = "getAdsMe",
             description = "",
@@ -280,7 +287,7 @@ public class AdsController {
             try {
                 return new ResponseEntity<ResponseWrapperAdsDto>(objectMapper.readValue("{\n  \"count\" : 0,\n  \"results\" : [ {\n    \"image\" : \"image\",\n    \"author\" : 6,\n    \"price\" : 5,\n    \"pk\" : 1,\n    \"title\" : \"title\"\n  }, {\n    \"image\" : \"image\",\n    \"author\" : 6,\n    \"price\" : 5,\n    \"pk\" : 1,\n    \"title\" : \"title\"\n  } ]\n}", ResponseWrapperAdsDto.class), HttpStatus.NOT_IMPLEMENTED);
             } catch (IOException e) {
-                log.error("Couldn't serialize response for content type application/json", e);
+                LOGGER.error("Couldn't serialize response for content type application/json", e);
                 return new ResponseEntity<ResponseWrapperAdsDto>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
@@ -329,7 +336,7 @@ public class AdsController {
             adsService.removeAdsUsingDELETE(adsEntity);
             return ResponseEntity.ok(null);
         } else {
-            return new ResponseEntity(HttpStatus.NO_CONTENT);
+            return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
         }
     }
 
@@ -403,13 +410,13 @@ public class AdsController {
         AdsEntity adsEntity1 = adsMapper.adsDtoToAds(body);
 
         if (adsEntity != null) {
- adsEntity.setAuthor(adsEntity1.getAuthor());
- adsEntity.setPrice(adsEntity1.getPrice());
- adsEntity.setTitle(adsEntity1.getTitle());
- adsEntity.setImages(adsEntity1.getImages());
+             adsEntity.setAuthor(adsEntity1.getAuthor());
+             adsEntity.setPrice(adsEntity1.getPrice());
+             adsEntity.setTitle(adsEntity1.getTitle());
+             adsEntity.setImages(adsEntity1.getImages());
              adsService.saveAddAds(adsEntity);
 
-            return new ResponseEntity(HttpStatus.OK);
+            return new ResponseEntity<AdsDto>(HttpStatus.OK);
         } else {
             return new ResponseEntity<AdsDto>(HttpStatus.NO_CONTENT);
         }

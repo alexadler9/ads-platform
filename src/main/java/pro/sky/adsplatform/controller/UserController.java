@@ -15,7 +15,6 @@ import pro.sky.adsplatform.dto.*;
 import pro.sky.adsplatform.entity.UserEntity;
 import pro.sky.adsplatform.exception.NotFoundException;
 import pro.sky.adsplatform.mapper.ResponseWrapperUserMapper;
-import pro.sky.adsplatform.mapper.UserListMapper;
 import pro.sky.adsplatform.mapper.UserMapper;
 import pro.sky.adsplatform.service.UserService;
 
@@ -29,24 +28,26 @@ import java.util.List;
 @RestController
 @RequestMapping("/users")
 public class UserController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserController.class);
 
     private final UserMapper userMapper;
-
     private final ResponseWrapperUserMapper responseWrapperUserMapper;
-    private final UserService userService;
-
-    private static final Logger log = LoggerFactory.getLogger(UserController.class);
-
     private final ObjectMapper objectMapper;
+
+    private final UserService userService;
 
     private final HttpServletRequest request;
 
     @org.springframework.beans.factory.annotation.Autowired
-    public UserController(UserMapper userMapper, UserListMapper userListMapper, ResponseWrapperUserMapper responseWrapperUserMapper, UserService userService, ObjectMapper objectMapper, HttpServletRequest request) {
+    public UserController(UserMapper userMapper,
+                          ResponseWrapperUserMapper responseWrapperUserMapper,
+                          ObjectMapper objectMapper,
+                          UserService userService,
+                          HttpServletRequest request) {
         this.userMapper = userMapper;
         this.responseWrapperUserMapper = responseWrapperUserMapper;
-        this.userService = userService;
         this.objectMapper = objectMapper;
+        this.userService = userService;
         this.request = request;
     }
 
@@ -66,7 +67,7 @@ public class UserController {
     )
     @GetMapping("/me")
     public ResponseEntity<ResponseWrapperUserDto> getUsersUsingGET() {
-        log.debug("ResponseWrapperUserDto is running");
+        LOGGER.debug("ResponseWrapperUserDto is running");
 
         String accept = request.getHeader("Accept");
         if (accept != null && accept.contains("application/json")) {
@@ -97,17 +98,15 @@ public class UserController {
                     @ApiResponse(responseCode = "403", description = "Forbidden")
             }
     )
-
     @PatchMapping("/me")
     public ResponseEntity<UserDto> updateUserUsingPATCH(@Parameter(in = ParameterIn.DEFAULT, description = "user", required = true, schema = @Schema()) @Valid @RequestBody UserDto body) {
-
         UserEntity userEntity = userMapper.userDtoToUser(body);
         try {
-            userService.updateUserUsingPATCH(userEntity);
-            return ResponseEntity.ok(body);
+            userService.updateUser(userEntity);
         } catch (NotFoundException e) {
-            throw new NotFoundException("Данные пользователя не обновлены");
+            return new ResponseEntity<UserDto>(HttpStatus.NO_CONTENT);
         }
+        return ResponseEntity.ok(body);
     }
 
     /**
@@ -127,13 +126,13 @@ public class UserController {
     )
     @PostMapping("/setPassword")
     public ResponseEntity<NewPasswordDto> setPasswordUsingPOST(@Parameter(in = ParameterIn.DEFAULT, description = "newPassword", required = true, schema = @Schema()) @Valid @RequestBody NewPasswordDto body) {
-        log.debug("setPasswordUsingPOST is running");
+        LOGGER.debug("setPasswordUsingPOST is running");
         String accept = request.getHeader("Accept");
         if (accept != null && accept.contains("application/json")) {
             try {
                 return new ResponseEntity<NewPasswordDto>(objectMapper.readValue("{\n  \"newPassword\" : \"newPassword\",\n  \"currentPassword\" : \"currentPassword\"\n}", NewPasswordDto.class), HttpStatus.NOT_IMPLEMENTED);
             } catch (IOException e) {
-                log.error("Couldn't serialize response for content type application/json", e);
+                LOGGER.error("Couldn't serialize response for content type application/json", e);
                 return new ResponseEntity<NewPasswordDto>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
         }
@@ -157,13 +156,10 @@ public class UserController {
     )
     @GetMapping(path = "{id}")
     public ResponseEntity<UserDto> getUserUsingGET(@Parameter(in = ParameterIn.PATH, description = "id", required = true, schema = @Schema()) @PathVariable("id") Integer id) {
-        log.debug("getUserUsingGET is running");
-
-        if (id != null) {
-            UserEntity userEntity = userService.getUser(id);
-            return ResponseEntity.ok(userMapper.userToUserDto(userEntity));
-        } else {
+        UserEntity user = userService.getUser(id);
+        if (user == null) {
             return new ResponseEntity<UserDto>(HttpStatus.NOT_FOUND);
         }
+        return ResponseEntity.ok(userMapper.userToUserDto(user));
     }
 }

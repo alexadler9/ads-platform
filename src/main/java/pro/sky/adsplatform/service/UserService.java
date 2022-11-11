@@ -8,7 +8,6 @@ import pro.sky.adsplatform.exception.NotFoundException;
 import pro.sky.adsplatform.repository.UserRepository;
 
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Сервис для работы с пользователями.
@@ -43,59 +42,37 @@ public class UserService {
     }
 
     /**
-     * Обновление данные пользователя.
+     * Обновляет данные пользователя.
      *
-     * @return
+     * @param user обновленные данные пользователя.
+     * @throws NotFoundException пользователь с указанными параметрами отсутствует в базе.
      */
-    public UserEntity updateUserUsingPATCH(UserEntity userEntity) {
-        LOGGER.info("Обновление данных пользователя");
-        UserEntity userBD = getUser(userEntity.getId());
-/*        if (userEntity.getId() != null) {
-            userRepository.findById(userEntity.getId())
-                            .ifPresent(user -> {
-                                user.setFirstName(userEntity.getFirstName());
-                                user.setLastName(userEntity.getLastName());
-                                user.setPhone(userEntity.getPhone());
-                                user.setId(userEntity.getId());
-                                user.setEmail(userEntity.getEmail());
-                            });
-           }*/
-        if ((userEntity.getId() != null) || (!Objects.equals(userEntity.getId(), userBD.getId()))){
-            if (userEntity.getFirstName() != null) {
-                userBD.setFirstName(userEntity.getFirstName());
-            }
-            if (userEntity.getLastName() != null) {
-                userBD.setLastName(userEntity.getLastName());
-            }
-            if (userEntity.getPhone() != null) {
-                userBD.setPhone(userEntity.getPhone());
-            }
-            if (userEntity.getId() != null) {
-                userBD.setId(userEntity.getId());
-            }
-            if (userEntity.getUsername() != null) {
-                userBD.setUsername(userEntity.getUsername());
-            }
-        } else {
-            LOGGER.error("В базе такой пользователь отстустсвует");
-            throw new NotFoundException("В базе такой пользователь отстустсвует");
+    public void updateUser(UserEntity user) {
+        UserEntity userBD = getUser(user.getId());
+        if (userBD == null) {
+            LOGGER.error("Пользователь с таким ID отсутствует");
+            throw new NotFoundException("Пользователь с таким ID отсутствует");
         }
-        return userRepository.save(userEntity);
+        if (user.getFirstName() != null) {
+            userBD.setFirstName(user.getFirstName());
+        }
+        if (user.getLastName() != null) {
+            userBD.setLastName(user.getLastName());
+        }
+        if (user.getPhone() != null) {
+            userBD.setPhone(user.getPhone());
+        }
+        if (user.getUsername() != null) {
+            userBD.setUsername(user.getUsername());
+        }
+        userRepository.save(userBD);
     }
 
     /**
      * Обновление пароля пользователя.
-     *
-     * @return
      */
-    public void setPassword() {
+    public void updateUserPassword() {
         LOGGER.info("Обновление пароля пользователя");
-/*                if (newPasswordDto.getId() != null) {
-            userRepository.findById(newPasswordDto.getId())
-                            .ifPresent(user -> {
-                                user.setPassword(newPasswordDto.getPassword());
-                            });
-           }
-        return userRepository.save(newPasswordDto);*/
+        throw new UnsupportedOperationException("Метод не поддерживается");
     }
 }
