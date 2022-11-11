@@ -45,20 +45,27 @@ public class AuthService {
             LOGGER.info("userExists");
             return false;
         }
- /*       manager.createUser(
+
+        manager.createUser(
                 User.withDefaultPasswordEncoder()
                         .password(registerReq.getPassword())
                         .username(registerReq.getUsername())
                         .roles(role.name())
                         .build()
         );
-*/
-        UserEntity userEntity = new UserEntity();
-        userEntity = registerReqMapper.registerReqDtoToUser(registerReq);
-        LOGGER.info("middle makeProcess - id {} FN {}  LN {}  getPhone: {} email {}  password {}  rol {}",
-                userEntity.getId(), userEntity.getFirstName(), userEntity.getLastName(), userEntity.getPhone(),
-                userEntity.getEmail(), userEntity.getPassword(), userEntity.getRole());
-        userRepository.save(registerReqMapper.registerReqDtoToUser(registerReq));
+
+        UserEntity userCreated = userRepository.findByUsername(registerReq.getUsername()).orElse(null);
+        if (userCreated != null) {
+            UserEntity userEntity = registerReqMapper.registerReqDtoToUser(registerReq);
+            userEntity.setId(userCreated.getId());
+            userEntity.setEnabled(userCreated.getEnabled());
+            userEntity.setPassword(userCreated.getPassword());
+            LOGGER.info("middle makeProcess - id {} FN {}  LN {}  getPhone: {} username {}  password {}",
+                    userEntity.getId(), userEntity.getFirstName(), userEntity.getLastName(), userEntity.getPhone(),
+                    userEntity.getUsername(), userEntity.getPassword());
+            userRepository.save(userEntity);
+        }
+
         return true;
     }
 }

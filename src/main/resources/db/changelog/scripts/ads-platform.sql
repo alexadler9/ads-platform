@@ -41,3 +41,42 @@ CREATE TABLE ads_comments
     comment_time    timestamp    NOT NULL,
     comment_text    text         NOT NULL
 );
+
+-- changeSet alexadler:2
+
+-- переименовать поле "email -> username" в таблице "Пользователи" и добавить ограничение для него
+ALTER TABLE users
+RENAME COLUMN email TO username;
+
+ALTER TABLE users
+ADD CONSTRAINT username_unique UNIQUE (username);
+
+-- удалить поле "role" в таблице "Пользователи"
+ALTER TABLE users
+DROP COLUMN IF EXISTS role;
+
+-- добавить поле "enabled" в таблицу "Пользователи"
+ALTER TABLE users
+ADD enabled boolean NOT NULL DEFAULT true;
+
+-- добавить таблицу "Authorities"
+CREATE TABLE authorities
+(
+    username    text            NOT NULL,
+    authority   varchar(16)     NOT NULL,
+    CONSTRAINT authorities_unique UNIQUE (username, authority)
+);
+
+-- changeSet alexadler:3
+
+-- удалить лишние ограничения в таблице "Пользователи"
+
+ALTER TABLE users
+ALTER COLUMN first_name DROP NOT NULL;
+
+ALTER TABLE users
+ALTER COLUMN last_name DROP NOT NULL;
+
+ALTER TABLE users
+ALTER COLUMN phone DROP NOT NULL;
+

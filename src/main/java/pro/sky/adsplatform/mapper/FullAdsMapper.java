@@ -14,7 +14,7 @@ import java.nio.charset.StandardCharsets;
 public interface FullAdsMapper {
     @Mapping(target = "authorFirstName", source = "author.firstName")
     @Mapping(target = "authorLastName", source = "author.lastName")
-    @Mapping(target = "email", source = "author.email")
+    @Mapping(target = "email", source = "author.username")
     @Mapping(target = "phone", source = "author.phone")
     @Mapping(target = "pk", source = "id")
     @Mapping(target = "image", source = "entity", qualifiedByName = "getLastImageString")

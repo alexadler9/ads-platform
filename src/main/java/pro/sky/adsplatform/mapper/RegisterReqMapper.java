@@ -8,6 +8,5 @@ import pro.sky.adsplatform.entity.UserEntity;
 
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface RegisterReqMapper {
-    @Mapping(target = "email", source = "username")
     UserEntity registerReqDtoToUser(RegisterReqDto dto);
 }

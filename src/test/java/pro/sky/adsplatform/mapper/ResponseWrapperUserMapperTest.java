@@ -24,7 +24,7 @@ class ResponseWrapperUserMapperTest {
         Assertions.assertNotNull(responseWrapperUserDto);
         Assertions.assertEquals(1, responseWrapperUserDto.getCount());
         Assertions.assertEquals(1, responseWrapperUserDto.getResults().size());
-        Assertions.assertEquals(USER.getEmail(), responseWrapperUserDto.getResults().get(0).getEmail());
+        Assertions.assertEquals(USER.getUsername(), responseWrapperUserDto.getResults().get(0).getEmail());
         Assertions.assertEquals(USER.getFirstName(), responseWrapperUserDto.getResults().get(0).getFirstName());
         Assertions.assertEquals(USER.getId(), responseWrapperUserDto.getResults().get(0).getId().longValue());
         Assertions.assertEquals(USER.getLastName(), responseWrapperUserDto.getResults().get(0).getLastName());

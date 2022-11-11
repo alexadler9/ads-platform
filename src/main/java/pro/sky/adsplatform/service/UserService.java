@@ -73,8 +73,8 @@ public class UserService {
             if (userEntity.getId() != null) {
                 userBD.setId(userEntity.getId());
             }
-            if (userEntity.getEmail() != null) {
-                userBD.setEmail(userEntity.getEmail());
+            if (userEntity.getUsername() != null) {
+                userBD.setUsername(userEntity.getUsername());
             }
         } else {
             LOGGER.error("В базе такой пользователь отстустсвует");
