@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import pro.sky.adsplatform.entity.AdsCommentEntity;
+import pro.sky.adsplatform.exception.NotFoundException;
 import pro.sky.adsplatform.mapper.AdsCommentMapper;
 import pro.sky.adsplatform.repository.AdsCommentRepository;
 
@@ -45,18 +46,44 @@ public class AdsCommentService {
     }
 
     /**
-     * Сохраняет комментарий.
+     * Создает новый отзыв.
+     *
+     * @param adsComment новый отзыв.
      */
-    public void saveAddAdsCommentsUsingPOST(AdsCommentEntity adsCommentEntity) {
-        adsCommentRepository.save(adsCommentEntity);
+    public void createAdsComment(AdsCommentEntity adsComment) {
+        adsComment.setId(null);
+        adsCommentRepository.save(adsComment);
+    }
 
+    /**
+     * Обновляет содержание отзыва.
+     *
+     * @param adsComment обновленный отзыв.
+     * @param id ID отзыва.
+     * @param idAds ID объявления.
+     * @throws IllegalArgumentException несооветствие значений ID entity и аргумента.
+     * @throws NotFoundException отзыв с указанными параметрами отсутствует в базе.
+     */
+    public void updateAdsCommentText(AdsCommentEntity adsComment, long id, long idAds) {
+        if (adsComment.getId() != id) {
+            LOGGER.error("Несоответствие значений ID отзыва");
+            throw new IllegalArgumentException("Несоответствие значений ID отзыва");
+        }
+        AdsCommentEntity adsCommentBD = getAdsComment(id, idAds);
+        if (adsCommentBD == null) {
+            LOGGER.error("Отзыв с таким ID отсутствует");
+            throw new NotFoundException("Отзыв с таким ID отсутствует");
+        }
+        if (adsComment.getText() != null) {
+            adsCommentBD.setText(adsComment.getText());
+        }
+        adsCommentRepository.save(adsCommentBD);
     }
 
     /**
      * Удаляет обьявление.
      */
-    public void deleteAdsCommentUsingDELETE(AdsCommentEntity adsCommentEntity) {
-        adsCommentRepository.delete(adsCommentEntity);
+    public void deleteAdsComment(AdsCommentEntity adsComment) {
+        adsCommentRepository.delete(adsComment);
     }
-
 }

@@ -126,14 +126,22 @@ public class AdsController {
     )
     @PostMapping("{ad_pk}/comment")
     public ResponseEntity<AdsCommentDto> addAdsCommentsUsingPOST(@PathVariable("ad_pk") String adPk, @RequestBody AdsCommentDto body) {
-        AdsCommentEntity adsCommentEntity = adsCommentMapper.adsCommentDtoToAdsComment(body);
-        try {
-            adsCommentEntity.setAds(adsService.findAds(Long.parseLong(adPk)));
-            adsCommentService.saveAddAdsCommentsUsingPOST(adsCommentEntity);
-            return ResponseEntity.ok(body);
-        } catch (NotFoundException e) {
-            throw new NotFoundException("Не сохранили");
+        AdsCommentEntity adsComment = adsCommentMapper.adsCommentDtoToAdsComment(body);
+        AdsEntity ads = adsService.findAds(Long.parseLong(adPk));
+        if (ads == null) {
+            return new ResponseEntity<AdsCommentDto>(HttpStatus.NOT_FOUND);
         }
+        adsComment.setAds(ads);
+        adsCommentService.createAdsComment(adsComment);
+        return ResponseEntity.ok(body);
+
+//        try {
+//            adsCommentEntity.setAds(adsService.findAds(Long.parseLong(adPk)));
+//            adsCommentService.saveAddAdsCommentsUsingPOST(adsCommentEntity);
+//            return ResponseEntity.ok(body);
+//        } catch (NotFoundException e) {
+//            throw new NotFoundException("Не сохранили");
+//        }
     }
 
     //IMAGE
@@ -164,7 +172,7 @@ public class AdsController {
         AdsCommentEntity adsCommentEntity = adsCommentService.getAdsComment(id, Long.parseLong(adPk));
 
         if (adsCommentEntity != null) {
-            adsCommentService.deleteAdsCommentUsingDELETE(adsCommentEntity);
+            adsCommentService.deleteAdsComment(adsCommentEntity);
             return ResponseEntity.ok(null);
 
         } else {
@@ -342,28 +350,35 @@ public class AdsController {
             method = RequestMethod.PATCH)
     //@PutMapping("/ads/{ad_pk}/comment/{id}")
     public ResponseEntity<AdsCommentDto> updateAdsCommentUsingPATCH(@PathVariable("ad_pk") String adPk, @PathVariable("id") Integer id, @RequestBody AdsCommentDto body) {
-
-        AdsCommentEntity adsCommentEntity = adsCommentService.getAdsComment(id, Long.parseLong(adPk));
-        AdsCommentEntity adsCommentEntity1 = adsCommentMapper.adsCommentDtoToAdsComment(body);
-
-
-        if (adsCommentEntity != null) {
-            adsCommentEntity.setAuthor(adsCommentEntity1.getAuthor());
-
-            Integer pk = body.getPk();
-            AdsEntity adsEntity = adsService.findAds(pk);
-            adsCommentEntity.setAds(adsEntity);
-
-            //            adsCommentEntity.setAds(adsCommentEntity1.getAds());
-            adsCommentEntity.setDateTime(adsCommentEntity1.getDateTime());
-            adsCommentEntity.setText(adsCommentEntity1.getText());
-
-            adsCommentService.saveAddAdsCommentsUsingPOST(adsCommentEntity);
-            AdsCommentDto adsCommentDto = adsCommentMapper.adsCommentToAdsCommentDto(adsCommentEntity);
-            return new ResponseEntity(HttpStatus.OK);
-        } else {
+        try {
+            AdsCommentEntity adsComment = adsCommentMapper.adsCommentDtoToAdsComment(body);
+            adsCommentService.updateAdsCommentText(adsComment, id, Long.parseLong(adPk));
+        } catch (IllegalArgumentException | NotFoundException e) {
             return new ResponseEntity<AdsCommentDto>(HttpStatus.NO_CONTENT);
         }
+        return ResponseEntity.ok(body);
+
+//        AdsCommentEntity adsCommentEntity = adsCommentService.getAdsComment(id, Long.parseLong(adPk));
+//        AdsCommentEntity adsCommentEntity1 = adsCommentMapper.adsCommentDtoToAdsComment(body);
+//
+//
+//        if (adsCommentEntity != null) {
+//            adsCommentEntity.setAuthor(adsCommentEntity1.getAuthor());
+//
+//            Integer pk = body.getPk();
+//            AdsEntity adsEntity = adsService.findAds(pk);
+//            adsCommentEntity.setAds(adsEntity);
+//
+//            //            adsCommentEntity.setAds(adsCommentEntity1.getAds());
+//            adsCommentEntity.setDateTime(adsCommentEntity1.getDateTime());
+//            adsCommentEntity.setText(adsCommentEntity1.getText());
+//
+//            adsCommentService.saveAddAdsCommentsUsingPOST(adsCommentEntity);
+//            AdsCommentDto adsCommentDto = adsCommentMapper.adsCommentToAdsCommentDto(adsCommentEntity);
+//            return new ResponseEntity(HttpStatus.OK);
+//        } else {
+//            return new ResponseEntity<AdsCommentDto>(HttpStatus.NO_CONTENT);
+//        }
     }
 
     @Operation(
