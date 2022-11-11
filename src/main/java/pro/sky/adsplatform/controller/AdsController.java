@@ -32,7 +32,7 @@ import java.util.List;
 
 @CrossOrigin(value = "http://localhost:3000")
 @RestController
-@RequestMapping("/ads/")
+@RequestMapping("/ads")
 public class AdsController {
 
     private final AdsCommentService adsCommentService;
@@ -106,20 +106,22 @@ catch (NotFoundException e){
 
 
     //IMAGE
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-        public ResponseEntity<AdsDto> addAdsUsingPOST(@Valid @RequestPart("properties")
-                                                                @Parameter(schema =  @Schema(type = "string", format = "binary"))  CreateAdsDto body,
-                                                            @RequestPart("image")MultipartFile file) {
-        AdsEntity adsEntity = createAdsMapper.createAdsDtoToAds(body);
+        public ResponseEntity<AdsDto> addAdsUsingPOST(@Valid @RequestPart("properties") @Parameter( schema=@Schema()) @RequestBody CreateAdsDto body,
+                                                            @RequestPart("image") @Parameter( schema=@Schema(type = "string",format = "binary"))  MultipartFile imageFile) {
+//        public ResponseEntity<AdsDto> addAdsUsingPOST(@RequestPart("image") @Parameter( schema=@Schema(type = "string",format = "binary"))  MultipartFile imageFile) {
+
+  //      AdsEntity adsEntity = createAdsMapper.createAdsDtoToAds(body);
 
 //Part 1
-        adsService.saveAddAds(adsEntity);
+ //       adsService.saveAddAds(adsEntity);
 
 //Part2
-        adsImageService.saveAddFile(adsEntity,file);
+//        adsImageService.saveAddFile(adsEntity,file);
 
-        return ResponseEntity.ok(adsMapper.adsToAdsDto(adsEntity));
+ //       return ResponseEntity.ok(adsMapper.adsToAdsDto(adsEntity));
+        return null;
     }
 
     //IMAGE

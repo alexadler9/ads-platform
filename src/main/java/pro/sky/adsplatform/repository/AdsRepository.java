@@ -10,5 +10,5 @@ import java.util.List;
 @Repository
 public interface AdsRepository extends JpaRepository<AdsEntity, Long> {
 
-    List<AdsEntity> findAllByTitleLike(String title);
+    List<AdsEntity> findAllByTitleLikeIgnoreCase(String title);
 }
