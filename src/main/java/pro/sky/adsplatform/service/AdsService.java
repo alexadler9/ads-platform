@@ -31,7 +31,7 @@ public class AdsService {
      * @param id ID объявления.
      * @return объявление. Может вернуть null, если такое объявление отсутствует.
      */
-    public AdsEntity getAds(long id) {
+    public AdsEntity findAds(long id) {
         return adsRepository.findById(id).orElse(null);
     }
 

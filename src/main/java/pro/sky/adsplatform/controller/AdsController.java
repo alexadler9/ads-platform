@@ -25,14 +25,17 @@ import pro.sky.adsplatform.service.AdsCommentService;
 import pro.sky.adsplatform.service.AdsImageService;
 import pro.sky.adsplatform.service.AdsService;
 
+import javax.naming.NotContextException;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.util.List;
 
 @CrossOrigin(value = "http://localhost:3000")
 @RestController
-@RequestMapping("/ads/")
+@RequestMapping("/ads")
 public class AdsController {
 
     private final AdsCommentService adsCommentService;
@@ -49,6 +52,48 @@ public class AdsController {
     private static final Logger log = LoggerFactory.getLogger(AdsController.class);
 
     private final ObjectMapper objectMapper;
+
+    @Operation(
+            summary = "addAds",
+            description = "Добавить объявления",
+            tags = {"Объявления"},
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "OK"),
+                    @ApiResponse(responseCode = "201", description = "Created"),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized"),
+                    @ApiResponse(responseCode = "403", description = "Forbidden"),
+                    @ApiResponse(responseCode = "404", description = "Not Found")
+            }
+    )
+
+
+    //IMAGE
+//    @RequestMapping(value = "", method = RequestMethod.POST,
+    //          consumes = {"multipart/form-data"})
+    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseBody
+    @PostMapping(consumes = {"multipart/form-data"})
+    public ResponseEntity<AdsDto> addAdsUsingPOST(
+            @RequestPart("properties") CreateAdsDto body,
+            @RequestPart("image") MultipartFile file) {
+
+//        @PostMapping ( value = "", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE } )
+//    public ResponseEntity<AdsDto> addAdsUsingPOST(
+//
+//            @Valid @RequestPart("properties") @Parameter(schema = @Schema()) AdsDto requestDto ,
+//            @RequestPart("image") @Parameter(schema = @Schema(type = "string",format= "binary")) MultipartFile imageFile){
+
+        AdsEntity adsEntity = createAdsMapper.createAdsDtoToAds(body);
+
+//Part 1
+        adsService.saveAddAds(adsEntity);
+
+//Part2
+        //       adsImageService.saveAddFile(adsEntity, file);
+
+        return ResponseEntity.ok(adsMapper.adsToAdsDto(adsEntity));
+
+    }
 
     private final HttpServletRequest request;
 
@@ -69,7 +114,7 @@ public class AdsController {
 
     @Operation(
             summary = "addAdsComments",
-            description = "",
+            description = "!",
             tags = {"Объявления"},
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
@@ -83,42 +128,12 @@ public class AdsController {
     public ResponseEntity<AdsCommentDto> addAdsCommentsUsingPOST(@PathVariable("ad_pk") String adPk, @RequestBody AdsCommentDto body) {
         AdsCommentEntity adsCommentEntity = adsCommentMapper.adsCommentDtoToAdsComment(body);
         try {
+            adsCommentEntity.setAds(adsService.findAds(Long.parseLong(adPk)));
             adsCommentService.saveAddAdsCommentsUsingPOST(adsCommentEntity);
             return ResponseEntity.ok(body);
         } catch (NotFoundException e) {
             throw new NotFoundException("Не сохранили");
         }
-    }
-
-    @Operation(
-            summary = "addAds",
-            description = "Добавить объявления",
-            tags = {"Объявления"},
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "OK"),
-                    @ApiResponse(responseCode = "201", description = "Created"),
-                    @ApiResponse(responseCode = "401", description = "Unauthorized"),
-                    @ApiResponse(responseCode = "403", description = "Forbidden"),
-                    @ApiResponse(responseCode = "404", description = "Not Found")
-            }
-    )
-
-
-    //IMAGE
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<AdsDto> addAdsUsingPOST(@Valid @RequestPart("properties")
-                                                  @Parameter(schema = @Schema(type = "string", format = "binary")) CreateAdsDto body,
-                                                  @RequestPart("image") MultipartFile file) {
-        AdsEntity adsEntity = createAdsMapper.createAdsDtoToAds(body);
-
-//Part 1
-        adsService.saveAddAds(adsEntity);
-
-//Part2
-        adsImageService.saveAddFile(adsEntity, file);
-
-        return ResponseEntity.ok(adsMapper.adsToAdsDto(adsEntity));
     }
 
     //IMAGE
@@ -136,7 +151,7 @@ public class AdsController {
 
     @Operation(
             summary = "deleteAdsComment",
-            description = "",
+            description = "!",
             tags = {"Объявления"},
             responses = {
                     @ApiResponse(responseCode = "204", description = "No Content"),
@@ -160,7 +175,7 @@ public class AdsController {
 
     @Operation(
             summary = "getALLAds",
-            description = "",
+            description = "!",
             tags = {"Объявления"},
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
@@ -190,7 +205,7 @@ public class AdsController {
 
     @Operation(
             summary = "getAdsComments",
-            description = "",
+            description = "!",
             tags = {"Объявления"},
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
@@ -212,7 +227,7 @@ public class AdsController {
 
     @Operation(
             summary = "getAdsComments",
-            description = "",
+            description = "!",
             tags = {"Объявления"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "*/*", schema = @Schema(implementation = ResponseWrapperAdsCommentDto.class))),
@@ -267,7 +282,7 @@ public class AdsController {
 
     @Operation(
             summary = "getAds",
-            description = "",
+            description = "!",
             tags = {"Объявления"},
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "*/*", schema = @Schema(implementation = FullAdsDto.class))),
@@ -279,15 +294,18 @@ public class AdsController {
     @GetMapping("{id}")
     public ResponseEntity<FullAdsDto> getAdsUsingGET(@PathVariable("id") Integer id) {
 
-        AdsEntity adsEntity = adsService.getAds(id);
-        return ResponseEntity.ok(fullAdsMapper.adsToFullAdsDto(adsEntity));
-
+        AdsEntity adsEntity = adsService.findAds(id);
+        if (adsEntity != null) {
+            return ResponseEntity.ok(fullAdsMapper.adsToFullAdsDto(adsEntity));
+        } else {
+            return new ResponseEntity<FullAdsDto>(HttpStatus.NOT_FOUND);
+        }
     }
 
 
     @Operation(
             summary = "removeAds",
-            description = "",
+            description = "!",
             tags = {"Объявления"},
             responses = {
                     @ApiResponse(responseCode = "204", description = "No Content"),
@@ -298,19 +316,18 @@ public class AdsController {
     @DeleteMapping("{id}")
     public ResponseEntity<Void> removeAdsUsingDELETE(@PathVariable("id") Integer id) {
         String accept = request.getHeader("Accept");
-        AdsEntity adsEntity = adsService.getAds(id);
+        AdsEntity adsEntity = adsService.findAds(id);
         if (adsEntity != null) {
             adsService.removeAdsUsingDELETE(adsEntity);
             return ResponseEntity.ok(null);
-
         } else {
-            throw new NotFoundException("Нечего удалчть");
+            return new ResponseEntity(HttpStatus.NO_CONTENT);
         }
     }
 
     @Operation(
             summary = "updateAdsComment",
-            description = "Добавить объявления",
+            description = "!Обновить комментарий",
             tags = {"Объявления"},
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
@@ -324,23 +341,34 @@ public class AdsController {
             consumes = {"application/json"},
             method = RequestMethod.PATCH)
     //@PutMapping("/ads/{ad_pk}/comment/{id}")
-    public ResponseEntity<AdsCommentDto> updateAdsCommentUsingPATCH(@PathVariable("ad_pk") String adPk, Integer id, @RequestBody AdsCommentDto body) {
+    public ResponseEntity<AdsCommentDto> updateAdsCommentUsingPATCH(@PathVariable("ad_pk") String adPk, @PathVariable("id") Integer id, @RequestBody AdsCommentDto body) {
 
         AdsCommentEntity adsCommentEntity = adsCommentService.getAdsComment(id, Long.parseLong(adPk));
         AdsCommentEntity adsCommentEntity1 = adsCommentMapper.adsCommentDtoToAdsComment(body);
 
-        if (adsCommentEntity != null) {
-            adsCommentEntity = adsCommentEntity1;
 
-            return ResponseEntity.ok(adsCommentMapper.adsCommentToAdsCommentDto(adsCommentEntity));
+        if (adsCommentEntity != null) {
+            adsCommentEntity.setAuthor(adsCommentEntity1.getAuthor());
+
+            Integer pk = body.getPk();
+            AdsEntity adsEntity = adsService.findAds(pk);
+            adsCommentEntity.setAds(adsEntity);
+
+            //            adsCommentEntity.setAds(adsCommentEntity1.getAds());
+            adsCommentEntity.setDateTime(adsCommentEntity1.getDateTime());
+            adsCommentEntity.setText(adsCommentEntity1.getText());
+
+            adsCommentService.saveAddAdsCommentsUsingPOST(adsCommentEntity);
+            AdsCommentDto adsCommentDto = adsCommentMapper.adsCommentToAdsCommentDto(adsCommentEntity);
+            return new ResponseEntity(HttpStatus.OK);
         } else {
-            return new ResponseEntity<AdsCommentDto>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<AdsCommentDto>(HttpStatus.NO_CONTENT);
         }
     }
 
     @Operation(
             summary = "updateAds",
-            description = "Добавить объявления",
+            description = "!Редактировать объявления",
             tags = {"Объявления"},
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
@@ -356,15 +384,19 @@ public class AdsController {
     //@PutMapping("/updateAds")
     public ResponseEntity<AdsDto> updateAdsUsingPATCH(@PathVariable("id") Integer id, @RequestBody AdsDto body) {
 
-        AdsEntity adsEntity = adsService.getAds(id);
+        AdsEntity adsEntity = adsService.findAds(id);
         AdsEntity adsEntity1 = adsMapper.adsDtoToAds(body);
 
         if (adsEntity != null) {
-            adsEntity = adsEntity1;
+ adsEntity.setAuthor(adsEntity1.getAuthor());
+ adsEntity.setPrice(adsEntity1.getPrice());
+ adsEntity.setTitle(adsEntity1.getTitle());
+ adsEntity.setImages(adsEntity1.getImages());
+             adsService.saveAddAds(adsEntity);
 
-            return ResponseEntity.ok(adsMapper.adsToAdsDto(adsEntity));
+            return new ResponseEntity(HttpStatus.OK);
         } else {
-            return new ResponseEntity<AdsDto>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<AdsDto>(HttpStatus.NO_CONTENT);
         }
 
     }

@@ -29,27 +29,27 @@ public class WebSecurityConfiguration {
 
     @Bean
     public JdbcUserDetailsManager userDetailsManager(DataSource dataSource) {
-        UserDetails user = User.withDefaultPasswordEncoder()
-                .username("user@gmail.com")
-                .password("password")
-                .roles("USER")
-                .build();
-        UserDetails admin = User.withDefaultPasswordEncoder()
-                .username("admin@gmail.com")
-                .password("password")
-                .roles("ADMIN", "USER")
-                .build();
+//        UserDetails user = User.withDefaultPasswordEncoder()
+//                .username("user@gmail.com")
+//                .password("password")
+//                .roles("USER")
+//                .build();
+//        UserDetails admin = User.withDefaultPasswordEncoder()
+//                .username("admin@gmail.com")
+//                .password("password")
+//                .roles("ADMIN", "USER")
+//                .build();
 
         JdbcUserDetailsManager users = new JdbcUserDetailsManager(dataSource);
-        if (users.userExists(user.getUsername())) {
-            users.deleteUser(user.getUsername());
-        }
-        if (users.userExists(admin.getUsername())) {
-            users.deleteUser(admin.getUsername());
-        }
-
-        users.createUser(user);
-        users.createUser(admin);
+//        if (users.userExists(user.getUsername())) {
+//            users.deleteUser(user.getUsername());
+//        }
+//        if (users.userExists(admin.getUsername())) {
+//            users.deleteUser(admin.getUsername());
+//        }
+//
+//        users.createUser(user);
+//        users.createUser(admin);
         return users;
     }
 
