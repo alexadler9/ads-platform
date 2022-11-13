@@ -31,6 +31,13 @@ public class UserService {
     public UserEntity getUser(long id) {
         return userRepository.findById(id).orElse(null);
     }
+    /**
+     * Возвращает пользователя по userName.
+     * @return пользователь. Может вернуть null, если такой пользователь отсутствует.
+     */
+    public UserEntity getUserByName(String userName) {
+        return userRepository.findByUsername(userName).orElse(null);
+    }
 
     /**
      * Возвращает всех пользователей.

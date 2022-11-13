@@ -2,7 +2,6 @@ package pro.sky.adsplatform.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -13,23 +12,22 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import pro.sky.adsplatform.dto.*;
 import pro.sky.adsplatform.entity.AdsCommentEntity;
 import pro.sky.adsplatform.entity.AdsEntity;
 import pro.sky.adsplatform.entity.AdsImageEntity;
+import pro.sky.adsplatform.entity.UserEntity;
 import pro.sky.adsplatform.exception.NotFoundException;
 import pro.sky.adsplatform.mapper.*;
 import pro.sky.adsplatform.service.AdsCommentService;
 import pro.sky.adsplatform.service.AdsImageService;
 import pro.sky.adsplatform.service.AdsService;
+import pro.sky.adsplatform.service.UserService;
 
-import javax.naming.NotContextException;
 import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.util.List;
 
@@ -46,7 +44,7 @@ public class AdsController {
     private final ResponseWrapperAdsMapper responseWrapperAdsMapper;
     private final ResponseWrapperAdsCommentMapper responseWrapperAdsCommentMapper;
     private final ObjectMapper objectMapper;
-
+    private final UserService userService;
     private final AdsService adsService;
     private final AdsCommentService adsCommentService;
     private final AdsImageService adsImageService;
@@ -61,7 +59,7 @@ public class AdsController {
                          ResponseWrapperAdsMapper responseWrapperAdsMapper,
                          ResponseWrapperAdsCommentMapper responseWrapperAdsCommentMapper,
                          ObjectMapper objectMapper,
-                         AdsService adsService,
+                         UserService userService, AdsService adsService,
                          AdsCommentService adsCommentService,
                          AdsImageService adsImageService,
                          HttpServletRequest request) {
@@ -72,6 +70,7 @@ public class AdsController {
         this.responseWrapperAdsMapper = responseWrapperAdsMapper;
         this.responseWrapperAdsCommentMapper = responseWrapperAdsCommentMapper;
         this.objectMapper = objectMapper;
+        this.userService = userService;
         this.adsService = adsService;
         this.adsCommentService = adsCommentService;
         this.adsImageService = adsImageService;
@@ -98,25 +97,24 @@ public class AdsController {
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
     @PostMapping(consumes = {"multipart/form-data"})
-    public ResponseEntity<AdsDto> addAdsUsingPOST(
-            @RequestPart("properties") CreateAdsDto body,
-            @RequestPart("image") MultipartFile file) {
+    public ResponseEntity<AdsDto> addAdsUsingPOST(Authentication authentication,
+                                                  @RequestPart("properties") CreateAdsDto body,
+                                                  @RequestPart("image") MultipartFile file) throws IOException {
 
-//        @PostMapping ( value = "", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE } )
-//    public ResponseEntity<AdsDto> addAdsUsingPOST(
-//
-//            @Valid @RequestPart("properties") @Parameter(schema = @Schema()) AdsDto requestDto ,
-//            @RequestPart("image") @Parameter(schema = @Schema(type = "string",format= "binary")) MultipartFile imageFile){
-
-        AdsEntity adsEntity = createAdsMapper.createAdsDtoToAds(body);
 
 //Part 1
+        AdsEntity adsEntity = createAdsMapper.createAdsDtoToAds(body);
+        String userName = authentication.getName();
+        UserEntity userEntity = userService.getUserByName(userName);
+        adsEntity.setAuthor(userEntity);
         adsService.saveAddAds(adsEntity);
 
 //Part2
-        //       adsImageService.saveAddFile(adsEntity, file);
-
-        return ResponseEntity.ok(adsMapper.adsToAdsDto(adsEntity));
+        String imageNo = adsImageService.saveAddFile(adsEntity, file);
+        AdsDto adsDto = new AdsDto();
+        adsDto = adsMapper.adsToAdsDto(adsEntity);
+        adsDto.setImage("ads/image/" + imageNo);
+        return ResponseEntity.ok(adsDto);
 
     }
 
@@ -133,13 +131,22 @@ public class AdsController {
             }
     )
     @PostMapping("{ad_pk}/comment")
-    public ResponseEntity<AdsCommentDto> addAdsCommentsUsingPOST(@PathVariable("ad_pk") String adPk, @RequestBody AdsCommentDto body) {
+    public ResponseEntity<AdsCommentDto> addAdsCommentsUsingPOST(Authentication authentication,
+                                                                 @PathVariable("ad_pk") String adPk, @RequestBody AdsCommentDto body) {
         AdsCommentEntity adsComment = adsCommentMapper.adsCommentDtoToAdsComment(body);
-        AdsEntity ads = adsService.findAds(Long.parseLong(adPk));
-        if (ads == null) {
+
+        UserEntity userEntity = userService.getUserByName(authentication.getName());
+        if (userEntity == null) {
             return new ResponseEntity<AdsCommentDto>(HttpStatus.NOT_FOUND);
         }
-        adsComment.setAds(ads);
+        adsComment.setAuthor(userEntity);
+
+        AdsEntity adsEntity = adsService.findAds(Long.parseLong(adPk));
+        if (adsEntity == null) {
+            return new ResponseEntity<AdsCommentDto>(HttpStatus.NOT_FOUND);
+        }
+        adsComment.setAds(adsEntity);
+
         adsCommentService.createAdsComment(adsComment);
         return ResponseEntity.ok(body);
 
@@ -153,12 +160,13 @@ public class AdsController {
     }
 
     //IMAGE
-    @GetMapping("image/{no}")
-    public ResponseEntity<byte[]> getImage(@PathVariable("adsImageId") Long adsImageId) {
-        AdsImageEntity adsImageEntity = adsImageService.getImageEntity(adsImageId);
+    @GetMapping(value = "/image/{pk}")
+    public ResponseEntity<byte[]> getImageNo(@PathVariable String pk) throws IOException {
+
+        AdsImageEntity adsImageEntity = adsImageService.getImageEntity(Long.valueOf(pk));
         if (adsImageEntity == null) throw new org.webjars.NotFoundException("Не найдена картинка");
         HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setContentType(MediaType.parseMediaType(MediaType.MULTIPART_FORM_DATA_VALUE));
+        httpHeaders.setContentType(MediaType.parseMediaType("image/jpeg"));
         httpHeaders.setContentLength(adsImageEntity.getImage().length);
 
         return ResponseEntity.status(HttpStatus.OK).headers(httpHeaders).body(adsImageEntity.getImage());
@@ -330,7 +338,7 @@ public class AdsController {
     )
     @DeleteMapping("{id}")
     public ResponseEntity<Void> removeAdsUsingDELETE(@PathVariable("id") Integer id) {
-        String accept = request.getHeader("Accept");
+
         AdsEntity adsEntity = adsService.findAds(id);
         if (adsEntity != null) {
             adsService.removeAdsUsingDELETE(adsEntity);
@@ -351,10 +359,11 @@ public class AdsController {
                     @ApiResponse(responseCode = "403", description = "Forbidden")
             }
     )
-    @RequestMapping(value = "{ad_pk}/comment/{id}",
-            produces = {"*/*"},
-            consumes = {"application/json"},
-            method = RequestMethod.PATCH)
+//    @RequestMapping(value = "{ad_pk}/comment/{id}",
+//            produces = {"*/*"},
+//            consumes = {"application/json"},
+//            method = RequestMethod.PATCH)
+    @PatchMapping("{ad_pk}/comment/{id}")
     //@PutMapping("/ads/{ad_pk}/comment/{id}")
     public ResponseEntity<AdsCommentDto> updateAdsCommentUsingPATCH(@PathVariable("ad_pk") String adPk, @PathVariable("id") Integer id, @RequestBody AdsCommentDto body) {
         try {
@@ -399,24 +408,20 @@ public class AdsController {
                     @ApiResponse(responseCode = "403", description = "Forbidden")
             }
     )
-    @RequestMapping(value = "{id}",
-            produces = {"*/*"},
-            consumes = {"application/json"},
-            method = RequestMethod.PATCH)
-    //@PutMapping("/updateAds")
+    @PatchMapping(value = "{id}")
     public ResponseEntity<AdsDto> updateAdsUsingPATCH(@PathVariable("id") Integer id, @RequestBody AdsDto body) {
 
         AdsEntity adsEntity = adsService.findAds(id);
         AdsEntity adsEntity1 = adsMapper.adsDtoToAds(body);
 
         if (adsEntity != null) {
-             adsEntity.setAuthor(adsEntity1.getAuthor());
-             adsEntity.setPrice(adsEntity1.getPrice());
-             adsEntity.setTitle(adsEntity1.getTitle());
-             adsEntity.setImages(adsEntity1.getImages());
-             adsService.saveAddAds(adsEntity);
+            adsEntity.setAuthor(adsEntity1.getAuthor());
+            adsEntity.setPrice(adsEntity1.getPrice());
+            adsEntity.setTitle(adsEntity1.getTitle());
+            adsEntity.setImages(adsEntity1.getImages());
+            adsService.saveAddAds(adsEntity);
 
-            return new ResponseEntity<AdsDto>(HttpStatus.OK);
+            return ResponseEntity.ok(body);
         } else {
             return new ResponseEntity<AdsDto>(HttpStatus.NO_CONTENT);
         }
@@ -427,4 +432,16 @@ public class AdsController {
     public List<AdsEntity> findAllByTitleLike(@PathVariable("title") String title) {
         return adsService.findAllByTitleLike(title);
     }
+
+    @PatchMapping(value = "{ad}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Void> updateAdsImage(@PathVariable Integer ad, @RequestParam MultipartFile file) throws IOException {
+        AdsEntity adsEntity = adsService.findAds(ad);
+        if (adsEntity != null) {
+            adsImageService.saveAddFile(adsEntity, file);
+            return ResponseEntity.ok(null);
+        } else {
+            return new ResponseEntity<Void>(HttpStatus.NOT_FOUND);
+        }
+    }
+
 }
