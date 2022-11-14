@@ -3,7 +3,7 @@ package pro.sky.adsplatform.dto;
 import lombok.Data;
 
 @Data
-public class LoginReqDto {
+public class LoginReq {
     private String password;
     private String username;
 }

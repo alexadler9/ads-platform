@@ -8,12 +8,12 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import pro.sky.adsplatform.dto.LoginReqDto;
-import pro.sky.adsplatform.dto.RegisterReqDto;
-import pro.sky.adsplatform.dto.RoleDto;
+import pro.sky.adsplatform.dto.LoginReq;
+import pro.sky.adsplatform.dto.RegisterReq;
+import pro.sky.adsplatform.dto.Role;
 import pro.sky.adsplatform.service.AuthService;
 
-import static pro.sky.adsplatform.dto.RoleDto.USER;
+import static pro.sky.adsplatform.dto.Role.USER;
 
 @Slf4j
 @CrossOrigin(value = "http://localhost:3000")
@@ -23,7 +23,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginReqDto req) {
+    public ResponseEntity<?> login(@RequestBody LoginReq req) {
         if (authService.login(req.getUsername(), req.getPassword())) {
             return ResponseEntity.ok().build();
         } else {
@@ -32,8 +32,8 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterReqDto req) {
-        RoleDto role = req.getRole() == null ? USER : req.getRole();
+    public ResponseEntity<?> register(@RequestBody RegisterReq req) {
+        Role role = req.getRole() == null ? USER : req.getRole();
         if (authService.register(req, role)) {
             return ResponseEntity.ok().build();
         } else {
