@@ -1,5 +1,5 @@
 package pro.sky.adsplatform.dto;
 
-public enum RoleDto {
+public enum Role {
     USER, ADMIN
 }

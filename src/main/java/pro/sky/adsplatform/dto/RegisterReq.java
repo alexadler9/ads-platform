@@ -3,11 +3,11 @@ package pro.sky.adsplatform.dto;
 import lombok.Data;
 
 @Data
-public class RegisterReqDto {
+public class RegisterReq {
     private String username;
     private String password;
     private String firstName;
     private String lastName;
     private String phone;
-    private RoleDto role;
+    private Role role;
 }
