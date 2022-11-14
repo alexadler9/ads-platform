@@ -467,41 +467,6 @@ paths:
       x-codegen-request-body-name: req
       x-contentType: application/json
       x-accepts: '*/*'
-  /users:
-    post:
-      operationId: addUserUsingPOST
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateUser'
-        description: user
-        required: true
-      responses:
-        "200":
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/CreateUser'
-          description: OK
-        "201":
-          content: {}
-          description: Created
-        "401":
-          content: {}
-          description: Unauthorized
-        "403":
-          content: {}
-          description: Forbidden
-        "404":
-          content: {}
-          description: Not Found
-      summary: addUser
-      tags:
-        - Пользователи
-      x-codegen-request-body-name: user
-      x-contentType: application/json
-      x-accepts: '*/*'
   /users/me:
     get:
       operationId: getUsersUsingGET
