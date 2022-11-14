@@ -30,14 +30,27 @@ public class AuthService {
         this.encoder = new BCryptPasswordEncoder();
     }
 
+    public void changePassword(String oldPassword, String newPassword) {
+        String passwordNew = encoder.encode(newPassword);
+        String passwordOld = oldPassword;
+
+        manager.changePassword(passwordOld, passwordNew);
+    }
+
+
     public boolean login(String userName, String password) {
         if (!manager.userExists(userName)) {
             return false;
         }
+
         UserDetails userDetails = manager.loadUserByUsername(userName);
         String encryptedPassword = userDetails.getPassword();
-        String encryptedPasswordWithoutEncryptionType = encryptedPassword.substring(8);
-        return encoder.matches(password, encryptedPasswordWithoutEncryptionType);
+        String str = encryptedPassword.substring(0,8);
+        String ecryptedPasswordWithoutEncryptionType = encryptedPassword;
+        if (str.equals("{bcrypt}"))
+             ecryptedPasswordWithoutEncryptionType = encryptedPassword.substring(8);
+
+         return encoder.matches(password, ecryptedPasswordWithoutEncryptionType);
     }
 
     public boolean register(RegisterReqDto registerReq, RoleDto role) {
@@ -52,8 +65,8 @@ public class AuthService {
                         .username(registerReq.getUsername())
                         .roles(role.name())
                         .build()
-        );
 
+        );
         UserEntity userCreated = userRepository.findByUsername(registerReq.getUsername()).orElse(null);
         if (userCreated != null) {
             UserEntity userEntity = registerReqMapper.registerReqDtoToUser(registerReq);
