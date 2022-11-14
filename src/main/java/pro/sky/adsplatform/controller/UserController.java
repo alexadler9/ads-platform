@@ -16,11 +16,11 @@ import pro.sky.adsplatform.entity.UserEntity;
 import pro.sky.adsplatform.exception.NotFoundException;
 import pro.sky.adsplatform.mapper.ResponseWrapperUserMapper;
 import pro.sky.adsplatform.mapper.UserMapper;
+import pro.sky.adsplatform.service.AuthService;
 import pro.sky.adsplatform.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.io.IOException;
 import java.util.List;
 
 
@@ -33,20 +33,20 @@ public class UserController {
     private final UserMapper userMapper;
     private final ResponseWrapperUserMapper responseWrapperUserMapper;
     private final ObjectMapper objectMapper;
-
+private final AuthService authService;
     private final UserService userService;
-
     private final HttpServletRequest request;
 
     @org.springframework.beans.factory.annotation.Autowired
     public UserController(UserMapper userMapper,
                           ResponseWrapperUserMapper responseWrapperUserMapper,
                           ObjectMapper objectMapper,
-                          UserService userService,
+                          AuthService authService, UserService userService,
                           HttpServletRequest request) {
         this.userMapper = userMapper;
         this.responseWrapperUserMapper = responseWrapperUserMapper;
         this.objectMapper = objectMapper;
+        this.authService = authService;
         this.userService = userService;
         this.request = request;
     }
@@ -124,20 +124,10 @@ public class UserController {
                     @ApiResponse(responseCode = "404", description = "Not Found")
             }
     )
-    @PostMapping("/setPassword")
-    public ResponseEntity<NewPasswordDto> setPasswordUsingPOST(@Parameter(in = ParameterIn.DEFAULT, description = "newPassword", required = true, schema = @Schema()) @Valid @RequestBody NewPasswordDto body) {
-        LOGGER.debug("setPasswordUsingPOST is running");
-        String accept = request.getHeader("Accept");
-        if (accept != null && accept.contains("application/json")) {
-            try {
-                return new ResponseEntity<NewPasswordDto>(objectMapper.readValue("{\n  \"newPassword\" : \"newPassword\",\n  \"currentPassword\" : \"currentPassword\"\n}", NewPasswordDto.class), HttpStatus.NOT_IMPLEMENTED);
-            } catch (IOException e) {
-                LOGGER.error("Couldn't serialize response for content type application/json", e);
-                return new ResponseEntity<NewPasswordDto>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        }
-
-        return new ResponseEntity<NewPasswordDto>(HttpStatus.NOT_IMPLEMENTED);
+    @PostMapping(value = "/set_password")
+    public ResponseEntity<NewPasswordDto> setPasswordUsingPOST(@RequestBody NewPasswordDto body) {
+authService.changePassword(body.getCurrentPassword(), body.getNewPassword());
+        return ResponseEntity.ok(body);
     }
 
     /**
