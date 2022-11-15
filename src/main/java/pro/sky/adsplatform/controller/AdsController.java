@@ -105,8 +105,16 @@ public class AdsController {
 
 //Part 1
         AdsEntity adsEntity = createAdsMapper.createAdsDtoToAds(body);
+        if (adsEntity == null) {
+            return new ResponseEntity<AdsDto>(HttpStatus.NOT_FOUND);
+        }
+
         String userName = authentication.getName();
         UserEntity userEntity = userService.getUserByName(userName);
+        if (userEntity == null) {
+            return new ResponseEntity<AdsDto>(HttpStatus.NOT_FOUND);
+        }
+
         adsEntity.setAuthor(userEntity);
         adsService.saveAddAds(adsEntity);
 
@@ -137,16 +145,17 @@ public class AdsController {
                                                                  @PathVariable("ad_pk") String adPk, @RequestBody AdsCommentDto body) {
         AdsCommentEntity adsComment = adsCommentMapper.adsCommentDtoToAdsComment(body);
 
-        UserEntity userEntity = userService.getUserByName(authentication.getName());
-        if (userEntity == null) {
-            return new ResponseEntity<AdsCommentDto>(HttpStatus.NOT_FOUND);
-        }
-        adsComment.setAuthor(userEntity);
-
         AdsEntity adsEntity = adsService.findAds(Long.parseLong(adPk));
         if (adsEntity == null) {
             return new ResponseEntity<AdsCommentDto>(HttpStatus.NOT_FOUND);
         }
+        UserEntity userEntity = userService.getUserByName(authentication.getName());
+        if (userEntity == null) {
+            return new ResponseEntity<AdsCommentDto>(HttpStatus.NOT_FOUND);
+        }
+
+        adsComment.setAuthor(userEntity);
+
         adsComment.setAds(adsEntity);
 
         adsCommentService.createAdsComment(adsComment);
@@ -187,10 +196,17 @@ public class AdsController {
     )
     @PreAuthorize("hasAuthority('ROLE_USER')")
     @DeleteMapping("{ad_pk}/comment/{id}")
-    public ResponseEntity<Void> deleteAdsCommentUsingDELETE(@PathVariable("ad_pk") String adPk, @PathVariable("id") Integer id) {
+    public ResponseEntity<Void> deleteAdsCommentUsingDELETE(Authentication authentication, @PathVariable("ad_pk") String adPk, @PathVariable("id") Integer id) {
         AdsCommentEntity adsCommentEntity = adsCommentService.getAdsComment(id, Long.parseLong(adPk));
 
         if (adsCommentEntity != null) {
+            AdsEntity adsEntity = adsService.findAds(Long.parseLong(adPk));
+            if (adsEntity == null) return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+
+            if (authService.hasRole(authentication.getName(), UserEntity.UserRole.ADMIN.name()) == false)
+                if (authentication.getName().equals(adsEntity.getAuthor().getUsername()) == false)
+                    return new ResponseEntity<Void>(HttpStatus.UNAUTHORIZED);
+
             adsCommentService.deleteAdsComment(adsCommentEntity);
             return ResponseEntity.ok(null);
 
@@ -214,15 +230,15 @@ public class AdsController {
     @GetMapping("")
     public ResponseEntity<ResponseWrapperAdsDto> getALLAdsUsingGET() {
 
-            List<AdsEntity> adsEntitys = adsService.getAllAds();
-            Integer count = adsEntitys.size();
-            if (count > 0) {
-                ResponseWrapperAdsDto responseWrapperAdsDto = responseWrapperAdsMapper
-                        .adsListToResponseWrapperAdsDto(count, adsEntitys);
-                return ResponseEntity.ok(responseWrapperAdsDto);
-            } else {
-                return new ResponseEntity<ResponseWrapperAdsDto>(HttpStatus.NOT_FOUND);
-            }
+        List<AdsEntity> adsEntitys = adsService.getAllAds();
+        Integer count = adsEntitys.size();
+        if (count > 0) {
+            ResponseWrapperAdsDto responseWrapperAdsDto = responseWrapperAdsMapper
+                    .adsListToResponseWrapperAdsDto(count, adsEntitys);
+            return ResponseEntity.ok(responseWrapperAdsDto);
+        } else {
+            return new ResponseEntity<ResponseWrapperAdsDto>(HttpStatus.NOT_FOUND);
+        }
 
     }
 
@@ -338,10 +354,14 @@ public class AdsController {
     )
     @PreAuthorize("hasAuthority('ROLE_USER')")
     @DeleteMapping("{id}")
-    public ResponseEntity<Void> removeAdsUsingDELETE(@PathVariable("id") Integer id) {
+    public ResponseEntity<Void> removeAdsUsingDELETE(Authentication authentication, @PathVariable("id") Integer id) {
 
         AdsEntity adsEntity = adsService.findAds(id);
         if (adsEntity != null) {
+            if (authService.hasRole(authentication.getName(), UserEntity.UserRole.ADMIN.name()) == false)
+                if (authentication.getName().equals(adsEntity.getAuthor().getUsername()) == false)
+                    return new ResponseEntity<Void>(HttpStatus.UNAUTHORIZED);
+
             adsService.removeAdsUsingDELETE(adsEntity);
             return ResponseEntity.ok(null);
         } else {
@@ -372,7 +392,7 @@ public class AdsController {
         try {
             AdsCommentEntity adsComment = adsCommentMapper.adsCommentDtoToAdsComment(body);
             AdsEntity adsEntity = adsService.findAds(Long.parseLong(adPk));
-            if (adsEntity == null)  return new ResponseEntity<AdsCommentDto>(HttpStatus.NO_CONTENT);
+            if (adsEntity == null) return new ResponseEntity<AdsCommentDto>(HttpStatus.NO_CONTENT);
 
             if (authService.hasRole(authentication.getName(), UserEntity.UserRole.ADMIN.name()) == false)
                 if (authentication.getName().equals(adsEntity.getAuthor().getUsername()) == false)
@@ -426,8 +446,8 @@ public class AdsController {
 
         AdsEntity adsEntity = adsService.findAds(id);
         AdsEntity adsEntity1 = adsMapper.adsDtoToAds(body);
-        if (adsEntity == null)  return new ResponseEntity<AdsDto>(HttpStatus.NO_CONTENT);
-            String adsName = adsEntity.getAuthor().getUsername();
+        if (adsEntity == null) return new ResponseEntity<AdsDto>(HttpStatus.NO_CONTENT);
+        String adsName = adsEntity.getAuthor().getUsername();
 
         if (authService.hasRole(meName, UserEntity.UserRole.ADMIN.name()) == false)
             if (meName.equals(adsName) == false)
@@ -454,9 +474,12 @@ public class AdsController {
 
     @PreAuthorize("hasAuthority('ROLE_USER')")
     @PatchMapping(value = "{ad}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Void> updateAdsImage(@PathVariable Integer ad, @RequestParam MultipartFile file) throws IOException {
+    public ResponseEntity<Void> updateAdsImage(Authentication authentication,@PathVariable Integer ad, @RequestParam MultipartFile file) throws IOException {
         AdsEntity adsEntity = adsService.findAds(ad);
         if (adsEntity != null) {
+            if (authService.hasRole(authentication.getName(), UserEntity.UserRole.ADMIN.name()) == false)
+                if (authentication.getName().equals(adsEntity.getAuthor().getUsername()) == false)
+                    return new ResponseEntity<Void>(HttpStatus.UNAUTHORIZED);
             adsImageService.saveAddFile(adsEntity, file);
             return ResponseEntity.ok(null);
         } else {
