@@ -12,6 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,13 +23,11 @@ import pro.sky.adsplatform.entity.AdsImageEntity;
 import pro.sky.adsplatform.entity.UserEntity;
 import pro.sky.adsplatform.exception.NotFoundException;
 import pro.sky.adsplatform.mapper.*;
-import pro.sky.adsplatform.service.AdsCommentService;
-import pro.sky.adsplatform.service.AdsImageService;
-import pro.sky.adsplatform.service.AdsService;
-import pro.sky.adsplatform.service.UserService;
+import pro.sky.adsplatform.service.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.security.Principal;
 import java.util.List;
 
 @CrossOrigin(value = "http://localhost:3000")
@@ -48,7 +47,7 @@ public class AdsController {
     private final AdsService adsService;
     private final AdsCommentService adsCommentService;
     private final AdsImageService adsImageService;
-
+    private final AuthService authService;
     private final HttpServletRequest request;
 
     @org.springframework.beans.factory.annotation.Autowired
@@ -62,7 +61,7 @@ public class AdsController {
                          UserService userService, AdsService adsService,
                          AdsCommentService adsCommentService,
                          AdsImageService adsImageService,
-                         HttpServletRequest request) {
+                         AuthService authService, HttpServletRequest request) {
         this.adsMapper = adsMapper;
         this.fullAdsMapper = fullAdsMapper;
         this.adsCommentMapper = adsCommentMapper;
@@ -74,6 +73,7 @@ public class AdsController {
         this.adsService = adsService;
         this.adsCommentService = adsCommentService;
         this.adsImageService = adsImageService;
+        this.authService = authService;
         this.request = request;
     }
 
@@ -96,6 +96,7 @@ public class AdsController {
     //          consumes = {"multipart/form-data"})
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
+    @PreAuthorize("hasAuthority('ROLE_USER')")
     @PostMapping(consumes = {"multipart/form-data"})
     public ResponseEntity<AdsDto> addAdsUsingPOST(Authentication authentication,
                                                   @RequestPart("properties") CreateAdsDto body,
@@ -130,6 +131,7 @@ public class AdsController {
                     @ApiResponse(responseCode = "404", description = "Not Found")
             }
     )
+    @PreAuthorize("hasAuthority('ROLE_USER')")
     @PostMapping("{ad_pk}/comment")
     public ResponseEntity<AdsCommentDto> addAdsCommentsUsingPOST(Authentication authentication,
                                                                  @PathVariable("ad_pk") String adPk, @RequestBody AdsCommentDto body) {
@@ -183,6 +185,7 @@ public class AdsController {
                     @ApiResponse(responseCode = "403", description = "Forbidden")
             }
     )
+    @PreAuthorize("hasAuthority('ROLE_USER')")
     @DeleteMapping("{ad_pk}/comment/{id}")
     public ResponseEntity<Void> deleteAdsCommentUsingDELETE(@PathVariable("ad_pk") String adPk, @PathVariable("id") Integer id) {
         AdsCommentEntity adsCommentEntity = adsCommentService.getAdsComment(id, Long.parseLong(adPk));
@@ -210,8 +213,7 @@ public class AdsController {
     )
     @GetMapping("")
     public ResponseEntity<ResponseWrapperAdsDto> getALLAdsUsingGET() {
-        String accept = request.getHeader("Accept");
-        if (accept != null && accept.contains("*/*")) {
+
             List<AdsEntity> adsEntitys = adsService.getAllAds();
             Integer count = adsEntitys.size();
             if (count > 0) {
@@ -221,8 +223,6 @@ public class AdsController {
             } else {
                 return new ResponseEntity<ResponseWrapperAdsDto>(HttpStatus.NOT_FOUND);
             }
-        }
-        return new ResponseEntity<ResponseWrapperAdsDto>(HttpStatus.NOT_IMPLEMENTED);
 
     }
 
@@ -336,6 +336,7 @@ public class AdsController {
                     @ApiResponse(responseCode = "403", description = "Forbidden")
             }
     )
+    @PreAuthorize("hasAuthority('ROLE_USER')")
     @DeleteMapping("{id}")
     public ResponseEntity<Void> removeAdsUsingDELETE(@PathVariable("id") Integer id) {
 
@@ -363,11 +364,20 @@ public class AdsController {
 //            produces = {"*/*"},
 //            consumes = {"application/json"},
 //            method = RequestMethod.PATCH)
+    @PreAuthorize("hasAuthority('ROLE_USER')")
     @PatchMapping("{ad_pk}/comment/{id}")
     //@PutMapping("/ads/{ad_pk}/comment/{id}")
-    public ResponseEntity<AdsCommentDto> updateAdsCommentUsingPATCH(@PathVariable("ad_pk") String adPk, @PathVariable("id") Integer id, @RequestBody AdsCommentDto body) {
+    public ResponseEntity<AdsCommentDto> updateAdsCommentUsingPATCH(Authentication authentication,
+                                                                    @PathVariable("ad_pk") String adPk, @PathVariable("id") Integer id, @RequestBody AdsCommentDto body) {
         try {
             AdsCommentEntity adsComment = adsCommentMapper.adsCommentDtoToAdsComment(body);
+            AdsEntity adsEntity = adsService.findAds(Long.parseLong(adPk));
+            if (adsEntity == null)  return new ResponseEntity<AdsCommentDto>(HttpStatus.NO_CONTENT);
+
+            if (authService.hasRole(authentication.getName(), UserEntity.UserRole.ADMIN.name()) == false)
+                if (authentication.getName().equals(adsEntity.getAuthor().getUsername()) == false)
+                    return new ResponseEntity<AdsCommentDto>(HttpStatus.UNAUTHORIZED);
+
             adsCommentService.updateAdsCommentText(adsComment, id, Long.parseLong(adPk));
         } catch (IllegalArgumentException | NotFoundException e) {
             return new ResponseEntity<AdsCommentDto>(HttpStatus.NO_CONTENT);
@@ -408,17 +418,26 @@ public class AdsController {
                     @ApiResponse(responseCode = "403", description = "Forbidden")
             }
     )
+    @PreAuthorize("hasAuthority('ROLE_USER')")
     @PatchMapping(value = "{id}")
-    public ResponseEntity<AdsDto> updateAdsUsingPATCH(@PathVariable("id") Integer id, @RequestBody AdsDto body) {
+    public ResponseEntity<AdsDto> updateAdsUsingPATCH(Authentication authentication, @PathVariable("id") Integer id, @RequestBody AdsDto body) {
+        String meName = authentication.getName();
+        UserEntity meUser = userService.getUserByName(meName);
 
         AdsEntity adsEntity = adsService.findAds(id);
         AdsEntity adsEntity1 = adsMapper.adsDtoToAds(body);
+        if (adsEntity == null)  return new ResponseEntity<AdsDto>(HttpStatus.NO_CONTENT);
+            String adsName = adsEntity.getAuthor().getUsername();
+
+        if (authService.hasRole(meName, UserEntity.UserRole.ADMIN.name()) == false)
+            if (meName.equals(adsName) == false)
+                return new ResponseEntity<AdsDto>(HttpStatus.UNAUTHORIZED);
 
         if (adsEntity != null) {
-            adsEntity.setAuthor(adsEntity1.getAuthor());
+            //            adsEntity.setAuthor(adsEntity1.getAuthor());
             adsEntity.setPrice(adsEntity1.getPrice());
             adsEntity.setTitle(adsEntity1.getTitle());
-            adsEntity.setImages(adsEntity1.getImages());
+            //adsEntity.setImages(adsEntity1.getImages());
             adsService.saveAddAds(adsEntity);
 
             return ResponseEntity.ok(body);
@@ -433,6 +452,7 @@ public class AdsController {
         return adsService.findAllByTitleLike(title);
     }
 
+    @PreAuthorize("hasAuthority('ROLE_USER')")
     @PatchMapping(value = "{ad}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> updateAdsImage(@PathVariable Integer ad, @RequestParam MultipartFile file) throws IOException {
         AdsEntity adsEntity = adsService.findAds(ad);

@@ -2,6 +2,8 @@ package pro.sky.adsplatform.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -13,6 +15,10 @@ import pro.sky.adsplatform.dto.RoleDto;
 import pro.sky.adsplatform.entity.UserEntity;
 import pro.sky.adsplatform.mapper.RegisterReqMapperImpl;
 import pro.sky.adsplatform.repository.UserRepository;
+
+import java.security.Principal;
+import java.util.Collection;
+import java.util.List;
 
 @Service
 public class AuthService {
@@ -35,7 +41,15 @@ public class AuthService {
         String passwordOld = oldPassword;
 
         manager.changePassword(passwordOld, passwordNew);
+
     }
+
+public  boolean hasRole(String userName,String role){
+    UserDetails userDetails = manager.loadUserByUsername(userName);
+    Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
+    boolean authorized = authorities.contains(new SimpleGrantedAuthority(role));
+return authorized;
+}
 
 
     public boolean login(String userName, String password) {
@@ -44,6 +58,7 @@ public class AuthService {
         }
 
         UserDetails userDetails = manager.loadUserByUsername(userName);
+
         String encryptedPassword = userDetails.getPassword();
         String str = encryptedPassword.substring(0,8);
         String ecryptedPasswordWithoutEncryptionType = encryptedPassword;

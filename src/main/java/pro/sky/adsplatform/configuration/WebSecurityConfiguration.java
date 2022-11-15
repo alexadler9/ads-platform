@@ -42,28 +42,32 @@ public class WebSecurityConfiguration {
                 .build();
 //
         JdbcUserDetailsManager users = new JdbcUserDetailsManager(dataSource);
-        if (users.userExists(user.getUsername())) {
-            users.deleteUser(user.getUsername());
+        if (!users.userExists(user.getUsername())) {
+            users.createUser(user);
+ //           users.deleteUser(user.getUsername());
         }
-        if (users.userExists(admin.getUsername())) {
-            users.deleteUser(admin.getUsername());
+        if (!users.userExists(admin.getUsername())) {
+            users.createUser(admin);
+ //           users.deleteUser(admin.getUsername());
         }
 
-        users.createUser(user);
-        users.createUser(admin);
+
+
         return users;
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .anonymous().principal("guest").authorities("GUEST")
+                .and()
                 .csrf().disable()
                 .authorizeHttpRequests((authz) ->
                         authz
                                 .mvcMatchers(AUTH_WHITELIST).permitAll()
                                 .mvcMatchers("/ads/**", "/users/**").authenticated()
-                                .mvcMatchers("/profile/**", "/users/**").hasRole("ADMIN")
-                                .mvcMatchers("/ads/**").hasRole("USER")
+                                .mvcMatchers("/**").permitAll()
+                                .mvcMatchers("/ads/**", "/users/**").hasAnyRole("ADMIN","USER")
 
                 )
                 .cors().disable()

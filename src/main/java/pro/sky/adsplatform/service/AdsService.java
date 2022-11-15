@@ -21,6 +21,7 @@ public class AdsService {
 
     private final AdsRepository adsRepository;
 
+
     public AdsService(AdsRepository adsRepository) {
         this.adsRepository = adsRepository;
     }
