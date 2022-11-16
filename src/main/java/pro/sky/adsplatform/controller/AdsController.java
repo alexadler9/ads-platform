@@ -300,6 +300,7 @@ public class AdsController {
 
 
         UserEntity userEntity = userService.getUserByName(authentication.getName());
+
         if (userEntity == null) {
             return new ResponseEntity<ResponseWrapperAdsDto>(HttpStatus.NOT_FOUND);
         }

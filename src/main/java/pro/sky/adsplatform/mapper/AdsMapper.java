@@ -19,7 +19,11 @@ public interface AdsMapper {
 
     @Named("getLastImageString")
     default String getLastImageString(AdsEntity entity) {
-      return  "ads/image/" + entity.getImages().get(0).getId().toString();
+ //       Integer count = entity.getImages().size();
+ //       if(count==0) return null;
+ //       return   "ads/image/" + entity.getImages().get(0).getId().toString();
+        return (entity.getImages().size() == 0) ? null :
+              new String("ads/image/" + entity.getImages().get(0).getId().toString());
 //        AdsImageEntity lastImage = entity.getLastImage();
 //        return ((lastImage == null) || (lastImage.getImage() == null)) ? null :
 //                new String(lastImage.getImage(), StandardCharsets.UTF_8);
