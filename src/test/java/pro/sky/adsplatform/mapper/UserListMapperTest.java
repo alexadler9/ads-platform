@@ -8,7 +8,7 @@ import pro.sky.adsplatform.entity.UserEntity;
 import java.util.Collections;
 import java.util.List;
 
-import static pro.sky.adsplatform.mapper.constants.MapperTestConstants.USER;
+import static pro.sky.adsplatform.constants.TestEntityConstants.USER;
 
 class UserListMapperTest {
     private final UserListMapper userListMapper = new UserListMapperImpl(new UserMapperImpl());

@@ -8,7 +8,7 @@ import pro.sky.adsplatform.entity.AdsCommentEntity;
 import java.util.Collections;
 import java.util.List;
 
-import static pro.sky.adsplatform.mapper.constants.MapperTestConstants.ADS_COMMENT;
+import static pro.sky.adsplatform.constants.TestEntityConstants.ADS_COMMENT;
 
 class AdsCommentListMapperTest {
     private final AdsCommentListMapper adsCommentListMapper = new AdsCommentListMapperImpl(new AdsCommentMapperImpl());

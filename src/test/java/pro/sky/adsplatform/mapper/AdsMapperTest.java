@@ -6,10 +6,9 @@ import pro.sky.adsplatform.dto.AdsDto;
 import pro.sky.adsplatform.entity.AdsEntity;
 
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
 
-import static pro.sky.adsplatform.mapper.constants.MapperTestConstants.ADS;
-import static pro.sky.adsplatform.mapper.constants.MapperTestConstants.ADS_DTO;
+import static pro.sky.adsplatform.constants.TestDtoConstants.ADS_DTO;
+import static pro.sky.adsplatform.constants.TestEntityConstants.ADS;
 
 class AdsMapperTest {
     private final AdsMapper adsMapper = new AdsMapperImpl();
@@ -20,7 +19,7 @@ class AdsMapperTest {
 
         Assertions.assertNotNull(adsDto);
         Assertions.assertEquals(ADS.getAuthor().getId(), adsDto.getAuthor().longValue());
-        Assertions.assertEquals(new String(ADS.getLastImage().getImage(), StandardCharsets.UTF_8), adsDto.getImage());
+        Assertions.assertEquals("ads/image/" + ADS.getLastImage().getId().toString(), adsDto.getImage());
         Assertions.assertEquals(ADS.getId(), adsDto.getPk().longValue());
         Assertions.assertEquals(ADS.getPrice(), new BigDecimal(adsDto.getPrice()));
         Assertions.assertEquals(ADS.getTitle(), adsDto.getTitle());

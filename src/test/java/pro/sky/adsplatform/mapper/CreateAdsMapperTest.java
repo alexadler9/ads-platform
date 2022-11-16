@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import pro.sky.adsplatform.entity.AdsEntity;
 
-import static pro.sky.adsplatform.mapper.constants.MapperTestConstants.CREATE_ADS_DTO;
+import static pro.sky.adsplatform.constants.TestDtoConstants.CREATE_ADS_DTO;
 
 class CreateAdsMapperTest {
     private final CreateAdsMapper createAdsMapper = new CreateAdsMapperImpl();

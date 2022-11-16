@@ -5,8 +5,8 @@ import org.junit.jupiter.api.Test;
 import pro.sky.adsplatform.dto.AdsCommentDto;
 import pro.sky.adsplatform.entity.AdsCommentEntity;
 
-import static pro.sky.adsplatform.mapper.constants.MapperTestConstants.ADS_COMMENT;
-import static pro.sky.adsplatform.mapper.constants.MapperTestConstants.ADS_COMMENT_DTO;
+import static pro.sky.adsplatform.constants.TestDtoConstants.ADS_COMMENT_DTO;
+import static pro.sky.adsplatform.constants.TestEntityConstants.ADS_COMMENT;
 
 class AdsCommentMapperTest {
     private final AdsCommentMapper adsCommentMapper = new AdsCommentMapperImpl();

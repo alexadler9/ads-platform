@@ -5,9 +5,8 @@ import org.junit.jupiter.api.Test;
 import pro.sky.adsplatform.dto.FullAdsDto;
 
 import java.math.BigDecimal;
-import java.nio.charset.StandardCharsets;
 
-import static pro.sky.adsplatform.mapper.constants.MapperTestConstants.ADS;
+import static pro.sky.adsplatform.constants.TestEntityConstants.ADS;
 
 class FullAdsMapperTest {
     private final FullAdsMapper fullAdsMapper = new FullAdsMapperImpl();
@@ -21,7 +20,7 @@ class FullAdsMapperTest {
         Assertions.assertEquals(ADS.getAuthor().getLastName(), fullAdsDto.getAuthorLastName());
         Assertions.assertEquals(ADS.getDescription(), fullAdsDto.getDescription());
         Assertions.assertEquals(ADS.getAuthor().getUsername(), fullAdsDto.getEmail());
-        Assertions.assertEquals(new String(ADS.getLastImage().getImage(), StandardCharsets.UTF_8), fullAdsDto.getImage());
+        Assertions.assertEquals("ads/image/" + ADS.getLastImage().getId().toString(), fullAdsDto.getImage());
         Assertions.assertEquals(ADS.getAuthor().getPhone(), fullAdsDto.getPhone());
         Assertions.assertEquals(ADS.getId(), fullAdsDto.getPk().longValue());
         Assertions.assertEquals(ADS.getPrice(), new BigDecimal(fullAdsDto.getPrice()));

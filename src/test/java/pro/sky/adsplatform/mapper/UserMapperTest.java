@@ -5,8 +5,8 @@ import org.junit.jupiter.api.Test;
 import pro.sky.adsplatform.dto.UserDto;
 import pro.sky.adsplatform.entity.UserEntity;
 
-import static pro.sky.adsplatform.mapper.constants.MapperTestConstants.USER;
-import static pro.sky.adsplatform.mapper.constants.MapperTestConstants.USER_DTO;
+import static pro.sky.adsplatform.constants.TestDtoConstants.USER_DTO;
+import static pro.sky.adsplatform.constants.TestEntityConstants.USER;
 
 class UserMapperTest {
     private final UserMapper userMapper = new UserMapperImpl();
