@@ -6,6 +6,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.UserDetailsManager;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import pro.sky.adsplatform.dto.RegisterReqDto;
 import pro.sky.adsplatform.dto.RoleDto;
 import pro.sky.adsplatform.entity.UserEntity;
+import pro.sky.adsplatform.mapper.RegisterReqMapper;
 import pro.sky.adsplatform.mapper.RegisterReqMapperImpl;
 import pro.sky.adsplatform.repository.UserRepository;
 
@@ -23,15 +25,20 @@ import java.util.List;
 @Service
 public class AuthService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthService.class);
+
+    private final RegisterReqMapper registerReqMapper;
+
     private final UserRepository userRepository;
-    private final RegisterReqMapperImpl registerReqMapper;
+
     private final UserDetailsManager manager;
-
     private final PasswordEncoder encoder;
+    private final String ROLE_PREFIX = "ROLE_";
 
-    public AuthService(UserRepository userRepository, RegisterReqMapperImpl registerReqMapper, UserDetailsManager manager) {
-        this.userRepository = userRepository;
+    public AuthService(RegisterReqMapperImpl registerReqMapper,
+                       UserRepository userRepository,
+                       UserDetailsManager manager) {
         this.registerReqMapper = registerReqMapper;
+        this.userRepository = userRepository;
         this.manager = manager;
         this.encoder = new BCryptPasswordEncoder();
     }
@@ -41,16 +48,18 @@ public class AuthService {
         String passwordOld = oldPassword;
 
         manager.changePassword(passwordOld, passwordNew);
-
     }
 
-public  boolean hasRole(String userName,String role){
-    UserDetails userDetails = manager.loadUserByUsername(userName);
-    Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
-    boolean authorized = authorities.contains(new SimpleGrantedAuthority(role));
-return authorized;
-}
-
+    public boolean hasRole(String userName, String role) {
+        UserDetails userDetails;
+        try {
+            userDetails = manager.loadUserByUsername(userName);
+        } catch (UsernameNotFoundException e) {
+            return false;
+        }
+        Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
+        return authorities.contains(new SimpleGrantedAuthority(ROLE_PREFIX + role));
+    }
 
     public boolean login(String userName, String password) {
         if (!manager.userExists(userName)) {
