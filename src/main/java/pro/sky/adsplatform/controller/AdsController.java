@@ -120,8 +120,7 @@ public class AdsController {
 
 //Part2
         String imageNo = adsImageService.saveAddFile(adsEntity, file);
-        AdsDto adsDto = new AdsDto();
-        adsDto = adsMapper.adsToAdsDto(adsEntity);
+        AdsDto adsDto = adsMapper.adsToAdsDto(adsEntity);
         adsDto.setImage("ads/image/" + imageNo);
         return ResponseEntity.ok(adsDto);
 
@@ -144,30 +143,21 @@ public class AdsController {
     public ResponseEntity<AdsCommentDto> addAdsCommentsUsingPOST(Authentication authentication,
                                                                  @PathVariable("ad_pk") String adPk, @RequestBody AdsCommentDto body) {
         AdsCommentEntity adsComment = adsCommentMapper.adsCommentDtoToAdsComment(body);
-
-        AdsEntity adsEntity = adsService.findAds(Long.parseLong(adPk));
-        if (adsEntity == null) {
-            return new ResponseEntity<AdsCommentDto>(HttpStatus.NOT_FOUND);
-        }
         UserEntity userEntity = userService.getUserByName(authentication.getName());
         if (userEntity == null) {
             return new ResponseEntity<AdsCommentDto>(HttpStatus.NOT_FOUND);
         }
+        AdsEntity adsEntity = adsService.findAds(Long.parseLong(adPk));
+        if (adsEntity == null) {
+            return new ResponseEntity<AdsCommentDto>(HttpStatus.NOT_FOUND);
+        }
 
         adsComment.setAuthor(userEntity);
-
         adsComment.setAds(adsEntity);
 
         adsCommentService.createAdsComment(adsComment);
         return ResponseEntity.ok(body);
 
-//        try {
-//            adsCommentEntity.setAds(adsService.findAds(Long.parseLong(adPk)));
-//            adsCommentService.saveAddAdsCommentsUsingPOST(adsCommentEntity);
-//            return ResponseEntity.ok(body);
-//        } catch (NotFoundException e) {
-//            throw new NotFoundException("Не сохранили");
-//        }
     }
 
     //IMAGE
@@ -205,7 +195,7 @@ public class AdsController {
 
             if (authService.hasRole(authentication.getName(), UserEntity.UserRole.ADMIN.name()) == false)
                 if (authentication.getName().equals(adsEntity.getAuthor().getUsername()) == false)
-                    return new ResponseEntity<Void>(HttpStatus.UNAUTHORIZED);
+                    return new ResponseEntity<Void>(HttpStatus.FORBIDDEN);
 
             adsCommentService.deleteAdsComment(adsCommentEntity);
             return ResponseEntity.ok(null);
@@ -300,23 +290,31 @@ public class AdsController {
                     @ApiResponse(responseCode = "404", description = "Not Found")
             }
     )
+    @PreAuthorize("hasAuthority('ROLE_USER')")
     @GetMapping("me")
-    public ResponseEntity<ResponseWrapperAdsDto> getAdsMeUsingGET(@RequestParam(required = false) Boolean authenticated,
+    public ResponseEntity<ResponseWrapperAdsDto> getAdsMeUsingGET(Authentication authentication, @RequestParam(required = false) Boolean authenticated,
                                                                   @RequestParam(required = false) String authorities0Authority,
                                                                   @RequestParam(required = false) Object credentials,
                                                                   @RequestParam(required = false) Object details,
                                                                   @RequestParam(required = false) Object principal) {
-        String accept = request.getHeader("Accept");
-        if (accept != null && accept.contains("application/json")) {
-            try {
-                return new ResponseEntity<ResponseWrapperAdsDto>(objectMapper.readValue("{\n  \"count\" : 0,\n  \"results\" : [ {\n    \"image\" : \"image\",\n    \"author\" : 6,\n    \"price\" : 5,\n    \"pk\" : 1,\n    \"title\" : \"title\"\n  }, {\n    \"image\" : \"image\",\n    \"author\" : 6,\n    \"price\" : 5,\n    \"pk\" : 1,\n    \"title\" : \"title\"\n  } ]\n}", ResponseWrapperAdsDto.class), HttpStatus.NOT_IMPLEMENTED);
-            } catch (IOException e) {
-                LOGGER.error("Couldn't serialize response for content type application/json", e);
-                return new ResponseEntity<ResponseWrapperAdsDto>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
+
+
+        UserEntity userEntity = userService.getUserByName(authentication.getName());
+        if (userEntity == null) {
+            return new ResponseEntity<ResponseWrapperAdsDto>(HttpStatus.NOT_FOUND);
         }
 
-        return new ResponseEntity<ResponseWrapperAdsDto>(HttpStatus.NOT_IMPLEMENTED);
+        List<AdsEntity> adsEntitys = adsService.findAllByAuthor(userEntity);
+
+        Integer count = adsEntitys.size();
+        if(count == 0) {
+            return new ResponseEntity<ResponseWrapperAdsDto>(HttpStatus.NOT_FOUND);
+        }
+
+            ResponseWrapperAdsDto responseWrapperAdsDto = responseWrapperAdsMapper
+                    .adsListToResponseWrapperAdsDto(count, adsEntitys);
+            return ResponseEntity.ok(responseWrapperAdsDto);
+
     }
 
     @Operation(
@@ -330,12 +328,24 @@ public class AdsController {
                     @ApiResponse(responseCode = "404", description = "Not Found")
             }
     )
+
     @GetMapping("{id}")
     public ResponseEntity<FullAdsDto> getAdsUsingGET(@PathVariable("id") Integer id) {
 
         AdsEntity adsEntity = adsService.findAds(id);
         if (adsEntity != null) {
-            return ResponseEntity.ok(fullAdsMapper.adsToFullAdsDto(adsEntity));
+            UserEntity userEntity = userService.getUserByName(adsEntity.getAuthor().getUsername());
+            if (userEntity == null) {
+                return new ResponseEntity<FullAdsDto>(HttpStatus.NOT_FOUND);
+            }
+
+            FullAdsDto fullAdsDto = fullAdsMapper.adsToFullAdsDto(adsEntity);
+            fullAdsDto.setAuthorFirstName(userEntity.getFirstName());
+            fullAdsDto.setAuthorLastName(userEntity.getLastName());
+            fullAdsDto.setPhone(userEntity.getPhone());
+            fullAdsDto.setImage("ads/image/" + adsEntity.getImages().get(0).getId().toString());
+
+            return ResponseEntity.ok(fullAdsDto);
         } else {
             return new ResponseEntity<FullAdsDto>(HttpStatus.NOT_FOUND);
         }
@@ -360,7 +370,7 @@ public class AdsController {
         if (adsEntity != null) {
             if (authService.hasRole(authentication.getName(), UserEntity.UserRole.ADMIN.name()) == false)
                 if (authentication.getName().equals(adsEntity.getAuthor().getUsername()) == false)
-                    return new ResponseEntity<Void>(HttpStatus.UNAUTHORIZED);
+                    return new ResponseEntity<Void>(HttpStatus.FORBIDDEN);
 
             adsService.removeAdsUsingDELETE(adsEntity);
             return ResponseEntity.ok(null);
@@ -380,10 +390,7 @@ public class AdsController {
                     @ApiResponse(responseCode = "403", description = "Forbidden")
             }
     )
-//    @RequestMapping(value = "{ad_pk}/comment/{id}",
-//            produces = {"*/*"},
-//            consumes = {"application/json"},
-//            method = RequestMethod.PATCH)
+
     @PreAuthorize("hasAuthority('ROLE_USER')")
     @PatchMapping("{ad_pk}/comment/{id}")
     //@PutMapping("/ads/{ad_pk}/comment/{id}")
@@ -396,7 +403,7 @@ public class AdsController {
 
             if (authService.hasRole(authentication.getName(), UserEntity.UserRole.ADMIN.name()) == false)
                 if (authentication.getName().equals(adsEntity.getAuthor().getUsername()) == false)
-                    return new ResponseEntity<AdsCommentDto>(HttpStatus.UNAUTHORIZED);
+                    return new ResponseEntity<AdsCommentDto>(HttpStatus.FORBIDDEN);
 
             adsCommentService.updateAdsCommentText(adsComment, id, Long.parseLong(adPk));
         } catch (IllegalArgumentException | NotFoundException e) {
@@ -404,27 +411,6 @@ public class AdsController {
         }
         return ResponseEntity.ok(body);
 
-//        AdsCommentEntity adsCommentEntity = adsCommentService.getAdsComment(id, Long.parseLong(adPk));
-//        AdsCommentEntity adsCommentEntity1 = adsCommentMapper.adsCommentDtoToAdsComment(body);
-//
-//
-//        if (adsCommentEntity != null) {
-//            adsCommentEntity.setAuthor(adsCommentEntity1.getAuthor());
-//
-//            Integer pk = body.getPk();
-//            AdsEntity adsEntity = adsService.findAds(pk);
-//            adsCommentEntity.setAds(adsEntity);
-//
-//            //            adsCommentEntity.setAds(adsCommentEntity1.getAds());
-//            adsCommentEntity.setDateTime(adsCommentEntity1.getDateTime());
-//            adsCommentEntity.setText(adsCommentEntity1.getText());
-//
-//            adsCommentService.saveAddAdsCommentsUsingPOST(adsCommentEntity);
-//            AdsCommentDto adsCommentDto = adsCommentMapper.adsCommentToAdsCommentDto(adsCommentEntity);
-//            return new ResponseEntity(HttpStatus.OK);
-//        } else {
-//            return new ResponseEntity<AdsCommentDto>(HttpStatus.NO_CONTENT);
-//        }
     }
 
     @Operation(
@@ -451,7 +437,7 @@ public class AdsController {
 
         if (authService.hasRole(meName, UserEntity.UserRole.ADMIN.name()) == false)
             if (meName.equals(adsName) == false)
-                return new ResponseEntity<AdsDto>(HttpStatus.UNAUTHORIZED);
+                return new ResponseEntity<AdsDto>(HttpStatus.FORBIDDEN);
 
         if (adsEntity != null) {
             //            adsEntity.setAuthor(adsEntity1.getAuthor());
@@ -474,12 +460,12 @@ public class AdsController {
 
     @PreAuthorize("hasAuthority('ROLE_USER')")
     @PatchMapping(value = "{ad}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Void> updateAdsImage(Authentication authentication,@PathVariable Integer ad, @RequestParam MultipartFile file) throws IOException {
+    public ResponseEntity<Void> updateAdsImage(Authentication authentication, @PathVariable Integer ad, @RequestParam MultipartFile file) throws IOException {
         AdsEntity adsEntity = adsService.findAds(ad);
         if (adsEntity != null) {
             if (authService.hasRole(authentication.getName(), UserEntity.UserRole.ADMIN.name()) == false)
                 if (authentication.getName().equals(adsEntity.getAuthor().getUsername()) == false)
-                    return new ResponseEntity<Void>(HttpStatus.UNAUTHORIZED);
+                    return new ResponseEntity<Void>(HttpStatus.FORBIDDEN);
             adsImageService.saveAddFile(adsEntity, file);
             return ResponseEntity.ok(null);
         } else {

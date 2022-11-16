@@ -33,7 +33,7 @@ public class AdsImageService {
         this.adsImageRepository = adsImageRepository;
     }
 
-//IMAGE
+    //IMAGE
     public String saveAddFile(AdsEntity adsEntity, MultipartFile file) throws IOException {
 
         AdsImageEntity adsImageEntity = new AdsImageEntity();
@@ -44,7 +44,7 @@ public class AdsImageService {
 
         adsImageEntity.setImage(imageByte);
         adsImageRepository.save(adsImageEntity);
-return adsImageEntity.getId().toString();
+        return adsImageEntity.getId().toString();
     }
 
 
@@ -57,7 +57,6 @@ return adsImageEntity.getId().toString();
         byte[] imageByte = file.getBytes();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ByteArrayInputStream bais = new ByteArrayInputStream(imageByte);
-
 
 
         BufferedImage imgIn = ImageIO.read(bais);
@@ -73,11 +72,13 @@ return adsImageEntity.getId().toString();
         byte[] imageByteOut = baos.toByteArray();
 
         return imageByteOut;
-    };
+    }
+
+    ;
 
 
-    public AdsImageEntity  getImageEntity(Long no) {
-       return adsImageRepository.findById(no).orElse(null);
-            }
+    public AdsImageEntity getImageEntity(Long no) {
+        return adsImageRepository.findById(no).orElse(null);
+    }
 
 }

@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 import pro.sky.adsplatform.dto.CreateAdsDto;
 import pro.sky.adsplatform.entity.AdsCommentEntity;
 import pro.sky.adsplatform.entity.AdsEntity;
+import pro.sky.adsplatform.entity.UserEntity;
 import pro.sky.adsplatform.repository.AdsRepository;
 
 import javax.transaction.Transactional;
@@ -36,6 +37,10 @@ public class AdsService {
         return adsRepository.findById(id).orElse(null);
     }
 
+    public List<AdsEntity> findAllByAuthor(UserEntity userEntity) {
+        return adsRepository.findAllByAuthor(userEntity);
+    }
+
     /**
      * Возвращает все объявления.
      *
@@ -49,7 +54,7 @@ public class AdsService {
      * Сохраняет обьявление.
      */
 //IMAGE
-    public AdsEntity  saveAddAds(AdsEntity adsEntity) {
+    public AdsEntity saveAddAds(AdsEntity adsEntity) {
         adsRepository.save(adsEntity);
         return adsEntity;
 
@@ -69,7 +74,7 @@ public class AdsService {
      * @return список всех объявлений.
      */
     public List<AdsEntity> findAllByTitleLike(String title) {
-        return adsRepository.findAllByTitleLike("%"+title+"%");
+        return adsRepository.findAllByTitleLike("%" + title + "%");
     }
 
 

@@ -23,56 +23,53 @@ public class WebSecurityConfiguration {
             "/swagger-ui.html",
             "/v3/api-docs",
             "/webjars/**",
-            "/login", "/register"
+            "/login", "/register","/ads/**"
     };
 
 
     @Bean
     public JdbcUserDetailsManager userDetailsManager(DataSource dataSource) {
 
-        UserDetails user = User.withDefaultPasswordEncoder()
-                .username("user@gmail.com")
-                .password("password")
-                .roles("USER")
-                .build();
+//        UserDetails user = User.withDefaultPasswordEncoder()
+//                .username("user@gmail.com")
+//                .password("password")
+//                .roles("USER")
+//                .build();
         UserDetails admin = User.withDefaultPasswordEncoder()
                 .username("admin@gmail.com")
                 .password("password")
                 .roles("ADMIN", "USER")
                 .build();
-//
+
+
+        //
         JdbcUserDetailsManager users = new JdbcUserDetailsManager(dataSource);
-        if (!users.userExists(user.getUsername())) {
-            users.createUser(user);
- //           users.deleteUser(user.getUsername());
-        }
+//        if (!users.userExists(user.getUsername())) {
+//            users.createUser(user);
+            //           users.deleteUser(user.getUsername());
+ //       }
         if (!users.userExists(admin.getUsername())) {
             users.createUser(admin);
- //           users.deleteUser(admin.getUsername());
+            //           users.deleteUser(admin.getUsername());
         }
 
+            return users;
+        }
 
+        @Bean
+        public SecurityFilterChain filterChain (HttpSecurity http) throws Exception {
+            http
+                    .csrf().disable()
+                    .authorizeHttpRequests((authz) ->
+                            authz
+                                    .mvcMatchers(AUTH_WHITELIST).permitAll()
+                                    .mvcMatchers("/ads/**", "/users/**").authenticated()
+                                    .mvcMatchers("/ads/**", "/users/**").hasAnyRole("ADMIN", "USER")
 
-        return users;
+                    )
+                    .cors().disable()
+                    .httpBasic(withDefaults());
+            return http.build();
+        }
     }
-
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .anonymous().principal("guest").authorities("GUEST")
-                .and()
-                .csrf().disable()
-                .authorizeHttpRequests((authz) ->
-                        authz
-                                .mvcMatchers(AUTH_WHITELIST).permitAll()
-                                .mvcMatchers("/ads/**", "/users/**").authenticated()
-                                .mvcMatchers("/**").permitAll()
-                                .mvcMatchers("/ads/**", "/users/**").hasAnyRole("ADMIN","USER")
-
-                )
-                .cors().disable()
-                .httpBasic(withDefaults());
-        return http.build();
-    }
-}
 
