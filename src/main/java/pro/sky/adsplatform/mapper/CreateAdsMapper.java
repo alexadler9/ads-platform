@@ -23,8 +23,6 @@ public interface CreateAdsMapper {
     @Named("getLastImageString")
     default String getLastImageString(AdsEntity entity) {
         AdsImageEntity lastImage = entity.getLastImage();
-        return ((lastImage == null) || (lastImage.getImage() == null)) ? null :
-                new String(lastImage.getImage(), StandardCharsets.UTF_8);
+        return (lastImage == null) ? null : "ads/image/" + lastImage.getId().toString();
     }
-
 }
