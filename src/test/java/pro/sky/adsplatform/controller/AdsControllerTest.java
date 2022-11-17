@@ -8,14 +8,19 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.mock.web.MockPart;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import pro.sky.adsplatform.entity.AdsCommentEntity;
+import pro.sky.adsplatform.entity.AdsEntity;
+import pro.sky.adsplatform.entity.AdsImageEntity;
 import pro.sky.adsplatform.repository.AdsCommentRepository;
 import pro.sky.adsplatform.repository.AdsImageRepository;
 import pro.sky.adsplatform.repository.AdsRepository;
 import pro.sky.adsplatform.repository.UserRepository;
 
+import java.io.ByteArrayInputStream;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -23,6 +28,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
@@ -54,6 +60,73 @@ class AdsControllerTest {
 
     @MockBean
     AdsImageRepository adsImageRepository;
+
+    @Test
+    @WithMockUser(username = SECURITY_USER_NAME, password = SECURITY_USER_PASSWORD, roles = SECURITY_USER_ROLE)
+    void shouldReturnOkWhenAddAds() throws Exception {
+        byte[] fileContent = new byte[] { 0x00 };
+        MockPart filePart = new MockPart("image", "image.jpeg", fileContent);
+
+        byte[] adsContent = objectMapper.writeValueAsString(CREATE_ADS_DTO).getBytes(UTF_8);
+        MockPart adsPart = new MockPart("properties", "createAdsDto", adsContent);
+        adsPart.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+
+        when(userRepository.findByUsername(any(String.class))).thenReturn(Optional.of(USER));
+        when(adsRepository.save(any(AdsEntity.class))).thenReturn(ADS);
+        when(adsImageRepository.save(any(AdsImageEntity.class))).thenReturn(ADS_IMAGE);
+
+        mockMvc.perform(multipart("http://localhost:3000/ads")
+                        .part(adsPart)
+                        .part(filePart)
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.author").value(ADS.getAuthor().getId()))
+                .andExpect(jsonPath("$.image").value("ads/image/" + ADS.getLastImage().getId()))
+                .andExpect(jsonPath("$.pk").value(ADS.getId()))
+                .andExpect(jsonPath("$.price").value(ADS.getPrice()))
+                .andExpect(jsonPath("$.title").value(ADS.getTitle()));
+    }
+
+    @Test
+    void shouldReturnUnauthorizedWhenAddAds() throws Exception {
+        byte[] fileContent = new byte[] { 0x00 };
+        MockPart filePart = new MockPart("image", "image.jpeg", fileContent);
+
+        byte[] adsContent = objectMapper.writeValueAsString(CREATE_ADS_DTO).getBytes(UTF_8);
+        MockPart adsPart = new MockPart("properties", "createAdsDto", adsContent);
+        adsPart.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+
+        when(userRepository.findByUsername(any(String.class))).thenReturn(Optional.of(USER));
+        when(adsRepository.save(any(AdsEntity.class))).thenReturn(ADS);
+        when(adsImageRepository.save(any(AdsImageEntity.class))).thenReturn(ADS_IMAGE);
+
+        mockMvc.perform(multipart("http://localhost:3000/ads")
+                        .part(adsPart)
+                        .part(filePart)
+                )
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser(username = SECURITY_USER_NAME, password = SECURITY_USER_PASSWORD, roles = SECURITY_USER_ROLE)
+    void shouldReturnNotFoundWhenAddAdsForMissingUser() throws Exception {
+        byte[] fileContent = new byte[] { 0x00 };
+        MockPart filePart = new MockPart("image", "image.jpeg", fileContent);
+
+        byte[] adsContent = objectMapper.writeValueAsString(CREATE_ADS_DTO).getBytes(UTF_8);
+        MockPart adsPart = new MockPart("properties", "createAdsDto", adsContent);
+        adsPart.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+
+        when(userRepository.findByUsername(any(String.class))).thenReturn(Optional.empty());
+        when(adsRepository.save(any(AdsEntity.class))).thenReturn(ADS);
+        when(adsImageRepository.save(any(AdsImageEntity.class))).thenReturn(ADS_IMAGE);
+
+        mockMvc.perform(multipart("http://localhost:3000/ads")
+                        .part(adsPart)
+                        .part(filePart)
+                )
+                .andExpect(status().isNotFound());
+    }
 
     @Test
     @WithMockUser(username = SECURITY_USER_NAME, password = SECURITY_USER_PASSWORD, roles = SECURITY_USER_ROLE)

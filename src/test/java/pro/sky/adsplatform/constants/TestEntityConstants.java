@@ -18,6 +18,8 @@ public class TestEntityConstants {
 
     public static final AdsCommentEntity ADS_COMMENT;
 
+    public static final AdsImageEntity ADS_IMAGE;
+
     static {
         USER = new UserEntity();
         USER.setId(1L);
@@ -46,5 +48,10 @@ public class TestEntityConstants {
         ADS_COMMENT.setAds(ADS);
         ADS_COMMENT.setDateTime(LocalDateTime.of(2022, Month.JANUARY, 1, 12, 0, 0));
         ADS_COMMENT.setText("text");
+
+        ADS_IMAGE = new AdsImageEntity();
+        ADS_IMAGE.setId(1L);
+        ADS_IMAGE.setImage(imageBytes);
+        ADS_IMAGE.setAds(ADS);
     }
 }
