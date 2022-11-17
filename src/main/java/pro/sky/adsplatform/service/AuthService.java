@@ -18,21 +18,22 @@ import pro.sky.adsplatform.mapper.RegisterReqMapper;
 import pro.sky.adsplatform.mapper.RegisterReqMapperImpl;
 import pro.sky.adsplatform.repository.UserRepository;
 
-import java.security.Principal;
 import java.util.Collection;
-import java.util.List;
 
+/**
+ * Сервис для работы с авторизацией.
+ */
 @Service
 public class AuthService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthService.class);
 
     private final RegisterReqMapper registerReqMapper;
-
     private final UserRepository userRepository;
-
     private final UserDetailsManager manager;
     private final PasswordEncoder encoder;
-    private final String ROLE_PREFIX = "ROLE_";
+
+    private static final String ROLE_PREFIX = "ROLE_";
+    private static final String ENCRYPTION_PREFIX = "{bcrypt}";
 
     public AuthService(RegisterReqMapperImpl registerReqMapper,
                        UserRepository userRepository,
@@ -43,43 +44,41 @@ public class AuthService {
         this.encoder = new BCryptPasswordEncoder();
     }
 
-    public void changePassword(String oldPassword, String newPassword) {
-        String passwordNew = encoder.encode(newPassword);
-        String passwordOld = oldPassword;
-
-        manager.changePassword(passwordOld, passwordNew);
-    }
-
-    public boolean hasRole(String userName, String role) {
-        UserDetails userDetails;
-        try {
-            userDetails = manager.loadUserByUsername(userName);
-        } catch (UsernameNotFoundException e) {
-            return false;
-        }
-        Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
-        return authorities.contains(new SimpleGrantedAuthority(ROLE_PREFIX + role));
-    }
-
-    public boolean login(String userName, String password) {
-        if (!manager.userExists(userName)) {
+    /**
+     * Авторизует пользователя.
+     *
+     * @param username имя пользователя.
+     * @param password пароль пользователя.
+     * @return true, если пользователь успешно авторизован, иначе false.
+     */
+    public boolean login(String username, String password) {
+        if (!manager.userExists(username)) {
+            LOGGER.info("Пользователь с такими данными не зарегистрирован");
             return false;
         }
 
-        UserDetails userDetails = manager.loadUserByUsername(userName);
+        UserDetails userDetails = manager.loadUserByUsername(username);
 
         String encryptedPassword = userDetails.getPassword();
-        String str = encryptedPassword.substring(0,8);
+        String prefix = encryptedPassword.substring(0, ENCRYPTION_PREFIX.length());
         String ecryptedPasswordWithoutEncryptionType = encryptedPassword;
-        if (str.equals("{bcrypt}"))
-             ecryptedPasswordWithoutEncryptionType = encryptedPassword.substring(8);
+        if (prefix.equals(ENCRYPTION_PREFIX)) {
+             ecryptedPasswordWithoutEncryptionType = encryptedPassword.substring(ENCRYPTION_PREFIX.length());
+        }
 
-         return encoder.matches(password, ecryptedPasswordWithoutEncryptionType);
+        return encoder.matches(password, ecryptedPasswordWithoutEncryptionType);
     }
 
+    /**
+     * Регистрирует нового пользователя.
+     *
+     * @param registerReq данные для регистрации пользователя.
+     * @param role роль пользователя.
+     * @return true, если пользователь успешно зарегистрирован, иначе false.
+     */
     public boolean register(RegisterReqDto registerReq, RoleDto role) {
         if (manager.userExists(registerReq.getUsername())) {
-            LOGGER.info("userExists");
+            LOGGER.info("Пользователь с такими данными уже зарегистрирован");
             return false;
         }
 
@@ -89,20 +88,47 @@ public class AuthService {
                         .username(registerReq.getUsername())
                         .roles(role.name())
                         .build()
-
         );
-        UserEntity userCreated = userRepository.findByUsername(registerReq.getUsername()).orElse(null);
-        if (userCreated != null) {
-            UserEntity userEntity = registerReqMapper.registerReqDtoToUser(registerReq);
-            userEntity.setId(userCreated.getId());
-            userEntity.setEnabled(userCreated.getEnabled());
-            userEntity.setPassword(userCreated.getPassword());
-            LOGGER.info("middle makeProcess - id {} FN {}  LN {}  getPhone: {} username {}  password {}",
-                    userEntity.getId(), userEntity.getFirstName(), userEntity.getLastName(), userEntity.getPhone(),
-                    userEntity.getUsername(), userEntity.getPassword());
-            userRepository.save(userEntity);
+
+        UserEntity userBD = userRepository.findByUsername(registerReq.getUsername()).orElse(null);
+        if (userBD != null) {
+            UserEntity user = registerReqMapper.registerReqDtoToUser(registerReq);
+            user.setId(userBD.getId());
+            user.setEnabled(userBD.getEnabled());
+            user.setPassword(userBD.getPassword());
+            LOGGER.info("Registered user: {}", user);
+            userRepository.save(user);
         }
 
         return true;
+    }
+
+    /**
+     * Обновляет пароль пользователя.
+     *
+     * @param oldPassword старый пароль пользователя.
+     * @param newPassword новый пароль пользователя.
+     */
+    public void changePassword(String oldPassword, String newPassword) {
+        manager.changePassword(oldPassword, encoder.encode(newPassword));
+    }
+
+    /**
+     * Определяет, относится ли пользователь к указанной роли.
+     *
+     * @param username имя пользователя.
+     * @param role роль.
+     * @return true, если пользователь относится к указанной роли, иначе false.
+     */
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    public boolean hasRole(String username, String role) {
+        UserDetails userDetails;
+        try {
+            userDetails = manager.loadUserByUsername(username);
+        } catch (UsernameNotFoundException e) {
+            return false;
+        }
+        Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
+        return authorities.contains(new SimpleGrantedAuthority(ROLE_PREFIX + role));
     }
 }

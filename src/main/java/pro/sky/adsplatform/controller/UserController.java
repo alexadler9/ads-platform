@@ -98,7 +98,7 @@ public class UserController {
         try {
             userService.updateUser(user);
         } catch (NotFoundException e) {
-            return new ResponseEntity<UserDto>(HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return ResponseEntity.ok(userDto);
     }
@@ -142,7 +142,7 @@ public class UserController {
     public ResponseEntity<UserDto> getUser(@Parameter(in = ParameterIn.PATH, description = "id", required = true, schema = @Schema()) @PathVariable("id") Integer id) {
         UserEntity user = userService.findUser(id);
         if (user == null) {
-            return new ResponseEntity<UserDto>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return ResponseEntity.ok(userMapper.userToUserDto(user));
     }

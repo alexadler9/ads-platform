@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import pro.sky.adsplatform.entity.AdsCommentEntity;
 import pro.sky.adsplatform.exception.NotFoundException;
-import pro.sky.adsplatform.mapper.AdsCommentMapper;
 import pro.sky.adsplatform.repository.AdsCommentRepository;
 
 import java.util.List;
@@ -19,7 +18,7 @@ public class AdsCommentService {
 
     private final AdsCommentRepository adsCommentRepository;
 
-    public AdsCommentService(AdsCommentRepository adsCommentRepository, AdsCommentMapper adsCommentMapper) {
+    public AdsCommentService(AdsCommentRepository adsCommentRepository) {
         this.adsCommentRepository = adsCommentRepository;
     }
 
@@ -61,23 +60,27 @@ public class AdsCommentService {
      * @param adsComment обновленные данные отзыва.
      * @param id ID отзыва.
      * @param idAds ID объявления.
+     * @return обновленный отзыв.
      * @throws IllegalArgumentException несооветствие значений ID entity и аргумента.
      * @throws NotFoundException отзыв с указанными параметрами отсутствует в базе.
      */
-    public void updateAdsComment(AdsCommentEntity adsComment, long id, long idAds) {
+    public AdsCommentEntity updateAdsComment(AdsCommentEntity adsComment, long id, long idAds) {
         if (adsComment.getId() != id) {
             LOGGER.error("Несоответствие значений ID отзыва");
             throw new IllegalArgumentException("Несоответствие значений ID отзыва");
         }
+
         AdsCommentEntity adsCommentBD = findAdsComment(id, idAds);
         if (adsCommentBD == null) {
             LOGGER.error("Отзыв с таким ID отсутствует");
             throw new NotFoundException("Отзыв с таким ID отсутствует");
         }
+
         if (adsComment.getText() != null) {
             adsCommentBD.setText(adsComment.getText());
         }
-        adsCommentRepository.save(adsCommentBD);
+
+        return adsCommentRepository.save(adsCommentBD);
     }
 
     /**

@@ -3,15 +3,11 @@ package pro.sky.adsplatform.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-import pro.sky.adsplatform.dto.CreateAdsDto;
-import pro.sky.adsplatform.entity.AdsCommentEntity;
 import pro.sky.adsplatform.entity.AdsEntity;
 import pro.sky.adsplatform.entity.UserEntity;
 import pro.sky.adsplatform.exception.NotFoundException;
 import pro.sky.adsplatform.repository.AdsRepository;
 
-import javax.transaction.Transactional;
 import java.util.List;
 
 /**
@@ -82,19 +78,22 @@ public class AdsService {
      *
      * @param ads обновленные данные объявления.
      * @param id ID объявления.
+     * @return обновленное объявление.
      * @throws IllegalArgumentException несооветствие значений ID entity и аргумента.
      * @throws NotFoundException объявление с указанными параметрами отсутствует в базе.
      */
-    public void updateAds(AdsEntity ads, long id) {
+    public AdsEntity updateAds(AdsEntity ads, long id) {
         if (ads.getId() != id) {
             LOGGER.error("Несоответствие значений ID объявления");
             throw new IllegalArgumentException("Несоответствие значений ID объявления");
         }
+
         AdsEntity adsBD = findAds(id);
         if (adsBD == null) {
             LOGGER.error("Объявление с таким ID отсутствует");
             throw new NotFoundException("Объявление с таким ID отсутствует");
         }
+
         if (ads.getPrice() != null) {
             adsBD.setPrice(ads.getPrice());
         }
@@ -104,13 +103,14 @@ public class AdsService {
         if (ads.getDescription() != null) {
             adsBD.setTitle(ads.getDescription());
         }
-        adsRepository.save(adsBD);
+
+        return adsRepository.save(adsBD);
     }
 
     /**
-     * Удаляет обьявление.
+     * Удаляет объявление.
      *
-     * @param ads обьявление, которое должно быть удалено.
+     * @param ads объявление, которое должно быть удалено.
      */
     public void deleteAds(AdsEntity ads) {
         adsRepository.delete(ads);

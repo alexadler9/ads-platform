@@ -11,8 +11,6 @@ import pro.sky.adsplatform.dto.RegisterReqDto;
 import pro.sky.adsplatform.dto.RoleDto;
 import pro.sky.adsplatform.service.AuthService;
 
-import java.security.Principal;
-
 import static pro.sky.adsplatform.dto.RoleDto.USER;
 
 @Slf4j
@@ -26,26 +24,23 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody LoginReqDto req) {
         if (authService.login(req.getUsername(), req.getPassword())) {
             return ResponseEntity.ok().build();
-        } else {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterReqDto req) {
-        RoleDto role = req.getRole() == null ? USER : req.getRole();
+        RoleDto role = (req.getRole() == null) ? USER : req.getRole();
         if (authService.register(req, role)) {
             return ResponseEntity.ok().build();
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
 
     @GetMapping("/meuser")
     public ResponseEntity<?> meUser(Authentication authentication) {
-            return  ResponseEntity.ok(authentication);
-        }
-
+        return ResponseEntity.ok(authentication);
     }
+}
 
 

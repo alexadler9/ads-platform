@@ -63,6 +63,7 @@ public class UserService {
             LOGGER.error("Пользователь с таким ID отсутствует");
             throw new NotFoundException("Пользователь с таким ID отсутствует");
         }
+
         if (user.getFirstName() != null) {
             userBD.setFirstName(user.getFirstName());
         }
@@ -72,6 +73,7 @@ public class UserService {
         if (user.getPhone() != null) {
             userBD.setPhone(user.getPhone());
         }
+
         userRepository.save(userBD);
     }
 }

@@ -2,7 +2,6 @@ package pro.sky.adsplatform.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import pro.sky.adsplatform.entity.AdsEntity;
@@ -15,8 +14,6 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
 
 import static com.datical.liquibase.ext.init.InitProjectUtil.getExtension;
 
