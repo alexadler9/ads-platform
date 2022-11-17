@@ -80,3 +80,38 @@ ALTER COLUMN last_name DROP NOT NULL;
 ALTER TABLE users
 ALTER COLUMN phone DROP NOT NULL;
 
+-- changeSet alexadler:4
+
+-- добавить каскадное удаление для таблицы "Отзывы"
+
+alter table ads_comments
+    drop constraint ads_comments_id_ads_fkey;
+
+alter table ads_comments
+    add foreign key (id_ads) references ads
+        on delete cascade;
+
+alter table ads_comments
+    drop constraint ads_comments_id_author_fkey;
+
+alter table ads_comments
+    add foreign key (id_author) references users
+        on delete cascade;
+
+-- добавить каскадное удаление для таблицы "Изображения"
+
+alter table ads_images
+    drop constraint ads_images_id_ads_fkey;
+
+alter table ads_images
+    add foreign key (id_ads) references ads
+        on delete cascade;
+
+-- добавить каскадное удаление для таблицы "Объявления"
+
+alter table ads
+    drop constraint ads_id_author_fkey;
+
+alter table ads
+    add foreign key (id_author) references users
+        on delete cascade;
