@@ -33,24 +33,31 @@ public class AdsImageService {
         this.adsImageRepository = adsImageRepository;
     }
 
-    //IMAGE
-    public String saveAddFile(AdsEntity adsEntity, MultipartFile file) throws IOException {
+    /**
+     * Создает новое изображение для объявления.
+     *
+     * @param ads объявление.
+     * @param file файл изображения.
+     * @return ID созданного изображения.
+     */
+    public String createImage(AdsEntity ads, MultipartFile file) throws IOException {
+        byte[] imageContent = getImageContent(file);
 
-        AdsImageEntity adsImageEntity = new AdsImageEntity();
+        AdsImageEntity adsImage = new AdsImageEntity();
+        adsImage.setAds(ads);
+        adsImage.setImage(imageContent);
 
-        adsImageEntity.setAds(adsEntity);
-
-        byte[] imageByte = getImageByteLite(file);
-
-        adsImageEntity.setImage(imageByte);
-        adsImageRepository.save(adsImageEntity);
-        return adsImageEntity.getId().toString();
+        return adsImageRepository.save(adsImage).getId().toString();
     }
 
-
-    public byte[] getImageByteLite(MultipartFile file) throws IOException {
-
-        String ContentType = file.getContentType();
+    /**
+     * Возвращает содержимое изображения.
+     *
+     * @param file файл изображения.
+     * @return содержимое изображения.
+     */
+    private byte[] getImageContent(MultipartFile file) throws IOException {
+        String contentType = file.getContentType();
         String fileNameOriginal = file.getOriginalFilename();
         String ext = getExtension(fileNameOriginal);
 
@@ -58,9 +65,10 @@ public class AdsImageService {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ByteArrayInputStream bais = new ByteArrayInputStream(imageByte);
 
-
         BufferedImage imgIn = ImageIO.read(bais);
-        if (imgIn == null) return null;
+        if (imgIn == null) {
+            return null;
+        }
 
         double height = imgIn.getHeight() / (imgIn.getWidth() / 100d);
         BufferedImage imgOut = new BufferedImage(100, (int) height, imgIn.getType());
@@ -69,16 +77,17 @@ public class AdsImageService {
         graphics.dispose();
 
         ImageIO.write(imgOut, ext, baos);
-        byte[] imageByteOut = baos.toByteArray();
 
-        return imageByteOut;
+        return baos.toByteArray();
     }
 
-    ;
-
-
-    public AdsImageEntity getImageEntity(Long no) {
-        return adsImageRepository.findById(no).orElse(null);
+    /**
+     * Возвращает изображение по указанному ID.
+     *
+     * @param id ID изображения.
+     * @return изображение. Может вернуть null, если такое изображение отсутствует.
+     */
+    public AdsImageEntity findImage(Long id) {
+        return adsImageRepository.findById(id).orElse(null);
     }
-
 }

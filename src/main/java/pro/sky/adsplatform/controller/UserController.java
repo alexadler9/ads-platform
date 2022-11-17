@@ -1,6 +1,5 @@
 package pro.sky.adsplatform.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
@@ -23,7 +22,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.List;
 
-
 @CrossOrigin(value = "http://localhost:3000")
 @RestController
 @RequestMapping("/users")
@@ -32,20 +30,18 @@ public class UserController {
 
     private final UserMapper userMapper;
     private final ResponseWrapperUserMapper responseWrapperUserMapper;
-    private final ObjectMapper objectMapper;
-private final AuthService authService;
+    private final AuthService authService;
     private final UserService userService;
     private final HttpServletRequest request;
 
     @org.springframework.beans.factory.annotation.Autowired
     public UserController(UserMapper userMapper,
                           ResponseWrapperUserMapper responseWrapperUserMapper,
-                          ObjectMapper objectMapper,
-                          AuthService authService, UserService userService,
+                          AuthService authService,
+                          UserService userService,
                           HttpServletRequest request) {
         this.userMapper = userMapper;
         this.responseWrapperUserMapper = responseWrapperUserMapper;
-        this.objectMapper = objectMapper;
         this.authService = authService;
         this.userService = userService;
         this.request = request;
@@ -66,12 +62,10 @@ private final AuthService authService;
             }
     )
     @GetMapping("/me")
-    public ResponseEntity<ResponseWrapperUserDto> getUsersUsingGET() {
-        LOGGER.debug("ResponseWrapperUserDto is running");
-
+    public ResponseEntity<ResponseWrapperUserDto> getUsers() {
         String accept = request.getHeader("Accept");
         if (accept != null && accept.contains("application/json")) {
-            List<UserEntity> userEntities = userService.getAllUsers();
+            List<UserEntity> userEntities = userService.findAllUsers();
             Integer count = userEntities.size();
             if (userEntities.size() > 0) {
                 ResponseWrapperUserDto responseWrapperUserDto = responseWrapperUserMapper
@@ -99,14 +93,14 @@ private final AuthService authService;
             }
     )
     @PatchMapping("/me")
-    public ResponseEntity<UserDto> updateUserUsingPATCH(@Parameter(in = ParameterIn.DEFAULT, description = "user", required = true, schema = @Schema()) @Valid @RequestBody UserDto body) {
-        UserEntity userEntity = userMapper.userDtoToUser(body);
+    public ResponseEntity<UserDto> updateUser(@Parameter(in = ParameterIn.DEFAULT, description = "user", required = true, schema = @Schema()) @Valid @RequestBody UserDto userDto) {
+        UserEntity user = userMapper.userDtoToUser(userDto);
         try {
-            userService.updateUser(userEntity);
+            userService.updateUser(user);
         } catch (NotFoundException e) {
             return new ResponseEntity<UserDto>(HttpStatus.NO_CONTENT);
         }
-        return ResponseEntity.ok(body);
+        return ResponseEntity.ok(userDto);
     }
 
     /**
@@ -125,9 +119,9 @@ private final AuthService authService;
             }
     )
     @PostMapping(value = "/set_password")
-    public ResponseEntity<NewPasswordDto> setPasswordUsingPOST(@RequestBody NewPasswordDto body) {
-authService.changePassword(body.getCurrentPassword(), body.getNewPassword());
-        return ResponseEntity.ok(body);
+    public ResponseEntity<NewPasswordDto> setPassword(@RequestBody NewPasswordDto newPasswordDto) {
+        authService.changePassword(newPasswordDto.getCurrentPassword(), newPasswordDto.getNewPassword());
+        return ResponseEntity.ok(newPasswordDto);
     }
 
     /**
@@ -145,8 +139,8 @@ authService.changePassword(body.getCurrentPassword(), body.getNewPassword());
             }
     )
     @GetMapping(path = "{id}")
-    public ResponseEntity<UserDto> getUserUsingGET(@Parameter(in = ParameterIn.PATH, description = "id", required = true, schema = @Schema()) @PathVariable("id") Integer id) {
-        UserEntity user = userService.getUser(id);
+    public ResponseEntity<UserDto> getUser(@Parameter(in = ParameterIn.PATH, description = "id", required = true, schema = @Schema()) @PathVariable("id") Integer id) {
+        UserEntity user = userService.findUser(id);
         if (user == null) {
             return new ResponseEntity<UserDto>(HttpStatus.NOT_FOUND);
         }

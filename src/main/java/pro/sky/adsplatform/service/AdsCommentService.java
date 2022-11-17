@@ -19,7 +19,6 @@ public class AdsCommentService {
 
     private final AdsCommentRepository adsCommentRepository;
 
-
     public AdsCommentService(AdsCommentRepository adsCommentRepository, AdsCommentMapper adsCommentMapper) {
         this.adsCommentRepository = adsCommentRepository;
     }
@@ -31,7 +30,7 @@ public class AdsCommentService {
      * @param idAds ID объявления.
      * @return отзыв. Может вернуть null, если такой отзыв отсутствует.
      */
-    public AdsCommentEntity getAdsComment(long id, long idAds) {
+    public AdsCommentEntity findAdsComment(long id, long idAds) {
         return adsCommentRepository.findFirstByIdAndAds_Id(id, idAds).orElse(null);
     }
 
@@ -39,9 +38,9 @@ public class AdsCommentService {
      * Возвращает все отзывы для объявления.
      *
      * @param idAds ID объявления.
-     * @return отзыв. Может вернуть null, если такой отзыв отсутствует.
+     * @return список всех отзывов для объявления.
      */
-    public List<AdsCommentEntity> getAllAdsComments(long idAds) {
+    public List<AdsCommentEntity> findAllAdsComments(long idAds) {
         return adsCommentRepository.findAllByAds_Id(idAds);
     }
 
@@ -49,27 +48,28 @@ public class AdsCommentService {
      * Создает новый отзыв.
      *
      * @param adsComment новый отзыв.
+     * @return созданный отзыв.
      */
-    public void createAdsComment(AdsCommentEntity adsComment) {
+    public AdsCommentEntity createAdsComment(AdsCommentEntity adsComment) {
         adsComment.setId(null);
-        adsCommentRepository.save(adsComment);
+        return adsCommentRepository.save(adsComment);
     }
 
     /**
-     * Обновляет содержание отзыва.
+     * Обновляет содержание отзыва (поле text).
      *
-     * @param adsComment обновленный отзыв.
+     * @param adsComment обновленные данные отзыва.
      * @param id ID отзыва.
      * @param idAds ID объявления.
      * @throws IllegalArgumentException несооветствие значений ID entity и аргумента.
      * @throws NotFoundException отзыв с указанными параметрами отсутствует в базе.
      */
-    public void updateAdsCommentText(AdsCommentEntity adsComment, long id, long idAds) {
+    public void updateAdsComment(AdsCommentEntity adsComment, long id, long idAds) {
         if (adsComment.getId() != id) {
             LOGGER.error("Несоответствие значений ID отзыва");
             throw new IllegalArgumentException("Несоответствие значений ID отзыва");
         }
-        AdsCommentEntity adsCommentBD = getAdsComment(id, idAds);
+        AdsCommentEntity adsCommentBD = findAdsComment(id, idAds);
         if (adsCommentBD == null) {
             LOGGER.error("Отзыв с таким ID отсутствует");
             throw new NotFoundException("Отзыв с таким ID отсутствует");
@@ -81,7 +81,9 @@ public class AdsCommentService {
     }
 
     /**
-     * Удаляет обьявление.
+     * Удаляет отзыв.
+     *
+     * @param adsComment отзыв, который должен быть удален.
      */
     public void deleteAdsComment(AdsCommentEntity adsComment) {
         adsCommentRepository.delete(adsComment);

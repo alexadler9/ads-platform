@@ -8,6 +8,7 @@ import pro.sky.adsplatform.dto.CreateAdsDto;
 import pro.sky.adsplatform.entity.AdsCommentEntity;
 import pro.sky.adsplatform.entity.AdsEntity;
 import pro.sky.adsplatform.entity.UserEntity;
+import pro.sky.adsplatform.exception.NotFoundException;
 import pro.sky.adsplatform.repository.AdsRepository;
 
 import javax.transaction.Transactional;
@@ -21,7 +22,6 @@ public class AdsService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AdsService.class);
 
     private final AdsRepository adsRepository;
-
 
     public AdsService(AdsRepository adsRepository) {
         this.adsRepository = adsRepository;
@@ -37,45 +37,82 @@ public class AdsService {
         return adsRepository.findById(id).orElse(null);
     }
 
-    public List<AdsEntity> findAllByAuthor(UserEntity userEntity) {
-        return adsRepository.findAllByAuthor(userEntity);
-    }
-
     /**
      * Возвращает все объявления.
      *
      * @return список всех объявлений.
      */
-    public List<AdsEntity> getAllAds() {
+    public List<AdsEntity> findAllAds() {
         return adsRepository.findAll();
     }
 
     /**
-     * Сохраняет обьявление.
-     */
-//IMAGE
-    public AdsEntity saveAddAds(AdsEntity adsEntity) {
-        adsRepository.save(adsEntity);
-        return adsEntity;
-
-    }
-
-    /**
-     * удаляет обьявление.
-     */
-    public void removeAdsUsingDELETE(AdsEntity adsEntity) {
-        adsRepository.delete(adsEntity);
-
-    }
-
-    /**
-     * Возвращает все объявления по шаблону
+     * Возвращает все объявления автора.
      *
-     * @return список всех объявлений.
+     * @param user автор.
+     * @return список всех объявлений автора.
      */
-    public List<AdsEntity> findAllByTitleLike(String title) {
+    public List<AdsEntity> findAllAdsByAuthor(UserEntity user) {
+        return adsRepository.findAllByAuthor(user);
+    }
+
+    /**
+     * Возвращает все объявления, соответствующие шаблону.
+     *
+     * @param title шаблон.
+     * @return список всех объявлений, соответствующих шаблону.
+     */
+    public List<AdsEntity> findAllAdsByTitleLike(String title) {
         return adsRepository.findAllByTitleLikeIgnoreCase("%" + title + "%");
     }
 
+    /**
+     * Создает новое объявление.
+     *
+     * @param ads новое объявление.
+     * @return созданное объявление.
+     */
+    public AdsEntity createAds(AdsEntity ads) {
+        ads.setId(null);
+        return adsRepository.save(ads);
+    }
 
+    /**
+     * Обновляет содержание объявления (поля price, title и description).
+     *
+     * @param ads обновленные данные объявления.
+     * @param id ID объявления.
+     * @throws IllegalArgumentException несооветствие значений ID entity и аргумента.
+     * @throws NotFoundException объявление с указанными параметрами отсутствует в базе.
+     */
+    public void updateAds(AdsEntity ads, long id) {
+        if (ads.getId() != id) {
+            LOGGER.error("Несоответствие значений ID объявления");
+            throw new IllegalArgumentException("Несоответствие значений ID объявления");
+        }
+        AdsEntity adsBD = findAds(id);
+        if (adsBD == null) {
+            LOGGER.error("Объявление с таким ID отсутствует");
+            throw new NotFoundException("Объявление с таким ID отсутствует");
+        }
+        if (ads.getPrice() != null) {
+            adsBD.setPrice(ads.getPrice());
+        }
+        if (ads.getTitle() != null) {
+            adsBD.setTitle(ads.getTitle());
+        }
+        if (ads.getDescription() != null) {
+            adsBD.setTitle(ads.getDescription());
+        }
+        adsRepository.save(adsBD);
+    }
+
+    /**
+     * Удаляет обьявление.
+     *
+     * @param ads обьявление, которое должно быть удалено.
+     */
+    public void deleteAds(AdsEntity ads) {
+        adsRepository.delete(ads);
+    }
 }

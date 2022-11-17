@@ -14,5 +14,4 @@ public interface AdsCommentRepository extends JpaRepository<AdsCommentEntity, Lo
     Optional<AdsCommentEntity> findFirstByIdAndAds_Id(Long id, Long idAds);
 
     List<AdsCommentEntity> findAllByAds_Id(Long idAds);
-
 }

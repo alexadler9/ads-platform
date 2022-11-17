@@ -28,15 +28,18 @@ public class UserService {
      * @param id ID пользователя.
      * @return пользователь. Может вернуть null, если такой пользователь отсутствует.
      */
-    public UserEntity getUser(long id) {
+    public UserEntity findUser(long id) {
         return userRepository.findById(id).orElse(null);
     }
+
     /**
-     * Возвращает пользователя по userName.
+     * Возвращает пользователя по указанному username.
+     *
+     * @param username username пользователя.
      * @return пользователь. Может вернуть null, если такой пользователь отсутствует.
      */
-    public UserEntity getUserByName(String userName) {
-        return userRepository.findByUsername(userName).orElse(null);
+    public UserEntity findUserByName(String username) {
+        return userRepository.findByUsername(username).orElse(null);
     }
 
     /**
@@ -44,18 +47,18 @@ public class UserService {
      *
      * @return список всех пользователей.
      */
-    public List<UserEntity> getAllUsers() {
+    public List<UserEntity> findAllUsers() {
         return userRepository.findAll();
     }
 
     /**
-     * Обновляет данные пользователя.
+     * Обновляет данные пользователя (поля firstName, lastName, phone).
      *
      * @param user обновленные данные пользователя.
      * @throws NotFoundException пользователь с указанными параметрами отсутствует в базе.
      */
     public void updateUser(UserEntity user) {
-        UserEntity userBD = getUser(user.getId());
+        UserEntity userBD = findUser(user.getId());
         if (userBD == null) {
             LOGGER.error("Пользователь с таким ID отсутствует");
             throw new NotFoundException("Пользователь с таким ID отсутствует");
@@ -69,17 +72,6 @@ public class UserService {
         if (user.getPhone() != null) {
             userBD.setPhone(user.getPhone());
         }
-        if (user.getUsername() != null) {
-            userBD.setUsername(user.getUsername());
-        }
         userRepository.save(userBD);
-    }
-
-    /**
-     * Обновление пароля пользователя.
-     */
-    public void updateUserPassword() {
-        LOGGER.info("Обновление пароля пользователя");
-        throw new UnsupportedOperationException("Метод не поддерживается");
     }
 }
