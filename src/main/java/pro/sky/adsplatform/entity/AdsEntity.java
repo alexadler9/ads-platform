@@ -103,11 +103,9 @@ public class AdsEntity {
     public String toString() {
         return "AdsEntity{" +
                 "id=" + id +
-                ", author=" + author +
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
                 ", price=" + price +
-                ", images=" + images +
                 '}';
     }
 }

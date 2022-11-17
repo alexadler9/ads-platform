@@ -13,7 +13,7 @@ import java.util.Optional;
 @Repository
 public interface AdsRepository extends JpaRepository<AdsEntity, Long> {
 
-    List<AdsEntity> findAllByTitleLike(String title);
+    List<AdsEntity> findAllByTitleLikeIgnoreCase(String title);
     Optional<AdsEntity> findById(long id);
     List<AdsEntity> findAllByAuthor(UserEntity userEntity);
 }

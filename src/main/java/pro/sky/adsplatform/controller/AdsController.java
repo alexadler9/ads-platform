@@ -150,7 +150,7 @@ public class AdsController {
 
     //IMAGE
     @GetMapping(value = "/image/{pk}")
-    public ResponseEntity<byte[]> getImageNo(@PathVariable String pk) throws IOException {
+    public ResponseEntity<byte[]> getImageNo(@PathVariable("pk") Integer pk) {
         AdsImageEntity adsImageEntity = adsImageService.getImageEntity(Long.valueOf(pk));
         if (adsImageEntity == null) throw new org.webjars.NotFoundException("Не найдена картинка");
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -428,10 +428,17 @@ public class AdsController {
         return ResponseEntity.ok(adsDto);
     }
 
-    @GetMapping("search{title}")
-    public List<AdsEntity> findAllByTitleLike(@PathVariable("title") String title) {
-        return adsService.findAllByTitleLike(title);
+     @GetMapping("search{title}")
+    public ResponseEntity<ResponseWrapperAdsDto> findAllByTitleLike(@PathVariable("title") String title) {
+        List<AdsEntity> adsList = adsService.findAllByTitleLike(title);
+        if (adsList.size() == 0) {
+            return new ResponseEntity<ResponseWrapperAdsDto>(HttpStatus.NOT_FOUND);
+        }
+        return ResponseEntity.ok(responseWrapperAdsMapper
+                .adsListToResponseWrapperAdsDto(adsList.size(), adsList));
     }
+
+
 
     @PreAuthorize("hasAuthority('ROLE_USER')")
     @PatchMapping(value = "{ad}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
