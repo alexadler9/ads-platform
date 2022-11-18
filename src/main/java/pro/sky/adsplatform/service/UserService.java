@@ -58,10 +58,10 @@ public class UserService {
      * @throws NotFoundException пользователь с указанными параметрами отсутствует в базе.
      */
     public void updateUser(UserEntity user) {
-        UserEntity userBD = findUser(user.getId());
+        UserEntity userBD = findUserByName(user.getUsername());
         if (userBD == null) {
-            LOGGER.error("Пользователь с таким ID отсутствует");
-            throw new NotFoundException("Пользователь с таким ID отсутствует");
+            LOGGER.error("Пользователь с таким Именем отсутствует");
+            throw new NotFoundException("Пользователь с таким именем отсутствует");
         }
 
         if (user.getFirstName() != null) {

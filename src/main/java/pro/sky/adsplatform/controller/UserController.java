@@ -9,8 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import pro.sky.adsplatform.dto.*;
+import pro.sky.adsplatform.entity.AdsEntity;
 import pro.sky.adsplatform.entity.UserEntity;
 import pro.sky.adsplatform.exception.NotFoundException;
 import pro.sky.adsplatform.mapper.ResponseWrapperUserMapper;
@@ -63,20 +65,16 @@ public class UserController {
     )
     @GetMapping("/me")
     public ResponseEntity<ResponseWrapperUserDto> getUsers() {
-        String accept = request.getHeader("Accept");
-        if (accept != null && accept.contains("application/json")) {
-            List<UserEntity> userEntities = userService.findAllUsers();
-            Integer count = userEntities.size();
-            if (userEntities.size() > 0) {
-                ResponseWrapperUserDto responseWrapperUserDto = responseWrapperUserMapper
-                        .userListToResponseWrapperUserDto(count, userEntities);
-                return ResponseEntity.ok(responseWrapperUserDto);
-            } else {
-                return new ResponseEntity<ResponseWrapperUserDto>(HttpStatus.NOT_FOUND);
-            }
+
+        List<UserEntity> userList = userService.findAllUsers();
+        if (userList.size() == 0) {
+            return new ResponseEntity<ResponseWrapperUserDto>(HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<ResponseWrapperUserDto>(HttpStatus.NOT_IMPLEMENTED);
+        return ResponseEntity.ok(responseWrapperUserMapper
+                .userListToResponseWrapperUserDto(userList.size(), userList));
+
     }
+
 
     /**
      * Обновляет данные пользователя.
@@ -93,7 +91,9 @@ public class UserController {
             }
     )
     @PatchMapping("/me")
-    public ResponseEntity<UserDto> updateUser(@Parameter(in = ParameterIn.DEFAULT, description = "user", required = true, schema = @Schema()) @Valid @RequestBody UserDto userDto) {
+    public ResponseEntity<UserDto> updateUser(Authentication authentication, @RequestBody UserDto userDto) {
+        userDto.setEmail(authentication.getName());
+        userDto.setId(Math.toIntExact(userService.findUserByName(authentication.getName()).getId()));
         UserEntity user = userMapper.userDtoToUser(userDto);
         try {
             userService.updateUser(user);
@@ -139,10 +139,14 @@ public class UserController {
             }
     )
     @GetMapping(path = "{id}")
-    public ResponseEntity<UserDto> getUser(@Parameter(in = ParameterIn.PATH, description = "id", required = true, schema = @Schema()) @PathVariable("id") Integer id) {
+    public ResponseEntity<UserDto> getUser(Authentication authentication, @PathVariable("id") Integer id) {
         UserEntity user = userService.findUser(id);
+
+        if (!user.getUsername().equals(authentication.getName()))
+            return new ResponseEntity<UserDto>(HttpStatus.FORBIDDEN);
+
         if (user == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<UserDto>(HttpStatus.NOT_FOUND);
         }
         return ResponseEntity.ok(userMapper.userToUserDto(user));
     }
