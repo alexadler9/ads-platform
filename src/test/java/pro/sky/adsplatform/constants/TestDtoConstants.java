@@ -1,13 +1,11 @@
 package pro.sky.adsplatform.constants;
 
 import pro.sky.adsplatform.dto.*;
-import pro.sky.adsplatform.entity.AdsImageEntity;
 
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.Month;
-import java.util.Collections;
-import java.util.List;
+
+import static pro.sky.adsplatform.constants.TestSecurityConstants.SECURITY_USER_PASSWORD;
 
 public class TestDtoConstants {
     public static final UserDto USER_DTO;
@@ -21,6 +19,8 @@ public class TestDtoConstants {
     public static final AdsCommentDto ADS_COMMENT_DTO;
 
     public static final RegisterReqDto REGISTER_REQ_DTO;
+
+    public static final NewPasswordDto NEW_PASSWORD_DTO;
 
     static {
         USER_DTO = new UserDto();
@@ -68,5 +68,9 @@ public class TestDtoConstants {
         REGISTER_REQ_DTO.setLastName("lastName");
         REGISTER_REQ_DTO.setPhone("phone");
         REGISTER_REQ_DTO.setRole(RoleDto.USER);
+
+        NEW_PASSWORD_DTO = new NewPasswordDto();
+        NEW_PASSWORD_DTO.setCurrentPassword(SECURITY_USER_PASSWORD);
+        NEW_PASSWORD_DTO.setNewPassword("new-password");
     }
 }
