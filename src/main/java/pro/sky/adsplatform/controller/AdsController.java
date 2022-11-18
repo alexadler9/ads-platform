@@ -1,12 +1,11 @@
 package pro.sky.adsplatform.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -45,7 +44,7 @@ public class AdsController {
     private final AdsImageService adsImageService;
     private final AuthService authService;
 
-    @org.springframework.beans.factory.annotation.Autowired
+    @Autowired
     public AdsController(AdsMapper adsMapper,
                          FullAdsMapper fullAdsMapper,
                          AdsCommentMapper adsCommentMapper,
@@ -71,24 +70,24 @@ public class AdsController {
     }
 
     @Operation(
-            summary = "addAds",
-            description = "Добавить объявления",
+            summary = "Добавить объявление",
             tags = {"Объявления"},
             responses = {
-                    @ApiResponse(responseCode = "200", description = "OK"),
-                    @ApiResponse(responseCode = "201", description = "Created"),
-                    @ApiResponse(responseCode = "401", description = "Unauthorized"),
-                    @ApiResponse(responseCode = "403", description = "Forbidden"),
-                    @ApiResponse(responseCode = "404", description = "Not Found")
+                    @ApiResponse(responseCode = "200", description = "Объявление успешно добавлено"),
+                    @ApiResponse(responseCode = "401", description = "Требуется авторизация"),
+                    @ApiResponse(responseCode = "403", description = "Доступ запрещен"),
+                    @ApiResponse(responseCode = "404", description = "Автор не найден")
             }
     )
-    @ResponseStatus(HttpStatus.CREATED)
-    @ResponseBody
     @PreAuthorize("hasAuthority('ROLE_USER')")
     @PostMapping(consumes = {"multipart/form-data"})
-    public ResponseEntity<AdsDto> addAds(Authentication authentication,
-                                         @RequestPart("properties") CreateAdsDto createAdsDto,
-                                         @RequestPart("image") MultipartFile file) throws IOException {
+    public ResponseEntity<AdsDto> addAds(
+            Authentication authentication,
+            @Parameter(description = "Параметры объявления")
+            @RequestPart("properties") CreateAdsDto createAdsDto,
+            @Parameter(description = "Изображение")
+            @RequestPart("image") MultipartFile file
+    ) throws IOException {
         UserEntity user = userService.findUserByName(authentication.getName());
         if (user == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -105,22 +104,24 @@ public class AdsController {
     }
 
     @Operation(
-            summary = "addAdsComments",
-            description = "!",
+            summary = "Добавить отзыв",
             tags = {"Объявления"},
             responses = {
-                    @ApiResponse(responseCode = "200", description = "OK"),
-                    @ApiResponse(responseCode = "201", description = "Created"),
-                    @ApiResponse(responseCode = "401", description = "Unauthorized"),
-                    @ApiResponse(responseCode = "403", description = "Forbidden"),
-                    @ApiResponse(responseCode = "404", description = "Not Found")
+                    @ApiResponse(responseCode = "200", description = "Отзыв успешно добавлен"),
+                    @ApiResponse(responseCode = "401", description = "Требуется авторизация"),
+                    @ApiResponse(responseCode = "403", description = "Доступ запрещен"),
+                    @ApiResponse(responseCode = "404", description = "Автор и/или объявление не найдены")
             }
     )
     @PreAuthorize("hasAuthority('ROLE_USER')")
     @PostMapping("{ad_pk}/comment")
-    public ResponseEntity<AdsCommentDto> addAdsComments(Authentication authentication,
-                                                        @PathVariable("ad_pk") String adPk,
-                                                        @RequestBody AdsCommentDto adsCommentDto) {
+    public ResponseEntity<AdsCommentDto> addAdsComments(
+            Authentication authentication,
+            @Parameter(description = "ID объявления")
+            @PathVariable("ad_pk") String adPk,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Параметры отзыва")
+            @RequestBody AdsCommentDto adsCommentDto
+    ) {
         UserEntity user = userService.findUserByName(authentication.getName());
         if (user == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -139,8 +140,19 @@ public class AdsController {
         return ResponseEntity.ok(adsCommentMapper.adsCommentToAdsCommentDto(adsCommentCreated));
     }
 
+    @Operation(
+            summary = "Получить изображение по ID",
+            tags = {"Объявления"},
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Изображение успешно получено"),
+                    @ApiResponse(responseCode = "404", description = "Изображение не найдено")
+            }
+    )
     @GetMapping(value = "/image/{pk}")
-    public ResponseEntity<byte[]> getImage(@PathVariable("pk") Integer pk) {
+    public ResponseEntity<byte[]> getImage(
+            @Parameter(description = "ID изображения")
+            @PathVariable("pk") Integer pk
+    ) {
         AdsImageEntity adsImage = adsImageService.findImage(Long.valueOf(pk));
         if (adsImage == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -154,20 +166,24 @@ public class AdsController {
     }
 
     @Operation(
-            summary = "deleteAdsComment",
-            description = "!",
+            summary = "Удалить отзыв",
             tags = {"Объявления"},
             responses = {
-                    @ApiResponse(responseCode = "204", description = "No Content"),
-                    @ApiResponse(responseCode = "401", description = "Unauthorized"),
-                    @ApiResponse(responseCode = "403", description = "Forbidden")
+                    @ApiResponse(responseCode = "200", description = "Отзыв успешно удален"),
+                    @ApiResponse(responseCode = "204", description = "Отзыв и/или объявление не найдены"),
+                    @ApiResponse(responseCode = "401", description = "Требуется авторизация"),
+                    @ApiResponse(responseCode = "403", description = "Доступ запрещен")
             }
     )
     @PreAuthorize("hasAuthority('ROLE_USER')")
     @DeleteMapping("{ad_pk}/comment/{id}")
-    public ResponseEntity<Void> deleteAdsComment(Authentication authentication,
-                                                 @PathVariable("ad_pk") String adPk,
-                                                 @PathVariable("id") Integer id) {
+    public ResponseEntity<Void> deleteAdsComment(
+            Authentication authentication,
+            @Parameter(description = "ID объявления")
+            @PathVariable("ad_pk") String adPk,
+            @Parameter(description = "ID отзыва")
+            @PathVariable("id") Integer id
+    ) {
         AdsCommentEntity adsComment = adsCommentService.findAdsComment(id, Long.parseLong(adPk));
         if (adsComment == null) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -189,14 +205,13 @@ public class AdsController {
     }
 
     @Operation(
-            summary = "getALLAds",
-            description = "!",
+            summary = "Получить список всех объявлений",
             tags = {"Объявления"},
             responses = {
-                    @ApiResponse(responseCode = "200", description = "OK"),
-                    @ApiResponse(responseCode = "401", description = "Unauthorized"),
-                    @ApiResponse(responseCode = "403", description = "Forbidden"),
-                    @ApiResponse(responseCode = "404", description = "Not Found")
+                    @ApiResponse(responseCode = "200", description = "Список успешно получен"),
+                    @ApiResponse(responseCode = "401", description = "Требуется авторизация"),
+                    @ApiResponse(responseCode = "403", description = "Доступ запрещен"),
+                    @ApiResponse(responseCode = "404", description = "Список пуст")
             }
     )
     @GetMapping("")
@@ -210,19 +225,22 @@ public class AdsController {
     }
 
     @Operation(
-            summary = "getAdsComments",
-            description = "!",
+            summary = "Получить отзыв по ID",
             tags = {"Объявления"},
             responses = {
-                    @ApiResponse(responseCode = "200", description = "OK"),
-                    @ApiResponse(responseCode = "401", description = "Unauthorized"),
-                    @ApiResponse(responseCode = "403", description = "Forbidden"),
-                    @ApiResponse(responseCode = "404", description = "Not Found")
+                    @ApiResponse(responseCode = "200", description = "Отзыв успешно получен"),
+                    @ApiResponse(responseCode = "401", description = "Требуется авторизация"),
+                    @ApiResponse(responseCode = "403", description = "Доступ запрещен"),
+                    @ApiResponse(responseCode = "404", description = "Отзыв не найден")
             }
     )
     @GetMapping("{ad_pk}/comment/{id}")
-    public ResponseEntity<AdsCommentDto> getAdsComment(@PathVariable("ad_pk") String adPk,
-                                                       @PathVariable("id") Integer id) {
+    public ResponseEntity<AdsCommentDto> getAdsComment(
+            @Parameter(description = "ID объявления")
+            @PathVariable("ad_pk") String adPk,
+            @Parameter(description = "ID отзыва")
+            @PathVariable("id") Integer id
+    ) {
         AdsCommentEntity adsComment = adsCommentService.findAdsComment(id, Long.parseLong(adPk));
         if (adsComment == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -231,18 +249,20 @@ public class AdsController {
     }
 
     @Operation(
-            summary = "getAdsComments",
-            description = "!",
-            tags = {"Объявления"})
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "*/*", schema = @Schema(implementation = ResponseWrapperAdsCommentDto.class))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(schema = @Schema())),
-            @ApiResponse(responseCode = "403", description = "Forbidden", content = @Content(schema = @Schema())),
-            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(schema = @Schema()))
-    }
+            summary = "Получить список отзывов",
+            tags = {"Объявления"},
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Список успешно получен"),
+                    @ApiResponse(responseCode = "401", description = "Требуется авторизация"),
+                    @ApiResponse(responseCode = "403", description = "Доступ запрещен"),
+                    @ApiResponse(responseCode = "404", description = "Список пуст")
+            }
     )
     @GetMapping("{ad_pk}/comment")
-    public ResponseEntity<ResponseWrapperAdsCommentDto> getAllAdsComments(@PathVariable("ad_pk") String adPk) {
+    public ResponseEntity<ResponseWrapperAdsCommentDto> getAllAdsComments(
+            @Parameter(description = "ID объявления")
+            @PathVariable("ad_pk") String adPk
+    ) {
         List<AdsCommentEntity> adsCommentList = adsCommentService.findAllAdsComments(Long.parseLong(adPk));
         if (adsCommentList.size() == 0) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -252,24 +272,25 @@ public class AdsController {
     }
 
     @Operation(
-            summary = "getAdsMe",
-            description = "",
+            summary = "Получить список объявлений пользователя",
             tags = {"Объявления"},
             responses = {
-                    @ApiResponse(responseCode = "200", description = "OK"),
-                    @ApiResponse(responseCode = "401", description = "Unauthorized"),
-                    @ApiResponse(responseCode = "403", description = "Forbidden"),
-                    @ApiResponse(responseCode = "404", description = "Not Found")
+                    @ApiResponse(responseCode = "200", description = "Список успешно получен"),
+                    @ApiResponse(responseCode = "401", description = "Требуется авторизация"),
+                    @ApiResponse(responseCode = "403", description = "Доступ запрещен"),
+                    @ApiResponse(responseCode = "404", description = "Список пуст")
             }
     )
     @PreAuthorize("hasAuthority('ROLE_USER')")
     @GetMapping("me")
-    public ResponseEntity<ResponseWrapperAdsDto> getAdsMe(Authentication authentication,
-                                                          @RequestParam(required = false) Boolean authenticated,
-                                                          @RequestParam(required = false) String authorities0Authority,
-                                                          @RequestParam(required = false) Object credentials,
-                                                          @RequestParam(required = false) Object details,
-                                                          @RequestParam(required = false) Object principal) {
+    public ResponseEntity<ResponseWrapperAdsDto> getAdsMe(
+            Authentication authentication,
+            @RequestParam(required = false) Boolean authenticated,
+            @RequestParam(required = false) String authorities0Authority,
+            @RequestParam(required = false) Object credentials,
+            @RequestParam(required = false) Object details,
+            @RequestParam(required = false) Object principal
+    ) {
         UserEntity user = userService.findUserByName(authentication.getName());
         if (user == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -285,18 +306,20 @@ public class AdsController {
     }
 
     @Operation(
-            summary = "getAds",
-            description = "!",
+            summary = "Получить объявление по ID",
             tags = {"Объявления"},
             responses = {
-                    @ApiResponse(responseCode = "200", description = "OK", content = @Content(mediaType = "*/*", schema = @Schema(implementation = FullAdsDto.class))),
-                    @ApiResponse(responseCode = "401", description = "Unauthorized"),
-                    @ApiResponse(responseCode = "403", description = "Forbidden"),
-                    @ApiResponse(responseCode = "404", description = "Not Found")
+                    @ApiResponse(responseCode = "200", description = "Объявление успешно получено"),
+                    @ApiResponse(responseCode = "401", description = "Требуется авторизация"),
+                    @ApiResponse(responseCode = "403", description = "Доступ запрещен"),
+                    @ApiResponse(responseCode = "404", description = "Объявление не найдено")
             }
     )
     @GetMapping("{id}")
-    public ResponseEntity<FullAdsDto> getAds(@PathVariable("id") Integer id) {
+    public ResponseEntity<FullAdsDto> getAds(
+            @Parameter(description = "ID объявления")
+            @PathVariable("id") Integer id
+    ) {
         AdsEntity ads = adsService.findAds(id);
         if (ads == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -305,19 +328,22 @@ public class AdsController {
     }
 
     @Operation(
-            summary = "removeAds",
-            description = "!",
+            summary = "Удалить объявление",
             tags = {"Объявления"},
             responses = {
-                    @ApiResponse(responseCode = "204", description = "No Content"),
-                    @ApiResponse(responseCode = "401", description = "Unauthorized"),
-                    @ApiResponse(responseCode = "403", description = "Forbidden")
+                    @ApiResponse(responseCode = "200", description = "Объявление успешно удалено"),
+                    @ApiResponse(responseCode = "204", description = "Объявление не найдено"),
+                    @ApiResponse(responseCode = "401", description = "Требуется авторизация"),
+                    @ApiResponse(responseCode = "403", description = "Доступ запрещен")
             }
     )
     @PreAuthorize("hasAuthority('ROLE_USER')")
     @DeleteMapping("{id}")
-    public ResponseEntity<Void> removeAds(Authentication authentication,
-                                          @PathVariable("id") Integer id) {
+    public ResponseEntity<Void> removeAds(
+            Authentication authentication,
+            @Parameter(description = "ID объявления")
+            @PathVariable("id") Integer id
+    ) {
         AdsEntity ads = adsService.findAds(id);
         if (ads == null) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -334,22 +360,26 @@ public class AdsController {
     }
 
     @Operation(
-            summary = "updateAdsComment",
-            description = "!Обновить комментарий",
+            summary = "Обновить отзыв",
             tags = {"Объявления"},
             responses = {
-                    @ApiResponse(responseCode = "200", description = "OK"),
-                    @ApiResponse(responseCode = "204", description = "No Content"),
-                    @ApiResponse(responseCode = "401", description = "Unauthorized"),
-                    @ApiResponse(responseCode = "403", description = "Forbidden")
+                    @ApiResponse(responseCode = "200", description = "Отзыв успешно обновлен"),
+                    @ApiResponse(responseCode = "204", description = "Объявление и/или отзыв не найдены"),
+                    @ApiResponse(responseCode = "401", description = "Требуется авторизация"),
+                    @ApiResponse(responseCode = "403", description = "Доступ запрещен")
             }
     )
     @PreAuthorize("hasAuthority('ROLE_USER')")
     @PatchMapping("{ad_pk}/comment/{id}")
-    public ResponseEntity<AdsCommentDto> updateAdsComment(Authentication authentication,
-                                                          @PathVariable("ad_pk") String adPk,
-                                                          @PathVariable("id") Integer id,
-                                                          @RequestBody AdsCommentDto adsCommentDto) {
+    public ResponseEntity<AdsCommentDto> updateAdsComment(
+            Authentication authentication,
+            @Parameter(description = "ID объявления")
+            @PathVariable("ad_pk") String adPk,
+            @Parameter(description = "ID отзыва")
+            @PathVariable("id") Integer id,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Параметры отзыва")
+            @RequestBody AdsCommentDto adsCommentDto
+    ) {
         AdsEntity ads = adsService.findAds(Long.parseLong(adPk));
         if (ads == null) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -371,21 +401,24 @@ public class AdsController {
     }
 
     @Operation(
-            summary = "updateAds",
-            description = "!Редактировать объявления",
+            summary = "Обновить объявление",
             tags = {"Объявления"},
             responses = {
-                    @ApiResponse(responseCode = "200", description = "OK"),
-                    @ApiResponse(responseCode = "204", description = "No Content"),
-                    @ApiResponse(responseCode = "401", description = "Unauthorized"),
-                    @ApiResponse(responseCode = "403", description = "Forbidden")
+                    @ApiResponse(responseCode = "200", description = "Объявление успешно обновлено"),
+                    @ApiResponse(responseCode = "204", description = "Объявление не найдено"),
+                    @ApiResponse(responseCode = "401", description = "Требуется авторизация"),
+                    @ApiResponse(responseCode = "403", description = "Доступ запрещен")
             }
     )
     @PreAuthorize("hasAuthority('ROLE_USER')")
     @PatchMapping(value = "{id}")
-    public ResponseEntity<AdsDto> updateAds(Authentication authentication,
-                                            @PathVariable("id") Integer id,
-                                            @RequestBody AdsDto adsDto) {
+    public ResponseEntity<AdsDto> updateAds(
+            Authentication authentication,
+            @Parameter(description = "ID объявления")
+            @PathVariable("id") Integer id,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Параметры объявления")
+            @RequestBody AdsDto adsDto
+    ) {
         AdsEntity ads = adsService.findAds(id);
         if (ads == null) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -408,8 +441,19 @@ public class AdsController {
         return ResponseEntity.ok(adsMapper.adsToAdsDto(adsUpdated));
     }
 
+    @Operation(
+            summary = "Получить список объявлений, совпадающих с шаблоном",
+            tags = {"Объявления"},
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Список успешно получен"),
+                    @ApiResponse(responseCode = "404", description = "Список пуст")
+            }
+    )
     @GetMapping("search{title}")
-    public ResponseEntity<ResponseWrapperAdsDto> findAllAdsByTitleLike(@PathVariable("title") String title) {
+    public ResponseEntity<ResponseWrapperAdsDto> findAllAdsByTitleLike(
+            @Parameter(description = "Шаблон")
+            @PathVariable("title") String title
+    ) {
         List<AdsEntity> adsList = adsService.findAllAdsByTitleLike(title);
         if (adsList.size() == 0) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -418,11 +462,25 @@ public class AdsController {
                 .adsListToResponseWrapperAdsDto(adsList.size(), adsList));
     }
 
+    @Operation(
+            summary = "Добавить изображение",
+            tags = {"Объявления"},
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Изображение успешно добавлено"),
+                    @ApiResponse(responseCode = "204", description = "Объявление не найдено"),
+                    @ApiResponse(responseCode = "401", description = "Требуется авторизация"),
+                    @ApiResponse(responseCode = "403", description = "Доступ запрещен")
+            }
+    )
     @PreAuthorize("hasAuthority('ROLE_USER')")
     @PatchMapping(value = "{ad}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Void> updateAdsImage(Authentication authentication,
-                                               @PathVariable Integer ad,
-                                               @RequestParam MultipartFile file) throws IOException {
+    public ResponseEntity<Void> updateAdsImage(
+            Authentication authentication,
+            @Parameter(description = "ID объявления")
+            @PathVariable Integer ad,
+            @Parameter(description = "Изображение")
+            @RequestParam MultipartFile file
+    ) throws IOException {
         AdsEntity ads = adsService.findAds(ad);
         if (ads == null) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);

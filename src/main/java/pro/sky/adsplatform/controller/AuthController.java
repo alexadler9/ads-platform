@@ -1,5 +1,7 @@
 package pro.sky.adsplatform.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -20,23 +22,52 @@ import static pro.sky.adsplatform.dto.RoleDto.USER;
 public class AuthController {
     private final AuthService authService;
 
+    @Operation(
+            summary = "Авторизовать пользователя",
+            tags = {"Авторизация"},
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Авторизация успешно выполнена"),
+                    @ApiResponse(responseCode = "403", description = "Не удалось выполнить авторизацию")
+            }
+    )
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginReqDto req) {
-        if (authService.login(req.getUsername(), req.getPassword())) {
+    public ResponseEntity<?> login(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Параметры авторизации")
+            @RequestBody LoginReqDto loginReqDto
+    ) {
+        if (authService.login(loginReqDto.getUsername(), loginReqDto.getPassword())) {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
+    @Operation(
+            summary = "Зарегистрировать пользователя",
+            tags = {"Авторизация"},
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Регистрация успешно выполнена"),
+                    @ApiResponse(responseCode = "400", description = "Не удалось выполнить регистрацию")
+            }
+    )
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterReqDto req) {
-        RoleDto role = (req.getRole() == null) ? USER : req.getRole();
-        if (authService.register(req, role)) {
+    public ResponseEntity<?> register(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Параметры регистрации")
+            @RequestBody RegisterReqDto registerReqDto
+    ) {
+        RoleDto role = (registerReqDto.getRole() == null) ? USER : registerReqDto.getRole();
+        if (authService.register(registerReqDto, role)) {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
     }
 
+    @Operation(
+            summary = "meUser",
+            tags = {"Авторизация"},
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "OK")
+            }
+    )
     @GetMapping("/meuser")
     public ResponseEntity<?> meUser(Authentication authentication) {
         return ResponseEntity.ok(authentication);
