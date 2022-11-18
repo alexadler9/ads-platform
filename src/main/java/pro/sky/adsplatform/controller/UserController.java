@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
 import pro.sky.adsplatform.dto.*;
 import pro.sky.adsplatform.entity.UserEntity;
 import pro.sky.adsplatform.exception.NotFoundException;
@@ -108,11 +109,13 @@ public class UserController {
             }
     )
     @PostMapping(value = "/set_password")
-    public ResponseEntity<NewPasswordDto> setPassword(
+    public ResponseEntity<NewPasswordDto> setPassword(Authentication authentication,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Параметры пароля")
             @RequestBody NewPasswordDto newPasswordDto
     ) {
-        authService.changePassword(newPasswordDto.getCurrentPassword(), newPasswordDto.getNewPassword());
+        if(authentication!=null)
+        authService.changePassword(authentication,newPasswordDto.getCurrentPassword(), newPasswordDto.getNewPassword());
+        else return new ResponseEntity<NewPasswordDto>(HttpStatus.FORBIDDEN);
         return ResponseEntity.ok(newPasswordDto);
     }
 

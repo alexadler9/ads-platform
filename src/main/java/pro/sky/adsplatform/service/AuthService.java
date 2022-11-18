@@ -127,7 +127,7 @@ public class AuthService {
             UserDetails newUser = User.withDefaultPasswordEncoder()
                     .password(newPassword)
                     .username(userName)
-                    //                       .roles("USER")
+                    .roles("USER")
                     .build();
             manager.updateUser(newUser);
         }else {
