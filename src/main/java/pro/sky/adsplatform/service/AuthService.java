@@ -2,6 +2,9 @@ package pro.sky.adsplatform.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -14,6 +17,7 @@ import org.springframework.stereotype.Service;
 import pro.sky.adsplatform.dto.RegisterReqDto;
 import pro.sky.adsplatform.dto.RoleDto;
 import pro.sky.adsplatform.entity.UserEntity;
+import pro.sky.adsplatform.exception.NotFoundException;
 import pro.sky.adsplatform.mapper.RegisterReqMapper;
 import pro.sky.adsplatform.mapper.RegisterReqMapperImpl;
 import pro.sky.adsplatform.repository.UserRepository;
@@ -63,7 +67,7 @@ public class AuthService {
         String prefix = encryptedPassword.substring(0, ENCRYPTION_PREFIX.length());
         String ecryptedPasswordWithoutEncryptionType = encryptedPassword;
         if (prefix.equals(ENCRYPTION_PREFIX)) {
-             ecryptedPasswordWithoutEncryptionType = encryptedPassword.substring(ENCRYPTION_PREFIX.length());
+            ecryptedPasswordWithoutEncryptionType = encryptedPassword.substring(ENCRYPTION_PREFIX.length());
         }
 
         return encoder.matches(password, ecryptedPasswordWithoutEncryptionType);
@@ -73,7 +77,7 @@ public class AuthService {
      * Регистрирует нового пользователя.
      *
      * @param registerReq данные для регистрации пользователя.
-     * @param role роль пользователя.
+     * @param role        роль пользователя.
      * @return true, если пользователь успешно зарегистрирован, иначе false.
      */
     public boolean register(RegisterReqDto registerReq, RoleDto role) {
@@ -95,7 +99,7 @@ public class AuthService {
             UserEntity user = registerReqMapper.registerReqDtoToUser(registerReq);
             user.setId(userBD.getId());
             user.setEnabled(userBD.getEnabled());
-            user.setPassword(userBD.getPassword());
+//            user.setPassword(userBD.getPassword());
             LOGGER.info("Registered user: {}", user);
             userRepository.save(user);
         }
@@ -109,15 +113,33 @@ public class AuthService {
      * @param oldPassword старый пароль пользователя.
      * @param newPassword новый пароль пользователя.
      */
-    public void changePassword(String oldPassword, String newPassword) {
-        manager.changePassword(oldPassword, encoder.encode(newPassword));
+    public void changePassword(Authentication authentication, String oldPassword, String newPassword) {
+        String userName = authentication.getName();
+        UserDetails user = manager.loadUserByUsername(userName);
+        String encryptedPassword = user.getPassword();
+        String prefix = encryptedPassword.substring(0, ENCRYPTION_PREFIX.length());
+        String ecryptedPasswordWithoutEncryptionType = encryptedPassword;
+        if (prefix.equals(ENCRYPTION_PREFIX)) {
+            ecryptedPasswordWithoutEncryptionType = encryptedPassword.substring(ENCRYPTION_PREFIX.length());
+        }
+
+        if (encoder.matches(oldPassword, ecryptedPasswordWithoutEncryptionType)) {
+            UserDetails newUser = User.withDefaultPasswordEncoder()
+                    .password(newPassword)
+                    .username(userName)
+                    //                       .roles("USER")
+                    .build();
+            manager.updateUser(newUser);
+        }else {
+            throw new NotFoundException("Password incorrect");
+        }
     }
 
     /**
      * Определяет, относится ли пользователь к указанной роли.
      *
      * @param username имя пользователя.
-     * @param role роль.
+     * @param role     роль.
      * @return true, если пользователь относится к указанной роли, иначе false.
      */
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")

@@ -119,8 +119,8 @@ public class UserController {
             }
     )
     @PostMapping(value = "/set_password")
-    public ResponseEntity<NewPasswordDto> setPassword(@RequestBody NewPasswordDto newPasswordDto) {
-        authService.changePassword(newPasswordDto.getCurrentPassword(), newPasswordDto.getNewPassword());
+    public ResponseEntity<NewPasswordDto> setPassword(Authentication authentication,@RequestBody NewPasswordDto newPasswordDto) {
+        authService.changePassword(authentication,newPasswordDto.getCurrentPassword(), newPasswordDto.getNewPassword());
         return ResponseEntity.ok(newPasswordDto);
     }
 
