@@ -10,7 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpClientErrorException;
 import pro.sky.adsplatform.dto.*;
 import pro.sky.adsplatform.entity.UserEntity;
 import pro.sky.adsplatform.exception.NotFoundException;
@@ -85,15 +84,22 @@ public class UserController {
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Параметры пользователя")
             @RequestBody UserDto userDto
     ) {
+        UserEntity user = userService.findUserByName(authentication.getName());
+        if (user == null) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
         userDto.setEmail(authentication.getName());
-        userDto.setId(Math.toIntExact(userService.findUserByName(authentication.getName()).getId()));
-        UserEntity user = userMapper.userDtoToUser(userDto);
+        userDto.setId(Math.toIntExact(user.getId()));
+
+        UserEntity userUpdated;
         try {
-            userService.updateUser(user);
+            userUpdated = userService.updateUser(userMapper.userDtoToUser(userDto));
         } catch (NotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
-        return ResponseEntity.ok(userDto);
+
+        return ResponseEntity.ok(userMapper.userToUserDto(userUpdated));
     }
 
     /**
@@ -109,13 +115,25 @@ public class UserController {
             }
     )
     @PostMapping(value = "/set_password")
-    public ResponseEntity<NewPasswordDto> setPassword(Authentication authentication,
+    public ResponseEntity<NewPasswordDto> setPassword(
+            Authentication authentication,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Параметры пароля")
             @RequestBody NewPasswordDto newPasswordDto
     ) {
-        if(authentication!=null)
-        authService.changePassword(authentication,newPasswordDto.getCurrentPassword(), newPasswordDto.getNewPassword());
-        else return new ResponseEntity<NewPasswordDto>(HttpStatus.FORBIDDEN);
+        if (authentication == null) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        try {
+            authService.changePassword(
+                    authentication,
+                    newPasswordDto.getCurrentPassword(),
+                    newPasswordDto.getNewPassword()
+            );
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
         return ResponseEntity.ok(newPasswordDto);
     }
 
@@ -140,11 +158,11 @@ public class UserController {
     ) {
         UserEntity user = userService.findUser(id);
         if (user == null) {
-            return new ResponseEntity<UserDto>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
         if (!user.getUsername().equals(authentication.getName())) {
-            return new ResponseEntity<UserDto>(HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
         return ResponseEntity.ok(userMapper.userToUserDto(user));

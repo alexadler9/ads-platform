@@ -55,9 +55,10 @@ public class UserService {
      * Обновляет данные пользователя (поля firstName, lastName, phone).
      *
      * @param user обновленные данные пользователя.
+     * @return обновленный пользователь.
      * @throws NotFoundException пользователь с указанными параметрами отсутствует в базе.
      */
-    public void updateUser(UserEntity user) {
+    public UserEntity updateUser(UserEntity user) {
         UserEntity userBD = findUserByName(user.getUsername());
         if (userBD == null) {
             LOGGER.error("Пользователь с таким Именем отсутствует");
@@ -74,6 +75,6 @@ public class UserService {
             userBD.setPhone(user.getPhone());
         }
 
-        userRepository.save(userBD);
+        return userRepository.save(userBD);
     }
 }

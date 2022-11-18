@@ -2,8 +2,6 @@ package pro.sky.adsplatform.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -112,27 +110,26 @@ public class AuthService {
      *
      * @param oldPassword старый пароль пользователя.
      * @param newPassword новый пароль пользователя.
+     * @throws NotFoundException не удалось верифицировать пользователя: неверный пароль.
      */
     public void changePassword(Authentication authentication, String oldPassword, String newPassword) {
-        String userName = authentication.getName();
-        UserDetails user = manager.loadUserByUsername(userName);
-        String encryptedPassword = user.getPassword();
+        String username = authentication.getName();
+        UserDetails userDetails = manager.loadUserByUsername(username);
+        String encryptedPassword = userDetails.getPassword();
         String prefix = encryptedPassword.substring(0, ENCRYPTION_PREFIX.length());
         String ecryptedPasswordWithoutEncryptionType = encryptedPassword;
         if (prefix.equals(ENCRYPTION_PREFIX)) {
             ecryptedPasswordWithoutEncryptionType = encryptedPassword.substring(ENCRYPTION_PREFIX.length());
         }
-
-        if (encoder.matches(oldPassword, ecryptedPasswordWithoutEncryptionType)) {
-            UserDetails newUser = User.withDefaultPasswordEncoder()
-                    .password(newPassword)
-                    .username(userName)
-                    .roles("USER")
-                    .build();
-            manager.updateUser(newUser);
-        }else {
+        if (!encoder.matches(oldPassword, ecryptedPasswordWithoutEncryptionType)) {
             throw new NotFoundException("Password incorrect");
         }
+
+        manager.updateUser(User.withDefaultPasswordEncoder()
+                .password(newPassword)
+                .username(username)
+                .roles("USER")
+                .build());
     }
 
     /**
