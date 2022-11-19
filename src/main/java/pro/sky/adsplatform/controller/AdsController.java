@@ -89,9 +89,6 @@ public class AdsController {
             @RequestPart("image") MultipartFile file
     ) throws IOException {
         UserEntity user = userService.findUserByName(authentication.getName());
-        if (user == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
 
         AdsEntity ads = createAdsMapper.createAdsDtoToAds(createAdsDto);
         ads.setAuthor(user);
@@ -123,14 +120,9 @@ public class AdsController {
             @RequestBody AdsCommentDto adsCommentDto
     ) {
         UserEntity user = userService.findUserByName(authentication.getName());
-        if (user == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+
 
         AdsEntity ads = adsService.findAds(Long.parseLong(adPk));
-        if (ads == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
 
         AdsCommentEntity adsComment = adsCommentMapper.adsCommentDtoToAdsComment(adsCommentDto);
         adsComment.setAuthor(user);
@@ -154,9 +146,7 @@ public class AdsController {
             @PathVariable("pk") Integer pk
     ) {
         AdsImageEntity adsImage = adsImageService.findImage(Long.valueOf(pk));
-        if (adsImage == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+
 
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.parseMediaType("image/jpeg"));
@@ -185,9 +175,6 @@ public class AdsController {
             @PathVariable("id") Integer id
     ) {
         AdsCommentEntity adsComment = adsCommentService.findAdsComment(id, Long.parseLong(adPk));
-        if (adsComment == null) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
 
         AdsEntity ads = adsService.findAds(Long.parseLong(adPk));
         if (ads == null) {
@@ -217,9 +204,9 @@ public class AdsController {
     @GetMapping("")
     public ResponseEntity<ResponseWrapperAdsDto> getAllAds() {
         List<AdsEntity> adsList = adsService.findAllAds();
-        if (adsList.size() == 0) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+//        if (adsList.size() == 0) {
+//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//        }
         return ResponseEntity.ok(responseWrapperAdsMapper
                 .adsListToResponseWrapperAdsDto(adsList.size(), adsList));
     }
@@ -242,9 +229,7 @@ public class AdsController {
             @PathVariable("id") Integer id
     ) {
         AdsCommentEntity adsComment = adsCommentService.findAdsComment(id, Long.parseLong(adPk));
-        if (adsComment == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+
         return ResponseEntity.ok(adsCommentMapper.adsCommentToAdsCommentDto(adsComment));
     }
 
@@ -264,9 +249,9 @@ public class AdsController {
             @PathVariable("ad_pk") String adPk
     ) {
         List<AdsCommentEntity> adsCommentList = adsCommentService.findAllAdsComments(Long.parseLong(adPk));
-        if (adsCommentList.size() == 0) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+//        if (adsCommentList.size() == 0) {
+//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//        }
         return ResponseEntity.ok(responseWrapperAdsCommentMapper
                 .adsCommentListToResponseWrapperAdsCommentDto(adsCommentList.size(), adsCommentList));
     }
@@ -292,14 +277,11 @@ public class AdsController {
             @RequestParam(required = false) Object principal
     ) {
         UserEntity user = userService.findUserByName(authentication.getName());
-        if (user == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
 
         List<AdsEntity> adsList = adsService.findAllAdsByAuthor(user);
-        if (adsList.size() == 0) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+//        if (adsList.size() == 0) {
+//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//        }
 
         return ResponseEntity.ok(responseWrapperAdsMapper
                 .adsListToResponseWrapperAdsDto(adsList.size(), adsList));
@@ -321,9 +303,7 @@ public class AdsController {
             @PathVariable("id") Integer id
     ) {
         AdsEntity ads = adsService.findAds(id);
-        if (ads == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+
         return ResponseEntity.ok(fullAdsMapper.adsToFullAdsDto(ads));
     }
 
@@ -344,10 +324,7 @@ public class AdsController {
             @Parameter(description = "ID объявления")
             @PathVariable("id") Integer id
     ) {
-        AdsEntity ads = adsService.findAds(id);
-        if (ads == null) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
+        AdsEntity ads = adsService.findAdsContent(id);
 
         if (!authService.hasRole(authentication.getName(), UserEntity.UserRole.ADMIN.name()) &&
                 !authentication.getName().equals(ads.getAuthor().getUsername())) {
@@ -380,10 +357,7 @@ public class AdsController {
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Параметры отзыва")
             @RequestBody AdsCommentDto adsCommentDto
     ) {
-        AdsEntity ads = adsService.findAds(Long.parseLong(adPk));
-        if (ads == null) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
+        AdsEntity ads = adsService.findAdsContent(Long.parseLong(adPk));
 
         if (!authService.hasRole(authentication.getName(), UserEntity.UserRole.ADMIN.name()) &&
                 !authentication.getName().equals(ads.getAuthor().getUsername())) {
@@ -419,10 +393,7 @@ public class AdsController {
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Параметры объявления")
             @RequestBody AdsDto adsDto
     ) {
-        AdsEntity ads = adsService.findAds(id);
-        if (ads == null) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
+        AdsEntity ads = adsService.findAdsContent(id);
 
         String meName = authentication.getName();
         String authorName = ads.getAuthor().getUsername();
@@ -455,9 +426,9 @@ public class AdsController {
             @PathVariable("title") String title
     ) {
         List<AdsEntity> adsList = adsService.findAllAdsByTitleLike(title);
-        if (adsList.size() == 0) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+//        if (adsList.size() == 0) {
+//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//        }
         return ResponseEntity.ok(responseWrapperAdsMapper
                 .adsListToResponseWrapperAdsDto(adsList.size(), adsList));
     }
@@ -481,10 +452,7 @@ public class AdsController {
             @Parameter(description = "Изображение")
             @RequestParam MultipartFile file
     ) throws IOException {
-        AdsEntity ads = adsService.findAds(ad);
-        if (ads == null) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
+        AdsEntity ads = adsService.findAdsContent(ad);
 
         if (!authService.hasRole(authentication.getName(), UserEntity.UserRole.ADMIN.name()) &&
             !authentication.getName().equals(ads.getAuthor().getUsername())) {

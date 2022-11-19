@@ -92,15 +92,15 @@ public class AuthService {
                         .build()
         );
 
-        UserEntity userBD = userRepository.findByUsername(registerReq.getUsername()).orElse(null);
-        if (userBD != null) {
+        UserEntity userBD = userRepository.findByUsername(registerReq.getUsername()).orElseThrow(
+                ()-> new NotFoundException("User not found"));
+
             UserEntity user = registerReqMapper.registerReqDtoToUser(registerReq);
             user.setId(userBD.getId());
             user.setEnabled(userBD.getEnabled());
 //            user.setPassword(userBD.getPassword());
             LOGGER.info("Registered user: {}", user);
             userRepository.save(user);
-        }
 
         return true;
     }

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import pro.sky.adsplatform.entity.AdsEntity;
 import pro.sky.adsplatform.entity.AdsImageEntity;
+import pro.sky.adsplatform.exception.NotFoundException;
 import pro.sky.adsplatform.repository.AdsImageRepository;
 
 import javax.imageio.ImageIO;
@@ -85,6 +86,7 @@ public class AdsImageService {
      * @return изображение. Может вернуть null, если такое изображение отсутствует.
      */
     public AdsImageEntity findImage(Long id) {
-        return adsImageRepository.findById(id).orElse(null);
+        return adsImageRepository.findById(id).orElseThrow(
+                ()-> new NotFoundException("Not found"));
     }
 }

@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import pro.sky.adsplatform.entity.AdsEntity;
 import pro.sky.adsplatform.entity.UserEntity;
+import pro.sky.adsplatform.exception.NoContentException;
 import pro.sky.adsplatform.exception.NotFoundException;
 import pro.sky.adsplatform.repository.AdsRepository;
 
@@ -30,7 +31,12 @@ public class AdsService {
      * @return объявление. Может вернуть null, если такое объявление отсутствует.
      */
     public AdsEntity findAds(long id) {
-        return adsRepository.findById(id).orElse(null);
+        return adsRepository.findById(id).orElseThrow(
+                ()-> new NotFoundException("Not found"));
+    }
+    public AdsEntity findAdsContent(long id) {
+        return adsRepository.findById(id).orElseThrow(
+                ()-> new NoContentException("No content"));
     }
 
     /**
@@ -88,11 +94,7 @@ public class AdsService {
             throw new IllegalArgumentException("Несоответствие значений ID объявления");
         }
 
-        AdsEntity adsBD = findAds(id);
-        if (adsBD == null) {
-            LOGGER.error("Объявление с таким ID отсутствует");
-            throw new NotFoundException("Объявление с таким ID отсутствует");
-        }
+        AdsEntity adsBD = findAdsContent(id);
 
         if (ads.getPrice() != null) {
             adsBD.setPrice(ads.getPrice());

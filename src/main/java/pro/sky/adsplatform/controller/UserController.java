@@ -58,9 +58,9 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<ResponseWrapperUserDto> getUsers() {
         List<UserEntity> userList = userService.findAllUsers();
-        if (userList.size() == 0) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+//        if (userList.size() == 0) {
+//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+//        }
         return ResponseEntity.ok(responseWrapperUserMapper
                 .userListToResponseWrapperUserDto(userList.size(), userList));
     }
@@ -84,10 +84,7 @@ public class UserController {
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Параметры пользователя")
             @RequestBody UserDto userDto
     ) {
-        UserEntity user = userService.findUserByName(authentication.getName());
-        if (user == null) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
+        UserEntity user = userService.findUserByNameContent(authentication.getName());
 
         userDto.setEmail(authentication.getName());
         userDto.setId(Math.toIntExact(user.getId()));
@@ -120,9 +117,6 @@ public class UserController {
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Параметры пароля")
             @RequestBody NewPasswordDto newPasswordDto
     ) {
-        if (authentication == null) {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }
 
         try {
             authService.changePassword(
@@ -157,9 +151,6 @@ public class UserController {
             @PathVariable("id") Integer id
     ) {
         UserEntity user = userService.findUser(id);
-        if (user == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
 
         if (!user.getUsername().equals(authentication.getName())) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);

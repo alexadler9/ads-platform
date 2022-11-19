@@ -4,6 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import pro.sky.adsplatform.entity.AdsCommentEntity;
+import pro.sky.adsplatform.entity.AdsEntity;
+import pro.sky.adsplatform.exception.NoContentException;
 import pro.sky.adsplatform.exception.NotFoundException;
 import pro.sky.adsplatform.repository.AdsCommentRepository;
 
@@ -30,9 +32,9 @@ public class AdsCommentService {
      * @return отзыв. Может вернуть null, если такой отзыв отсутствует.
      */
     public AdsCommentEntity findAdsComment(long id, long idAds) {
-        return adsCommentRepository.findFirstByIdAndAds_Id(id, idAds).orElse(null);
+        return adsCommentRepository.findFirstByIdAndAds_Id(id, idAds).orElseThrow(
+                ()-> new NotFoundException("Not found"));
     }
-
     /**
      * Возвращает все отзывы для объявления.
      *
