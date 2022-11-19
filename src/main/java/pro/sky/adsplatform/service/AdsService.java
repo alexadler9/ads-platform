@@ -96,15 +96,15 @@ public class AdsService {
 
         AdsEntity adsBD = findAdsContent(id);
 
-        if (ads.getPrice() != null) {
+ //       if (ads.getPrice() != null) {
             adsBD.setPrice(ads.getPrice());
-        }
-        if (ads.getTitle() != null) {
+//        }
+ //       if (ads.getTitle() != null) {
             adsBD.setTitle(ads.getTitle());
-        }
-        if (ads.getDescription() != null) {
+   //     }
+ //       if (ads.getDescription() != null) {
             adsBD.setTitle(ads.getDescription());
-        }
+//        }
 
         return adsRepository.save(adsBD);
     }

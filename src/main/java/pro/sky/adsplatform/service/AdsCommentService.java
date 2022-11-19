@@ -32,7 +32,7 @@ public class AdsCommentService {
      * @return отзыв. Может вернуть null, если такой отзыв отсутствует.
      */
     public AdsCommentEntity findAdsComment(long id, long idAds) {
-        return adsCommentRepository.findFirstByIdAndAds_Id(id, idAds).orElseThrow(
+        return adsCommentRepository.findFirstByIdAndAdsId(id, idAds).orElseThrow(
                 ()-> new NotFoundException("Not found"));
     }
     /**
@@ -42,7 +42,7 @@ public class AdsCommentService {
      * @return список всех отзывов для объявления.
      */
     public List<AdsCommentEntity> findAllAdsComments(long idAds) {
-        return adsCommentRepository.findAllByAds_Id(idAds);
+        return adsCommentRepository.findAllByAdsId(idAds);
     }
 
     /**

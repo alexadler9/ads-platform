@@ -47,11 +47,11 @@ public class WebSecurityConfiguration {
                 .authorizeHttpRequests((authz) ->
                         authz
                                 .mvcMatchers(AUTH_WHITELIST).permitAll()
-                                .mvcMatchers("/ads/**", "/users/**").authenticated()
                                 .mvcMatchers("/ads/**", "/users/**").hasAnyRole("ADMIN", "USER")
 
                 )
-                .cors().disable()
+                 //        .cors().disable()
+                .cors(withDefaults())
                 .httpBasic(withDefaults());
 
         return http.build();

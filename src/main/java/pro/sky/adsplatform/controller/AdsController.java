@@ -405,8 +405,8 @@ public class AdsController {
         AdsEntity adsUpdated;
         try {
             adsUpdated = adsService.updateAds(adsMapper.adsDtoToAds(adsDto), id);
-        } catch (IllegalArgumentException | NotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
         return ResponseEntity.ok(adsMapper.adsToAdsDto(adsUpdated));

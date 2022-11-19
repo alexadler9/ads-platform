@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @Repository
 public interface AdsCommentRepository extends JpaRepository<AdsCommentEntity, Long> {
-    Optional<AdsCommentEntity> findFirstByIdAndAds_Id(Long id, Long idAds);
+    Optional<AdsCommentEntity> findFirstByIdAndAdsId(Long id, Long idAds);
 
-    List<AdsCommentEntity> findAllByAds_Id(Long idAds);
+    List<AdsCommentEntity> findAllByAdsId(Long idAds);
 }

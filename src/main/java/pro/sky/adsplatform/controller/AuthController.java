@@ -55,8 +55,8 @@ public class AuthController {
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Параметры регистрации")
             @RequestBody RegisterReqDto registerReqDto
     ) {
-        RoleDto role = (registerReqDto.getRole() == null) ? USER : registerReqDto.getRole();
-        if (authService.register(registerReqDto, role)) {
+ //       RoleDto role = (registerReqDto.getRole() == null) ? USER : registerReqDto.getRole();
+        if (authService.register(registerReqDto, USER)) {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
