@@ -3,7 +3,6 @@ package pro.sky.adsplatform.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 import pro.sky.adsplatform.entity.AdsEntity;
 import pro.sky.adsplatform.entity.UserEntity;
 import pro.sky.adsplatform.exception.NoContentException;
@@ -29,15 +28,24 @@ public class AdsService {
      * Возвращает объявление по указанному ID.
      *
      * @param id ID объявления.
-     * @return объявление. Может вернуть null, если такое объявление отсутствует.
+     * @return объявление.
+     * @throws NotFoundException объявление с указанным ID отсутствует в базе.
      */
     public AdsEntity findAds(long id) {
         return adsRepository.findById(id).orElseThrow(
-                ()-> new NotFoundException("Not found"));
+                () -> new NotFoundException("Ads not found"));
     }
+
+    /**
+     * Возвращает объявление по указанному ID.
+     *
+     * @param id ID объявления.
+     * @return объявление.
+     * @throws NoContentException объявление с указанным ID отсутствует в базе.
+     */
     public AdsEntity findAdsContent(long id) {
         return adsRepository.findById(id).orElseThrow(
-                ()-> new NoContentException("No content"));
+                () -> new NoContentException("No content for ads"));
     }
 
     /**
@@ -81,27 +89,23 @@ public class AdsService {
     }
 
     /**
-     * Обновляет содержание объявления (поля price, title и description).
+     * Обновляет содержание объявления (поля price и title).
      *
      * @param ads обновленные данные объявления.
-     * @param id  ID объявления.
+     * @param id ID объявления.
      * @return обновленное объявление.
-     * @throws IllegalArgumentException несооветствие значений ID entity и аргумента.
-     * @throws NotFoundException        объявление с указанными параметрами отсутствует в базе.
+     * @throws NoContentException несооветствие значений ID entity и аргумента.
+     * @throws NoContentException объявление с указанными параметрами отсутствует в базе.
      */
     public AdsEntity updateAds(AdsEntity ads, long id)  {
         if (ads.getId() != id) {
             LOGGER.error("Несоответствие значений ID объявления");
-            throw new IllegalArgumentException("Несоответствие значений ID объявления");
+            throw new NoContentException("Bad ads ID parameter");
         }
 
         AdsEntity adsBD = findAdsContent(id);
-
         adsBD.setPrice(ads.getPrice());
-
         adsBD.setTitle(ads.getTitle());
-
-        adsBD.setTitle(ads.getDescription());
 
         return adsRepository.save(adsBD);
     }
@@ -109,9 +113,9 @@ public class AdsService {
     /**
      * Удаляет объявление.
      *
-     * @param ads объявление, которое должно быть удалено.
+     * @param id ID объявления, которое должно быть удалено.
      */
-    public void deleteAds(AdsEntity ads) {
-        adsRepository.delete(ads);
+    public void deleteAds(long id) {
+        adsRepository.deleteById(id);
     }
 }

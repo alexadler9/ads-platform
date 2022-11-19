@@ -9,6 +9,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+
 @Component
 @CrossOrigin(value = "http://localhost:3000")
 public class BasicAuthCorsFilter extends OncePerRequestFilter {

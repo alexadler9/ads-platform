@@ -21,10 +21,13 @@ public class AdsEntity {
     @ManyToOne
     @JoinColumn(name = "id_author")
     private UserEntity author;
+
     @NotNull
     private String title;
+
     @NotNull
     private String description;
+
     @NotNull
     private BigDecimal price;
 

@@ -15,7 +15,8 @@ import org.springframework.stereotype.Service;
 import pro.sky.adsplatform.dto.RegisterReqDto;
 import pro.sky.adsplatform.dto.RoleDto;
 import pro.sky.adsplatform.entity.UserEntity;
-import pro.sky.adsplatform.exception.NotFoundException;
+import pro.sky.adsplatform.exception.BadRequestException;
+import pro.sky.adsplatform.exception.ForbiddenException;
 import pro.sky.adsplatform.mapper.RegisterReqMapper;
 import pro.sky.adsplatform.mapper.RegisterReqMapperImpl;
 import pro.sky.adsplatform.repository.UserRepository;
@@ -51,37 +52,40 @@ public class AuthService {
      *
      * @param username имя пользователя.
      * @param password пароль пользователя.
-     * @return true, если пользователь успешно авторизован, иначе false.
+     * @throws ForbiddenException пользователь не зарегистрирован.
+     * @throws ForbiddenException не удалось авторизовать пользователя: неверный пароль.
      */
-    public boolean login(String username, String password) {
+    public void login(String username, String password) {
         if (!manager.userExists(username)) {
-            LOGGER.info("Пользователь с такими данными не зарегистрирован");
-            return false;
+            LOGGER.error("Пользователь с такими данными не зарегистрирован");
+            throw new ForbiddenException("User is not registered");
         }
 
         UserDetails userDetails = manager.loadUserByUsername(username);
-
         String encryptedPassword = userDetails.getPassword();
         String prefix = encryptedPassword.substring(0, ENCRYPTION_PREFIX.length());
         String ecryptedPasswordWithoutEncryptionType = encryptedPassword;
         if (prefix.equals(ENCRYPTION_PREFIX)) {
             ecryptedPasswordWithoutEncryptionType = encryptedPassword.substring(ENCRYPTION_PREFIX.length());
         }
-
-        return encoder.matches(password, ecryptedPasswordWithoutEncryptionType);
+        if (!encoder.matches(password, ecryptedPasswordWithoutEncryptionType)) {
+            LOGGER.error("Не удалось авторизовать пользователя: неверный пароль");
+            throw new ForbiddenException("User authorization failed: invalid password");
+        }
     }
 
     /**
      * Регистрирует нового пользователя.
      *
      * @param registerReq данные для регистрации пользователя.
-     * @param role        роль пользователя.
-     * @return true, если пользователь успешно зарегистрирован, иначе false.
+     * @param role роль пользователя.
+     * @throws BadRequestException пользователь уже зарегистрирован.
+     * @throws BadRequestException пользователь отсутствует в базе данных после регистрации.
      */
-    public boolean register(RegisterReqDto registerReq, RoleDto role) {
+    public void register(RegisterReqDto registerReq, RoleDto role) {
         if (manager.userExists(registerReq.getUsername())) {
-            LOGGER.info("Пользователь с такими данными уже зарегистрирован");
-            return false;
+            LOGGER.error("Пользователь с такими данными уже зарегистрирован");
+            throw new BadRequestException("User is already registered");
         }
 
         manager.createUser(
@@ -93,16 +97,13 @@ public class AuthService {
         );
 
         UserEntity userBD = userRepository.findByUsername(registerReq.getUsername()).orElseThrow(
-                ()-> new NotFoundException("User not found"));
+                ()-> new BadRequestException("User not found"));
 
-            UserEntity user = registerReqMapper.registerReqDtoToUser(registerReq);
-            user.setId(userBD.getId());
-            user.setEnabled(userBD.getEnabled());
-            user.setPassword(userBD.getPassword());
-            LOGGER.info("Registered user: {}", user);
-            userRepository.save(user);
-
-        return true;
+        UserEntity user = registerReqMapper.registerReqDtoToUser(registerReq);
+        user.setId(userBD.getId());
+        user.setEnabled(userBD.getEnabled());
+        user.setPassword(userBD.getPassword());
+        userRepository.save(user);
     }
 
     /**
@@ -110,7 +111,7 @@ public class AuthService {
      *
      * @param oldPassword старый пароль пользователя.
      * @param newPassword новый пароль пользователя.
-     * @throws NotFoundException не удалось верифицировать пользователя: неверный пароль.
+     * @throws ForbiddenException не удалось верифицировать пользователя: неверный пароль.
      */
     public void changePassword(Authentication authentication, String oldPassword, String newPassword) {
         String username = authentication.getName();
@@ -122,7 +123,8 @@ public class AuthService {
             ecryptedPasswordWithoutEncryptionType = encryptedPassword.substring(ENCRYPTION_PREFIX.length());
         }
         if (!encoder.matches(oldPassword, ecryptedPasswordWithoutEncryptionType)) {
-            throw new NotFoundException("Password incorrect");
+            LOGGER.error("Не удалось верифицировать пользователя: неверный пароль");
+            throw new ForbiddenException("User verification failed: invalid password");
         }
 
         manager.updateUser(User.withDefaultPasswordEncoder()
@@ -136,7 +138,7 @@ public class AuthService {
      * Определяет, относится ли пользователь к указанной роли.
      *
      * @param username имя пользователя.
-     * @param role     роль.
+     * @param role роль.
      * @return true, если пользователь относится к указанной роли, иначе false.
      */
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")

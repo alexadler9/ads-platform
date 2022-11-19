@@ -3,6 +3,7 @@ package pro.sky.adsplatform.entity;
 import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -27,6 +28,7 @@ public class AdsCommentEntity {
     private LocalDateTime dateTime;
 
     @Column(name = "comment_text")
+    @NotNull
     private String text;
 
     public AdsCommentEntity() {

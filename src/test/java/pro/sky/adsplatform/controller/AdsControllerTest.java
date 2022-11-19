@@ -237,16 +237,6 @@ class AdsControllerTest {
     }
 
     @Test
-    void shouldReturnNotFoundWhenGetAllAds() throws Exception {
-        final List<AdsEntity> adsList = new ArrayList<>();
-
-        when(adsRepository.findAll()).thenReturn(adsList);
-
-        mockMvc.perform(get("http://localhost:3000/ads"))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
     @WithMockUser(username = SECURITY_USER_NAME, password = SECURITY_USER_PASSWORD, roles = SECURITY_USER_ROLE)
     void shouldReturnOkWhenGetAllAdsForMe() throws Exception {
         final List<AdsEntity> adsList = new ArrayList<>();
@@ -284,18 +274,6 @@ class AdsControllerTest {
         adsList.add(ADS);
 
         when(userRepository.findByUsername(any(String.class))).thenReturn(Optional.empty());
-        when(adsRepository.findAllByAuthor(any(UserEntity.class))).thenReturn(adsList);
-
-        mockMvc.perform(get("http://localhost:3000/ads/me"))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    @WithMockUser(username = SECURITY_USER_NAME, password = SECURITY_USER_PASSWORD, roles = SECURITY_USER_ROLE)
-    void shouldReturnNotFoundWhenGetAllAdsForMe() throws Exception {
-        final List<AdsEntity> adsList = new ArrayList<>();
-
-        when(userRepository.findByUsername(any(String.class))).thenReturn(Optional.of(USER));
         when(adsRepository.findAllByAuthor(any(UserEntity.class))).thenReturn(adsList);
 
         mockMvc.perform(get("http://localhost:3000/ads/me"))
@@ -347,17 +325,6 @@ class AdsControllerTest {
                 .andExpect(jsonPath("$.results[0].pk").value(ADS_DTO.getPk()))
                 .andExpect(jsonPath("$.results[0].price").value(ADS_DTO.getPrice()))
                 .andExpect(jsonPath("$.results[0].title").value(ADS_DTO.getTitle()));
-    }
-
-    @Test
-    void shouldReturnNotFoundWhenGetAdsByTitle() throws Exception {
-        final String title = "title";
-        final List<AdsEntity> adsList = new ArrayList<>();
-
-        when(adsRepository.findAllByTitleLikeIgnoreCase(any(String.class))).thenReturn(adsList);
-
-        mockMvc.perform(get("http://localhost:3000/ads/search{title}", title))
-                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -614,7 +581,7 @@ class AdsControllerTest {
         final Long id = 1L;
 
         when(adsRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(ADS));
-        when(adsCommentRepository.findFirstByIdAndAds_Id(any(Long.class), any(Long.class))).thenReturn(Optional.of(ADS_COMMENT));
+        when(adsCommentRepository.findFirstByIdAndAdsId(any(Long.class), any(Long.class))).thenReturn(Optional.of(ADS_COMMENT));
         when(adsCommentRepository.save(any(AdsCommentEntity.class))).thenReturn(ADS_COMMENT);
 
         mockMvc.perform(patch("http://localhost:3000/ads/{ad_pk}/comment/{id}", adPk, id)
@@ -636,7 +603,7 @@ class AdsControllerTest {
         final Long id = 1L;
 
         when(adsRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(ADS));
-        when(adsCommentRepository.findFirstByIdAndAds_Id(any(Long.class), any(Long.class))).thenReturn(Optional.of(ADS_COMMENT));
+        when(adsCommentRepository.findFirstByIdAndAdsId(any(Long.class), any(Long.class))).thenReturn(Optional.of(ADS_COMMENT));
         when(adsCommentRepository.save(any(AdsCommentEntity.class))).thenReturn(ADS_COMMENT);
 
         mockMvc.perform(patch("http://localhost:3000/ads/{ad_pk}/comment/{id}", adPk, id)
@@ -657,7 +624,7 @@ class AdsControllerTest {
         final Long id = 1L;
 
         when(adsRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(ADS));
-        when(adsCommentRepository.findFirstByIdAndAds_Id(any(Long.class), any(Long.class))).thenReturn(Optional.of(ADS_COMMENT));
+        when(adsCommentRepository.findFirstByIdAndAdsId(any(Long.class), any(Long.class))).thenReturn(Optional.of(ADS_COMMENT));
         when(adsCommentRepository.save(any(AdsCommentEntity.class))).thenReturn(ADS_COMMENT);
 
         mockMvc.perform(patch("http://localhost:3000/ads/{ad_pk}/comment/{id}", adPk, id)
@@ -673,7 +640,7 @@ class AdsControllerTest {
         final Long id = 1L;
 
         when(adsRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(ADS));
-        when(adsCommentRepository.findFirstByIdAndAds_Id(any(Long.class), any(Long.class))).thenReturn(Optional.of(ADS_COMMENT));
+        when(adsCommentRepository.findFirstByIdAndAdsId(any(Long.class), any(Long.class))).thenReturn(Optional.of(ADS_COMMENT));
         when(adsCommentRepository.save(any(AdsCommentEntity.class))).thenReturn(ADS_COMMENT);
 
         mockMvc.perform(patch("http://localhost:3000/ads/{ad_pk}/comment/{id}", adPk, id)
@@ -690,7 +657,7 @@ class AdsControllerTest {
         final Long id = 1L;
 
         when(adsRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
-        when(adsCommentRepository.findFirstByIdAndAds_Id(any(Long.class), any(Long.class))).thenReturn(Optional.of(ADS_COMMENT));
+        when(adsCommentRepository.findFirstByIdAndAdsId(any(Long.class), any(Long.class))).thenReturn(Optional.of(ADS_COMMENT));
         when(adsCommentRepository.save(any(AdsCommentEntity.class))).thenReturn(ADS_COMMENT);
 
         mockMvc.perform(patch("http://localhost:3000/ads/{ad_pk}/comment/{id}", adPk, id)
@@ -707,7 +674,7 @@ class AdsControllerTest {
         final Long id = 1L;
 
         when(adsRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(ADS));
-        when(adsCommentRepository.findFirstByIdAndAds_Id(any(Long.class), any(Long.class))).thenReturn(Optional.empty());
+        when(adsCommentRepository.findFirstByIdAndAdsId(any(Long.class), any(Long.class))).thenReturn(Optional.empty());
         when(adsCommentRepository.save(any(AdsCommentEntity.class))).thenReturn(ADS_COMMENT);
 
         mockMvc.perform(patch("http://localhost:3000/ads/{ad_pk}/comment/{id}", adPk, id)
@@ -724,7 +691,7 @@ class AdsControllerTest {
         final Long id = 1L;
 
         when(adsRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(ADS));
-        when(adsCommentRepository.findFirstByIdAndAds_Id(any(Long.class), any(Long.class))).thenReturn(Optional.of(ADS_COMMENT));
+        when(adsCommentRepository.findFirstByIdAndAdsId(any(Long.class), any(Long.class))).thenReturn(Optional.of(ADS_COMMENT));
         doNothing().when(adsCommentRepository).delete(any(AdsCommentEntity.class));
 
         mockMvc.perform(delete("http://localhost:3000/ads/{ad_pk}/comment/{id}", adPk, id))
@@ -738,7 +705,7 @@ class AdsControllerTest {
         final Long id = 1L;
 
         when(adsRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(ADS));
-        when(adsCommentRepository.findFirstByIdAndAds_Id(any(Long.class), any(Long.class))).thenReturn(Optional.of(ADS_COMMENT));
+        when(adsCommentRepository.findFirstByIdAndAdsId(any(Long.class), any(Long.class))).thenReturn(Optional.of(ADS_COMMENT));
         doNothing().when(adsCommentRepository).delete(any(AdsCommentEntity.class));
 
         mockMvc.perform(delete("http://localhost:3000/ads/{ad_pk}/comment/{id}", adPk, id))
@@ -752,7 +719,7 @@ class AdsControllerTest {
         final Long id = 1L;
 
         when(adsRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(ADS));
-        when(adsCommentRepository.findFirstByIdAndAds_Id(any(Long.class), any(Long.class))).thenReturn(Optional.of(ADS_COMMENT));
+        when(adsCommentRepository.findFirstByIdAndAdsId(any(Long.class), any(Long.class))).thenReturn(Optional.of(ADS_COMMENT));
         doNothing().when(adsCommentRepository).delete(any(AdsCommentEntity.class));
 
         mockMvc.perform(delete("http://localhost:3000/ads/{ad_pk}/comment/{id}", adPk, id))
@@ -765,7 +732,7 @@ class AdsControllerTest {
         final Long id = 1L;
 
         when(adsRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(ADS));
-        when(adsCommentRepository.findFirstByIdAndAds_Id(any(Long.class), any(Long.class))).thenReturn(Optional.of(ADS_COMMENT));
+        when(adsCommentRepository.findFirstByIdAndAdsId(any(Long.class), any(Long.class))).thenReturn(Optional.of(ADS_COMMENT));
         doNothing().when(adsCommentRepository).delete(any(AdsCommentEntity.class));
 
         mockMvc.perform(delete("http://localhost:3000/ads/{ad_pk}/comment/{id}", adPk, id))
@@ -779,21 +746,7 @@ class AdsControllerTest {
         final Long id = 1L;
 
         when(adsRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
-        when(adsCommentRepository.findFirstByIdAndAds_Id(any(Long.class), any(Long.class))).thenReturn(Optional.of(ADS_COMMENT));
-        doNothing().when(adsCommentRepository).delete(any(AdsCommentEntity.class));
-
-        mockMvc.perform(delete("http://localhost:3000/ads/{ad_pk}/comment/{id}", adPk, id))
-                .andExpect(status().isNoContent());
-    }
-
-    @Test
-    @WithMockUser(username = SECURITY_USER_NAME, password = SECURITY_USER_PASSWORD, roles = SECURITY_USER_ROLE)
-    void shouldReturnNoContentWhenDeleteCommentForMissingComment() throws Exception {
-        final Long adPk = 1L;
-        final Long id = 1L;
-
-        when(adsRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(ADS));
-        when(adsCommentRepository.findFirstByIdAndAds_Id(any(Long.class), any(Long.class))).thenReturn(Optional.empty());
+        when(adsCommentRepository.findFirstByIdAndAdsId(any(Long.class), any(Long.class))).thenReturn(Optional.of(ADS_COMMENT));
         doNothing().when(adsCommentRepository).delete(any(AdsCommentEntity.class));
 
         mockMvc.perform(delete("http://localhost:3000/ads/{ad_pk}/comment/{id}", adPk, id))
@@ -806,7 +759,7 @@ class AdsControllerTest {
         final Long adPk = 1L;
         final Long id = 1L;
 
-        when(adsCommentRepository.findFirstByIdAndAds_Id(any(Long.class), any(Long.class))).thenReturn(Optional.of(ADS_COMMENT));
+        when(adsCommentRepository.findFirstByIdAndAdsId(any(Long.class), any(Long.class))).thenReturn(Optional.of(ADS_COMMENT));
 
         mockMvc.perform(get("http://localhost:3000/ads/{ad_pk}/comment/{id}", adPk, id))
                 .andExpect(status().isOk())
@@ -821,7 +774,7 @@ class AdsControllerTest {
         final Long adPk = 1L;
         final Long id = 1L;
 
-        when(adsCommentRepository.findFirstByIdAndAds_Id(any(Long.class), any(Long.class))).thenReturn(Optional.empty());
+        when(adsCommentRepository.findFirstByIdAndAdsId(any(Long.class), any(Long.class))).thenReturn(Optional.empty());
 
         mockMvc.perform(get("http://localhost:3000/ads/{ad_pk}/comment/{id}", adPk, id))
                 .andExpect(status().isNotFound());
@@ -834,7 +787,7 @@ class AdsControllerTest {
         final List<AdsCommentEntity> adsCommentList = new ArrayList<>();
         adsCommentList.add(ADS_COMMENT);
 
-        when(adsCommentRepository.findAllByAds_Id(any(Long.class))).thenReturn(adsCommentList);
+        when(adsCommentRepository.findAllByAdsId(any(Long.class))).thenReturn(adsCommentList);
 
         mockMvc.perform(get("http://localhost:3000/ads/{ad_pk}/comment", adPk))
                 .andExpect(status().isOk())
@@ -843,16 +796,5 @@ class AdsControllerTest {
                 .andExpect(jsonPath("$.results[0].text").value(ADS_COMMENT_DTO.getText()))
                 .andExpect(jsonPath("$.results[0].author").value(ADS_COMMENT_DTO.getAuthor()))
                 .andExpect(jsonPath("$.results[0].createdAt").value(ADS_COMMENT_DTO.getCreatedAt().format(dateTimeFormatter)));
-    }
-
-    @Test
-    void shouldReturnNotFoundWhenGetAllComments() throws Exception {
-        final Long adPk = 1L;
-        final List<AdsCommentEntity> adsCommentList = new ArrayList<>();
-
-        when(adsCommentRepository.findAllByAds_Id(any(Long.class))).thenReturn(adsCommentList);
-
-        mockMvc.perform(get("http://localhost:3000/ads/{ad_pk}/comment", adPk))
-                .andExpect(status().isNotFound());
     }
 }

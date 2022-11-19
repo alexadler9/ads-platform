@@ -83,10 +83,11 @@ public class AdsImageService {
      * Возвращает изображение по указанному ID.
      *
      * @param id ID изображения.
-     * @return изображение. Может вернуть null, если такое изображение отсутствует.
+     * @return изображение.
+     * @throws NotFoundException изображение с указанным ID отсутствует в базе.
      */
     public AdsImageEntity findImage(Long id) {
         return adsImageRepository.findById(id).orElseThrow(
-                ()-> new NotFoundException("Not found"));
+                () -> new NotFoundException("Image not found"));
     }
 }

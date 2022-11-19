@@ -48,9 +48,7 @@ public class WebSecurityConfiguration {
                         authz
                                 .mvcMatchers(AUTH_WHITELIST).permitAll()
                                 .mvcMatchers("/ads/**", "/users/**").hasAnyRole("ADMIN", "USER")
-
                 )
-
                 .cors(withDefaults())
                 .httpBasic(withDefaults());
 

@@ -1,6 +1,5 @@
 package pro.sky.adsplatform.entity;
 
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.*;
@@ -22,7 +21,6 @@ public class UserEntity {
     private Long id;
 
     @Column(name = "first_name")
-
     @NotNull
     private String firstName;
 

@@ -19,7 +19,6 @@ import pro.sky.adsplatform.entity.AdsCommentEntity;
 import pro.sky.adsplatform.entity.AdsEntity;
 import pro.sky.adsplatform.entity.AdsImageEntity;
 import pro.sky.adsplatform.entity.UserEntity;
-import pro.sky.adsplatform.exception.NotFoundException;
 import pro.sky.adsplatform.mapper.*;
 import pro.sky.adsplatform.service.*;
 
@@ -88,15 +87,17 @@ public class AdsController {
             @Parameter(description = "Изображение")
             @RequestPart("image") MultipartFile file
     ) throws IOException {
-        UserEntity user = userService.findUserByName(authentication.getName());
+        LOGGER.info("Добавление объявления: {}", createAdsDto);
 
+        UserEntity author = userService.findUserByName(authentication.getName());
         AdsEntity ads = createAdsMapper.createAdsDtoToAds(createAdsDto);
-        ads.setAuthor(user);
+        ads.setAuthor(author);
         AdsEntity adsCreated = adsService.createAds(ads);
 
         String imageId = adsImageService.createImage(adsCreated, file);
         AdsDto adsDto = adsMapper.adsToAdsDto(adsCreated);
         adsDto.setImage("ads/image/" + imageId);
+
         return ResponseEntity.ok(adsDto);
     }
 
@@ -119,13 +120,12 @@ public class AdsController {
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Параметры отзыва")
             @RequestBody AdsCommentDto adsCommentDto
     ) {
-        UserEntity user = userService.findUserByName(authentication.getName());
+        LOGGER.info("Добавление отзыва: {}", adsCommentDto);
 
-
+        UserEntity author = userService.findUserByName(authentication.getName());
         AdsEntity ads = adsService.findAds(Long.parseLong(adPk));
-
         AdsCommentEntity adsComment = adsCommentMapper.adsCommentDtoToAdsComment(adsCommentDto);
-        adsComment.setAuthor(user);
+        adsComment.setAuthor(author);
         adsComment.setAds(ads);
         AdsCommentEntity adsCommentCreated = adsCommentService.createAdsComment(adsComment);
 
@@ -145,8 +145,9 @@ public class AdsController {
             @Parameter(description = "ID изображения")
             @PathVariable("pk") Integer pk
     ) {
-        AdsImageEntity adsImage = adsImageService.findImage(Long.valueOf(pk));
+        LOGGER.info("Получение изображения {}", pk);
 
+        AdsImageEntity adsImage = adsImageService.findImage(Long.valueOf(pk));
 
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.parseMediaType("image/jpeg"));
@@ -160,7 +161,7 @@ public class AdsController {
             tags = {"Объявления"},
             responses = {
                     @ApiResponse(responseCode = "200", description = "Отзыв успешно удален"),
-                    @ApiResponse(responseCode = "204", description = "Отзыв и/или объявление не найдены"),
+                    @ApiResponse(responseCode = "204", description = "Объявление не найдено"),
                     @ApiResponse(responseCode = "401", description = "Требуется авторизация"),
                     @ApiResponse(responseCode = "403", description = "Доступ запрещен")
             }
@@ -174,19 +175,15 @@ public class AdsController {
             @Parameter(description = "ID отзыва")
             @PathVariable("id") Integer id
     ) {
-        AdsCommentEntity adsComment = adsCommentService.findAdsComment(id, Long.parseLong(adPk));
+        LOGGER.info("Удаление отзыва {}", id);
 
-        AdsEntity ads = adsService.findAds(Long.parseLong(adPk));
-        if (ads == null) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-
+        UserEntity author = adsService.findAdsContent(Long.parseLong(adPk)).getAuthor();
         if (!authService.hasRole(authentication.getName(), UserEntity.UserRole.ADMIN.name()) &&
-                !authentication.getName().equals(ads.getAuthor().getUsername())) {
+                !authentication.getName().equals(author.getUsername())) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
-        adsCommentService.deleteAdsComment(adsComment);
+        adsCommentService.deleteAdsComment(id);
 
         return ResponseEntity.ok(null);
     }
@@ -197,12 +194,13 @@ public class AdsController {
             responses = {
                     @ApiResponse(responseCode = "200", description = "Список успешно получен"),
                     @ApiResponse(responseCode = "401", description = "Требуется авторизация"),
-                    @ApiResponse(responseCode = "403", description = "Доступ запрещен"),
-                    @ApiResponse(responseCode = "404", description = "Список пуст")
+                    @ApiResponse(responseCode = "403", description = "Доступ запрещен")
             }
     )
     @GetMapping("")
     public ResponseEntity<ResponseWrapperAdsDto> getAllAds() {
+        LOGGER.info("Получение списка объявлений");
+
         List<AdsEntity> adsList = adsService.findAllAds();
 
         return ResponseEntity.ok(responseWrapperAdsMapper
@@ -226,6 +224,8 @@ public class AdsController {
             @Parameter(description = "ID отзыва")
             @PathVariable("id") Integer id
     ) {
+        LOGGER.info("Получение отзыва {}", id);
+
         AdsCommentEntity adsComment = adsCommentService.findAdsComment(id, Long.parseLong(adPk));
 
         return ResponseEntity.ok(adsCommentMapper.adsCommentToAdsCommentDto(adsComment));
@@ -237,8 +237,7 @@ public class AdsController {
             responses = {
                     @ApiResponse(responseCode = "200", description = "Список успешно получен"),
                     @ApiResponse(responseCode = "401", description = "Требуется авторизация"),
-                    @ApiResponse(responseCode = "403", description = "Доступ запрещен"),
-                    @ApiResponse(responseCode = "404", description = "Список пуст")
+                    @ApiResponse(responseCode = "403", description = "Доступ запрещен")
             }
     )
     @GetMapping("{ad_pk}/comment")
@@ -246,6 +245,8 @@ public class AdsController {
             @Parameter(description = "ID объявления")
             @PathVariable("ad_pk") String adPk
     ) {
+        LOGGER.info("Получение списка отзывов для объявления {}", adPk);
+
         List<AdsCommentEntity> adsCommentList = adsCommentService.findAllAdsComments(Long.parseLong(adPk));
 
         return ResponseEntity.ok(responseWrapperAdsCommentMapper
@@ -253,13 +254,13 @@ public class AdsController {
     }
 
     @Operation(
-            summary = "Получить список объявлений пользователя",
+            summary = "Получить список объявлений авторизованного пользователя",
             tags = {"Объявления"},
             responses = {
                     @ApiResponse(responseCode = "200", description = "Список успешно получен"),
                     @ApiResponse(responseCode = "401", description = "Требуется авторизация"),
                     @ApiResponse(responseCode = "403", description = "Доступ запрещен"),
-                    @ApiResponse(responseCode = "404", description = "Список пуст")
+                    @ApiResponse(responseCode = "404", description = "Пользователь не найден")
             }
     )
     @PreAuthorize("hasAuthority('ROLE_USER')")
@@ -272,10 +273,10 @@ public class AdsController {
             @RequestParam(required = false) Object details,
             @RequestParam(required = false) Object principal
     ) {
+        LOGGER.info("Получение списка объявлений авторизованного пользователя");
+
         UserEntity user = userService.findUserByName(authentication.getName());
-
         List<AdsEntity> adsList = adsService.findAllAdsByAuthor(user);
-
 
         return ResponseEntity.ok(responseWrapperAdsMapper
                 .adsListToResponseWrapperAdsDto(adsList.size(), adsList));
@@ -296,6 +297,8 @@ public class AdsController {
             @Parameter(description = "ID объявления")
             @PathVariable("id") Integer id
     ) {
+        LOGGER.info("Получение объявления {}", id);
+
         AdsEntity ads = adsService.findAds(id);
 
         return ResponseEntity.ok(fullAdsMapper.adsToFullAdsDto(ads));
@@ -318,14 +321,15 @@ public class AdsController {
             @Parameter(description = "ID объявления")
             @PathVariable("id") Integer id
     ) {
-        AdsEntity ads = adsService.findAdsContent(id);
+        LOGGER.info("Удаление объявления {}", id);
 
+        UserEntity author = adsService.findAdsContent(id).getAuthor();
         if (!authService.hasRole(authentication.getName(), UserEntity.UserRole.ADMIN.name()) &&
-                !authentication.getName().equals(ads.getAuthor().getUsername())) {
+                !authentication.getName().equals(author.getUsername())) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
-        adsService.deleteAds(ads);
+        adsService.deleteAds(id);
 
         return ResponseEntity.ok(null);
     }
@@ -351,19 +355,18 @@ public class AdsController {
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Параметры отзыва")
             @RequestBody AdsCommentDto adsCommentDto
     ) {
+        LOGGER.info("Обновление отзыва {} : {}", id, adsCommentDto);
+
         AdsEntity ads = adsService.findAdsContent(Long.parseLong(adPk));
 
+        UserEntity author = ads.getAuthor();
         if (!authService.hasRole(authentication.getName(), UserEntity.UserRole.ADMIN.name()) &&
-                !authentication.getName().equals(ads.getAuthor().getUsername())) {
+                !authentication.getName().equals(author.getUsername())) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
-        AdsCommentEntity adsCommentUpdated;
-        try {
-            adsCommentUpdated = adsCommentService.updateAdsComment(adsCommentMapper.adsCommentDtoToAdsComment(adsCommentDto), id, Long.parseLong(adPk));
-        } catch (IllegalArgumentException | NotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
+        AdsCommentEntity adsCommentUpdated = adsCommentService
+                .updateAdsComment(adsCommentMapper.adsCommentDtoToAdsComment(adsCommentDto), id, Long.parseLong(adPk));
 
         return ResponseEntity.ok(adsCommentMapper.adsCommentToAdsCommentDto(adsCommentUpdated));
     }
@@ -387,22 +390,17 @@ public class AdsController {
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Параметры объявления")
             @RequestBody AdsDto adsDto
     )  {
+        LOGGER.info("Обновление объявления {} : {}", id, adsDto);
+
         AdsEntity ads = adsService.findAdsContent(id);
 
-        String meName = authentication.getName();
-        String authorName = ads.getAuthor().getUsername();
-        if (!authService.hasRole(meName, UserEntity.UserRole.ADMIN.name()) &&
-            !meName.equals(authorName)) {
+        UserEntity author = ads.getAuthor();
+        if (!authService.hasRole(authentication.getName(), UserEntity.UserRole.ADMIN.name()) &&
+                !authentication.getName().equals(author.getUsername())) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
-        AdsEntity adsUpdated;
-
-        try {
-            adsUpdated = adsService.updateAds(adsMapper.adsDtoToAds(adsDto), id);
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+        AdsEntity adsUpdated = adsService.updateAds(adsMapper.adsDtoToAds(adsDto), id);
 
         return ResponseEntity.ok(adsMapper.adsToAdsDto(adsUpdated));
     }
@@ -411,8 +409,7 @@ public class AdsController {
             summary = "Получить список объявлений, совпадающих с шаблоном",
             tags = {"Объявления"},
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Список успешно получен"),
-                    @ApiResponse(responseCode = "404", description = "Список пуст")
+                    @ApiResponse(responseCode = "200", description = "Список успешно получен")
             }
     )
     @GetMapping("search{title}")
@@ -420,6 +417,8 @@ public class AdsController {
             @Parameter(description = "Шаблон")
             @PathVariable("title") String title
     ) {
+        LOGGER.info("Получение списка объявлений, совпадающих с шаблоном {}", title);
+
         List<AdsEntity> adsList = adsService.findAllAdsByTitleLike(title);
 
         return ResponseEntity.ok(responseWrapperAdsMapper
@@ -445,10 +444,13 @@ public class AdsController {
             @Parameter(description = "Изображение")
             @RequestParam MultipartFile file
     ) throws IOException {
+        LOGGER.info("Добавление изображения для объявления {}", ad);
+
         AdsEntity ads = adsService.findAdsContent(ad);
 
+        UserEntity author = ads.getAuthor();
         if (!authService.hasRole(authentication.getName(), UserEntity.UserRole.ADMIN.name()) &&
-            !authentication.getName().equals(ads.getAuthor().getUsername())) {
+                !authentication.getName().equals(author.getUsername())) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 

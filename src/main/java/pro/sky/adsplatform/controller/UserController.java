@@ -12,7 +12,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import pro.sky.adsplatform.dto.*;
 import pro.sky.adsplatform.entity.UserEntity;
-import pro.sky.adsplatform.exception.NotFoundException;
 import pro.sky.adsplatform.mapper.ResponseWrapperUserMapper;
 import pro.sky.adsplatform.mapper.UserMapper;
 import pro.sky.adsplatform.service.AuthService;
@@ -51,12 +50,13 @@ public class UserController {
             responses = {
                     @ApiResponse(responseCode = "200", description = "Список успешно получен"),
                     @ApiResponse(responseCode = "401", description = "Требуется авторизация"),
-                    @ApiResponse(responseCode = "403", description = "Доступ запрещен"),
-                    @ApiResponse(responseCode = "404", description = "Список пуст")
+                    @ApiResponse(responseCode = "403", description = "Доступ запрещен")
             }
     )
     @GetMapping("/me")
     public ResponseEntity<ResponseWrapperUserDto> getUsers() {
+        LOGGER.info("Получение списка пользователей");
+
         List<UserEntity> userList = userService.findAllUsers();
 
         return ResponseEntity.ok(responseWrapperUserMapper
@@ -82,17 +82,13 @@ public class UserController {
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Параметры пользователя")
             @RequestBody UserDto userDto
     ) {
-        UserEntity user = userService.findUserByNameContent(authentication.getName());
+        LOGGER.info("Обновление данных пользователя: {}", userDto);
 
+        UserEntity user = userService.findUserContentByName(authentication.getName());
         userDto.setEmail(authentication.getName());
         userDto.setId(Math.toIntExact(user.getId()));
 
-        UserEntity userUpdated;
-        try {
-            userUpdated = userService.updateUser(userMapper.userDtoToUser(userDto));
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+        UserEntity userUpdated = userService.updateUser(userMapper.userDtoToUser(userDto));
 
         return ResponseEntity.ok(userMapper.userToUserDto(userUpdated));
     }
@@ -115,16 +111,13 @@ public class UserController {
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Параметры пароля")
             @RequestBody NewPasswordDto newPasswordDto
     ) {
+        LOGGER.info("Обновление пароля пользователя: {}", newPasswordDto);
 
-        try {
-            authService.changePassword(
-                    authentication,
-                    newPasswordDto.getCurrentPassword(),
-                    newPasswordDto.getNewPassword()
-            );
-        } catch (NotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        }
+        authService.changePassword(
+                authentication,
+                newPasswordDto.getCurrentPassword(),
+                newPasswordDto.getNewPassword()
+        );
 
         return ResponseEntity.ok(newPasswordDto);
     }
@@ -148,8 +141,9 @@ public class UserController {
             @Parameter(description = "ID пользователя")
             @PathVariable("id") Integer id
     ) {
-        UserEntity user = userService.findUser(id);
+        LOGGER.info("Получение данных пользователя {}", id);
 
+        UserEntity user = userService.findUser(id);
         if (!user.getUsername().equals(authentication.getName())) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }

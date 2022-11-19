@@ -4,14 +4,14 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import pro.sky.adsplatform.dto.LoginReqDto;
 import pro.sky.adsplatform.dto.RegisterReqDto;
-import pro.sky.adsplatform.dto.RoleDto;
 import pro.sky.adsplatform.service.AuthService;
 
 import static pro.sky.adsplatform.dto.RoleDto.USER;
@@ -21,6 +21,8 @@ import static pro.sky.adsplatform.dto.RoleDto.USER;
 @RestController
 @RequiredArgsConstructor
 public class AuthController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthController.class);
+
     private final AuthService authService;
 
     @Operation(
@@ -36,10 +38,11 @@ public class AuthController {
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Параметры авторизации")
             @RequestBody LoginReqDto loginReqDto
     ) {
-        if (authService.login(loginReqDto.getUsername(), loginReqDto.getPassword())) {
-            return ResponseEntity.ok().build();
-        }
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        LOGGER.info("Авторизация пользователя: {}", loginReqDto);
+
+        authService.login(loginReqDto.getUsername(), loginReqDto.getPassword());
+
+        return ResponseEntity.ok().build();
     }
 
     @Operation(
@@ -55,11 +58,11 @@ public class AuthController {
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Параметры регистрации")
             @RequestBody RegisterReqDto registerReqDto
     ) {
+        LOGGER.info("Регистрация пользователя: {}", registerReqDto);
 
-        if (authService.register(registerReqDto, USER)) {
-            return ResponseEntity.ok().build();
-        }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        authService.register(registerReqDto, USER);
+
+        return ResponseEntity.ok().build();
     }
 
     @Operation(
@@ -72,7 +75,8 @@ public class AuthController {
     @PreAuthorize("hasAuthority('ROLE_USER')")
     @GetMapping("/meuser")
     public ResponseEntity<?> meUser(Authentication authentication) {
-        String au = authentication.getName();
+        LOGGER.info("Endpoint meUser() is called");
+
         return ResponseEntity.ok(authentication);
     }
 }

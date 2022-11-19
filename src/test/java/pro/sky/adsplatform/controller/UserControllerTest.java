@@ -78,17 +78,6 @@ class UserControllerTest {
 
     @Test
     @WithMockUser(username = SECURITY_USER_NAME, password = SECURITY_USER_PASSWORD, roles = SECURITY_USER_ROLE)
-    void shouldReturnNotFoundWhenGetAllUsers() throws Exception {
-        final List<UserEntity> userList = new ArrayList<>();
-
-        when(userRepository.findAll()).thenReturn(userList);
-
-        mockMvc.perform(get("http://localhost:3000/users/me"))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    @WithMockUser(username = SECURITY_USER_NAME, password = SECURITY_USER_PASSWORD, roles = SECURITY_USER_ROLE)
     void shouldReturnOkWhenUpdateUserData() throws Exception {
         final Long id = 1L;
 

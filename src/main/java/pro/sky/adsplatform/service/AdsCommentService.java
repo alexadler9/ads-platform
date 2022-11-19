@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import pro.sky.adsplatform.entity.AdsCommentEntity;
-import pro.sky.adsplatform.entity.AdsEntity;
 import pro.sky.adsplatform.exception.NoContentException;
 import pro.sky.adsplatform.exception.NotFoundException;
 import pro.sky.adsplatform.repository.AdsCommentRepository;
@@ -29,12 +28,27 @@ public class AdsCommentService {
      *
      * @param id ID отзыва.
      * @param idAds ID объявления.
-     * @return отзыв. Может вернуть null, если такой отзыв отсутствует.
+     * @return отзыв.
+     * @throws NotFoundException отзыв с указанным ID отсутствует в базе.
      */
     public AdsCommentEntity findAdsComment(long id, long idAds) {
         return adsCommentRepository.findFirstByIdAndAdsId(id, idAds).orElseThrow(
-                ()-> new NotFoundException("Not found"));
+                () -> new NotFoundException("Comment not found"));
     }
+
+    /**
+     * Возвращает отзыв для объявления по указанному ID.
+     *
+     * @param id ID отзыва.
+     * @param idAds ID объявления.
+     * @return отзыв.
+     * @throws NoContentException отзыв с указанным ID отсутствует в базе.
+     */
+    public AdsCommentEntity findAdsCommentContent(long id, long idAds) {
+        return adsCommentRepository.findFirstByIdAndAdsId(id, idAds).orElseThrow(
+                () -> new NoContentException("No content for comment"));
+    }
+
     /**
      * Возвращает все отзывы для объявления.
      *
@@ -63,24 +77,17 @@ public class AdsCommentService {
      * @param id ID отзыва.
      * @param idAds ID объявления.
      * @return обновленный отзыв.
-     * @throws IllegalArgumentException несооветствие значений ID entity и аргумента.
-     * @throws NotFoundException отзыв с указанными параметрами отсутствует в базе.
+     * @throws NoContentException несооветствие значений ID entity и аргумента.
+     * @throws NoContentException отзыв с указанными параметрами отсутствует в базе.
      */
     public AdsCommentEntity updateAdsComment(AdsCommentEntity adsComment, long id, long idAds) {
         if (adsComment.getId() != id) {
             LOGGER.error("Несоответствие значений ID отзыва");
-            throw new IllegalArgumentException("Несоответствие значений ID отзыва");
+            throw new NoContentException("Bad ads ID parameter");
         }
 
-        AdsCommentEntity adsCommentBD = findAdsComment(id, idAds);
-        if (adsCommentBD == null) {
-            LOGGER.error("Отзыв с таким ID отсутствует");
-            throw new NotFoundException("Отзыв с таким ID отсутствует");
-        }
-
-        if (adsComment.getText() != null) {
-            adsCommentBD.setText(adsComment.getText());
-        }
+        AdsCommentEntity adsCommentBD = findAdsCommentContent(id, idAds);
+        adsCommentBD.setText(adsComment.getText());
 
         return adsCommentRepository.save(adsCommentBD);
     }
@@ -88,9 +95,9 @@ public class AdsCommentService {
     /**
      * Удаляет отзыв.
      *
-     * @param adsComment отзыв, который должен быть удален.
+     * @param id ID отзыва, который должен быть удален.
      */
-    public void deleteAdsComment(AdsCommentEntity adsComment) {
-        adsCommentRepository.delete(adsComment);
+    public void deleteAdsComment(long id) {
+        adsCommentRepository.deleteById(id);
     }
 }

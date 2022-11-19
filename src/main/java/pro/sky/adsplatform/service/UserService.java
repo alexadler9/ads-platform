@@ -27,27 +27,36 @@ public class UserService {
      * Возвращает пользователя по указанному ID.
      *
      * @param id ID пользователя.
-     * @return пользователь. Может вернуть null, если такой пользователь отсутствует.
+     * @return пользователь.
+     * @throws NotFoundException пользователь с указанным ID отсутствует в базе.
      */
     public UserEntity findUser(long id) {
         return userRepository.findById(id).orElseThrow(
-                () -> new NotFoundException("Not found"));
+                () -> new NotFoundException("User not found"));
     }
 
     /**
      * Возвращает пользователя по указанному username.
      *
      * @param username username пользователя.
-     * @return пользователь. Может вернуть null, если такой пользователь отсутствует.
+     * @return пользователь.
+     * @throws NotFoundException пользователь с указанным username отсутствует в базе.
      */
     public UserEntity findUserByName(String username) {
         return userRepository.findByUsername(username).orElseThrow(
-                () -> new NotFoundException("Not found"));
+                () -> new NotFoundException("User not found"));
     }
 
-    public UserEntity findUserByNameContent(String username) {
+    /**
+     * Возвращает пользователя по указанному username.
+     *
+     * @param username username пользователя.
+     * @return пользователь.
+     * @throws NoContentException пользователь с указанным username отсутствует в базе.
+     */
+    public UserEntity findUserContentByName(String username) {
         return userRepository.findByUsername(username).orElseThrow(
-                () -> new NoContentException("No content"));
+                () -> new NoContentException("No content for user"));
     }
 
     /**
@@ -64,17 +73,13 @@ public class UserService {
      *
      * @param user обновленные данные пользователя.
      * @return обновленный пользователь.
-     * @throws NotFoundException пользователь с указанными параметрами отсутствует в базе.
+     * @throws NoContentException пользователь с указанными параметрами отсутствует в базе.
      */
     public UserEntity updateUser(UserEntity user) {
-        UserEntity userBD = findUserByNameContent(user.getUsername());
-
+        UserEntity userBD = findUserContentByName(user.getUsername());
         userBD.setFirstName(user.getFirstName());
-
         userBD.setLastName(user.getLastName());
-
         userBD.setPhone(user.getPhone());
-
 
         return userRepository.save(userBD);
     }
