@@ -97,7 +97,6 @@ public class AdsService {
      * @throws NoContentException объявление с указанными параметрами отсутствует в базе.
      */
     public AdsEntity updateAds(AdsEntity ads, long id)  {
-
         AdsEntity adsBD = findAdsContent(id);
         adsBD.setId(id);
         adsBD.setPrice(ads.getPrice());

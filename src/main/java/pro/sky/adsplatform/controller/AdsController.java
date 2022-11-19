@@ -86,7 +86,7 @@ public class AdsController {
             @RequestPart("properties") CreateAdsDto createAdsDto,
             @Parameter(description = "Изображение")
             @RequestPart("image") MultipartFile file
-    ) throws IOException {
+    ) {
         LOGGER.info("Добавление объявления: {}", createAdsDto);
 
         UserEntity author = userService.findUserByName(authentication.getName());
@@ -430,7 +430,7 @@ public class AdsController {
             tags = {"Объявления"},
             responses = {
                     @ApiResponse(responseCode = "200", description = "Изображение успешно добавлено"),
-                    @ApiResponse(responseCode = "204", description = "Объявление не найдено"),
+                    @ApiResponse(responseCode = "204", description = "Объявление и/или содержимое изображения не найдено"),
                     @ApiResponse(responseCode = "401", description = "Требуется авторизация"),
                     @ApiResponse(responseCode = "403", description = "Доступ запрещен")
             }
@@ -443,7 +443,7 @@ public class AdsController {
             @PathVariable Integer ad,
             @Parameter(description = "Изображение")
             @RequestParam MultipartFile file
-    ) throws IOException {
+    ) {
         LOGGER.info("Добавление изображения для объявления {}", ad);
 
         AdsEntity ads = adsService.findAdsContent(ad);

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import pro.sky.adsplatform.entity.AdsEntity;
 import pro.sky.adsplatform.entity.AdsImageEntity;
+import pro.sky.adsplatform.exception.NoContentException;
 import pro.sky.adsplatform.exception.NotFoundException;
 import pro.sky.adsplatform.repository.AdsImageRepository;
 
@@ -37,9 +38,15 @@ public class AdsImageService {
      * @param ads объявление.
      * @param file файл изображения.
      * @return ID созданного изображения.
+     * @throws NoContentException не удалось извлечь содержимое изображения.
      */
-    public String createImage(AdsEntity ads, MultipartFile file) throws IOException {
-        byte[] imageContent = getImageContent(file);
+    public String createImage(AdsEntity ads, MultipartFile file) {
+        byte[] imageContent;
+        try {
+            imageContent = getImageContent(file);
+        } catch (IOException e) {
+            throw new NoContentException("Failed to extract image contents");
+        }
 
         AdsImageEntity adsImage = new AdsImageEntity();
         adsImage.setAds(ads);
