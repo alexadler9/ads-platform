@@ -83,10 +83,10 @@ public class AdsService {
      * Обновляет содержание объявления (поля price, title и description).
      *
      * @param ads обновленные данные объявления.
-     * @param id ID объявления.
+     * @param id  ID объявления.
      * @return обновленное объявление.
      * @throws IllegalArgumentException несооветствие значений ID entity и аргумента.
-     * @throws NotFoundException объявление с указанными параметрами отсутствует в базе.
+     * @throws NotFoundException        объявление с указанными параметрами отсутствует в базе.
      */
     public AdsEntity updateAds(AdsEntity ads, long id) {
         if (ads.getId() != id) {
@@ -96,15 +96,11 @@ public class AdsService {
 
         AdsEntity adsBD = findAdsContent(id);
 
- //       if (ads.getPrice() != null) {
-            adsBD.setPrice(ads.getPrice());
-//        }
- //       if (ads.getTitle() != null) {
-            adsBD.setTitle(ads.getTitle());
-   //     }
- //       if (ads.getDescription() != null) {
-            adsBD.setTitle(ads.getDescription());
-//        }
+        adsBD.setPrice(ads.getPrice());
+
+        adsBD.setTitle(ads.getTitle());
+
+        adsBD.setTitle(ads.getDescription());
 
         return adsRepository.save(adsBD);
     }
