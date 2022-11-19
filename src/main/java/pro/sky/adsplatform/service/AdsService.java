@@ -94,15 +94,9 @@ public class AdsService {
      * @param ads обновленные данные объявления.
      * @param id ID объявления.
      * @return обновленное объявление.
-     * @throws NoContentException несооветствие значений ID entity и аргумента.
      * @throws NoContentException объявление с указанными параметрами отсутствует в базе.
      */
     public AdsEntity updateAds(AdsEntity ads, long id)  {
-        if (ads.getId() != id) {
-            LOGGER.error("Несоответствие значений ID объявления");
-            throw new NoContentException("Bad ads ID parameter");
-        }
-
         AdsEntity adsBD = findAdsContent(id);
         adsBD.setPrice(ads.getPrice());
         adsBD.setTitle(ads.getTitle());
