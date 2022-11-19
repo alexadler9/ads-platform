@@ -68,10 +68,10 @@ public class AdsImageService {
             return null;
         }
 
-        double height = imgIn.getHeight() / (imgIn.getWidth() / 100d);
-        BufferedImage imgOut = new BufferedImage(100, (int) height, imgIn.getType());
+        double height = imgIn.getHeight() / (imgIn.getWidth() / 250d);
+        BufferedImage imgOut = new BufferedImage(250, (int) height, imgIn.getType());
         Graphics2D graphics = imgOut.createGraphics();
-        graphics.drawImage((Image) imgIn, 0, 0, 100, (int) height, null);
+        graphics.drawImage((Image) imgIn, 0, 0, 250, (int) height, null);
         graphics.dispose();
 
         ImageIO.write(imgOut, ext, baos);
