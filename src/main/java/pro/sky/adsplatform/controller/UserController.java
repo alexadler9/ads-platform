@@ -92,8 +92,8 @@ public class UserController {
         UserEntity userUpdated;
         try {
             userUpdated = userService.updateUser(userMapper.userDtoToUser(userDto));
-        } catch (NotFoundException e) {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
         return ResponseEntity.ok(userMapper.userToUserDto(userUpdated));

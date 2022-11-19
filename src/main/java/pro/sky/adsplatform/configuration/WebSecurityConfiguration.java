@@ -50,7 +50,7 @@ public class WebSecurityConfiguration {
                                 .mvcMatchers("/ads/**", "/users/**").hasAnyRole("ADMIN", "USER")
 
                 )
-                 //        .cors().disable()
+
                 .cors(withDefaults())
                 .httpBasic(withDefaults());
 

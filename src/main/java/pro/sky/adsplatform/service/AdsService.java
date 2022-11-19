@@ -3,6 +3,7 @@ package pro.sky.adsplatform.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import pro.sky.adsplatform.entity.AdsEntity;
 import pro.sky.adsplatform.entity.UserEntity;
 import pro.sky.adsplatform.exception.NoContentException;
@@ -88,7 +89,7 @@ public class AdsService {
      * @throws IllegalArgumentException несооветствие значений ID entity и аргумента.
      * @throws NotFoundException        объявление с указанными параметрами отсутствует в базе.
      */
-    public AdsEntity updateAds(AdsEntity ads, long id) {
+    public AdsEntity updateAds(AdsEntity ads, long id)  {
         if (ads.getId() != id) {
             LOGGER.error("Несоответствие значений ID объявления");
             throw new IllegalArgumentException("Несоответствие значений ID объявления");

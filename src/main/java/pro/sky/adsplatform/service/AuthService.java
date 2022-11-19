@@ -98,7 +98,7 @@ public class AuthService {
             UserEntity user = registerReqMapper.registerReqDtoToUser(registerReq);
             user.setId(userBD.getId());
             user.setEnabled(userBD.getEnabled());
-//            user.setPassword(userBD.getPassword());
+            user.setPassword(userBD.getPassword());
             LOGGER.info("Registered user: {}", user);
             userRepository.save(user);
 

@@ -4,6 +4,7 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.Objects;
 
 @Entity
@@ -21,11 +22,15 @@ public class UserEntity {
     private Long id;
 
     @Column(name = "first_name")
+
+    @NotNull
     private String firstName;
 
     @Column(name = "last_name")
+    @NotNull
     private String lastName;
 
+    @NotNull
     private String phone;
 
     private String username;

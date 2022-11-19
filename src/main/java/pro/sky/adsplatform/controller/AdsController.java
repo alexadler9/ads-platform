@@ -392,7 +392,7 @@ public class AdsController {
             @PathVariable("id") Integer id,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Параметры объявления")
             @RequestBody AdsDto adsDto
-    ) {
+    )  {
         AdsEntity ads = adsService.findAdsContent(id);
 
         String meName = authentication.getName();
@@ -403,9 +403,10 @@ public class AdsController {
         }
 
         AdsEntity adsUpdated;
+
         try {
             adsUpdated = adsService.updateAds(adsMapper.adsDtoToAds(adsDto), id);
-        } catch (IllegalArgumentException e) {
+        } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
@@ -426,9 +427,7 @@ public class AdsController {
             @PathVariable("title") String title
     ) {
         List<AdsEntity> adsList = adsService.findAllAdsByTitleLike(title);
-//        if (adsList.size() == 0) {
-//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//        }
+
         return ResponseEntity.ok(responseWrapperAdsMapper
                 .adsListToResponseWrapperAdsDto(adsList.size(), adsList));
     }

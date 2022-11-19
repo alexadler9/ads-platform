@@ -31,7 +31,7 @@ public class UserService {
      */
     public UserEntity findUser(long id) {
         return userRepository.findById(id).orElseThrow(
-                ()-> new NotFoundException("Not found"));
+                () -> new NotFoundException("Not found"));
     }
 
     /**
@@ -42,12 +42,14 @@ public class UserService {
      */
     public UserEntity findUserByName(String username) {
         return userRepository.findByUsername(username).orElseThrow(
-                ()-> new NotFoundException("Not found"));
+                () -> new NotFoundException("Not found"));
     }
+
     public UserEntity findUserByNameContent(String username) {
         return userRepository.findByUsername(username).orElseThrow(
-                ()-> new NoContentException("No content"));
+                () -> new NoContentException("No content"));
     }
+
     /**
      * Возвращает всех пользователей.
      *
@@ -67,15 +69,12 @@ public class UserService {
     public UserEntity updateUser(UserEntity user) {
         UserEntity userBD = findUserByNameContent(user.getUsername());
 
-        if (user.getFirstName() != null) {
-            userBD.setFirstName(user.getFirstName());
-        }
-        if (user.getLastName() != null) {
-            userBD.setLastName(user.getLastName());
-        }
-        if (user.getPhone() != null) {
-            userBD.setPhone(user.getPhone());
-        }
+        userBD.setFirstName(user.getFirstName());
+
+        userBD.setLastName(user.getLastName());
+
+        userBD.setPhone(user.getPhone());
+
 
         return userRepository.save(userBD);
     }
