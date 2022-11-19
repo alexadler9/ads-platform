@@ -204,9 +204,7 @@ public class AdsController {
     @GetMapping("")
     public ResponseEntity<ResponseWrapperAdsDto> getAllAds() {
         List<AdsEntity> adsList = adsService.findAllAds();
-//        if (adsList.size() == 0) {
-//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//        }
+
         return ResponseEntity.ok(responseWrapperAdsMapper
                 .adsListToResponseWrapperAdsDto(adsList.size(), adsList));
     }
@@ -249,9 +247,7 @@ public class AdsController {
             @PathVariable("ad_pk") String adPk
     ) {
         List<AdsCommentEntity> adsCommentList = adsCommentService.findAllAdsComments(Long.parseLong(adPk));
-//        if (adsCommentList.size() == 0) {
-//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//        }
+
         return ResponseEntity.ok(responseWrapperAdsCommentMapper
                 .adsCommentListToResponseWrapperAdsCommentDto(adsCommentList.size(), adsCommentList));
     }
@@ -279,9 +275,7 @@ public class AdsController {
         UserEntity user = userService.findUserByName(authentication.getName());
 
         List<AdsEntity> adsList = adsService.findAllAdsByAuthor(user);
-//        if (adsList.size() == 0) {
-//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//        }
+
 
         return ResponseEntity.ok(responseWrapperAdsMapper
                 .adsListToResponseWrapperAdsDto(adsList.size(), adsList));

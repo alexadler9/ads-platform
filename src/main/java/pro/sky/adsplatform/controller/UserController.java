@@ -58,9 +58,7 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<ResponseWrapperUserDto> getUsers() {
         List<UserEntity> userList = userService.findAllUsers();
-//        if (userList.size() == 0) {
-//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//        }
+
         return ResponseEntity.ok(responseWrapperUserMapper
                 .userListToResponseWrapperUserDto(userList.size(), userList));
     }
