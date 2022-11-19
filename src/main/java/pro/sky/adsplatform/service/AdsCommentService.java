@@ -77,15 +77,9 @@ public class AdsCommentService {
      * @param id ID отзыва.
      * @param idAds ID объявления.
      * @return обновленный отзыв.
-     * @throws NoContentException несооветствие значений ID entity и аргумента.
      * @throws NoContentException отзыв с указанными параметрами отсутствует в базе.
      */
     public AdsCommentEntity updateAdsComment(AdsCommentEntity adsComment, long id, long idAds) {
-        if (adsComment.getId() != id) {
-            LOGGER.error("Несоответствие значений ID отзыва");
-            throw new NoContentException("Bad ads ID parameter");
-        }
-
         AdsCommentEntity adsCommentBD = findAdsCommentContent(id, idAds);
         adsCommentBD.setText(adsComment.getText());
 
