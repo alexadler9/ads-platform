@@ -5,10 +5,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import pro.sky.adsplatform.entity.AdsEntity;
 import pro.sky.adsplatform.entity.UserEntity;
-import pro.sky.adsplatform.exception.NoContentException;
 import pro.sky.adsplatform.exception.NotFoundException;
 import pro.sky.adsplatform.repository.AdsRepository;
 
+import javax.naming.NotContextException;
 import java.util.List;
 
 /**
@@ -41,11 +41,11 @@ public class AdsService {
      *
      * @param id ID объявления.
      * @return объявление.
-     * @throws NoContentException объявление с указанным ID отсутствует в базе.
+     * @throws NotContextException объявление с указанным ID отсутствует в базе.
      */
-    public AdsEntity findAdsContent(long id) {
+    public AdsEntity findAdsContent(long id) throws NotContextException {
         return adsRepository.findById(id).orElseThrow(
-                () -> new NoContentException("No content for ads"));
+                ()-> new NotContextException("No content"));
     }
 
     /**
@@ -94,9 +94,8 @@ public class AdsService {
      * @param ads обновленные данные объявления.
      * @param id ID объявления.
      * @return обновленное объявление.
-     * @throws NoContentException объявление с указанными параметрами отсутствует в базе.
-     */
-    public AdsEntity updateAds(AdsEntity ads, long id)  {
+      */
+    public AdsEntity updateAds(AdsEntity ads, long id) throws NotContextException {
         AdsEntity adsBD = findAdsContent(id);
         adsBD.setId(id);
         adsBD.setPrice(ads.getPrice());

@@ -4,10 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import pro.sky.adsplatform.entity.UserEntity;
-import pro.sky.adsplatform.exception.NoContentException;
 import pro.sky.adsplatform.exception.NotFoundException;
 import pro.sky.adsplatform.repository.UserRepository;
 
+import javax.naming.NotContextException;
 import java.util.List;
 
 /**
@@ -52,11 +52,11 @@ public class UserService {
      *
      * @param username username пользователя.
      * @return пользователь.
-     * @throws NoContentException пользователь с указанным username отсутствует в базе.
+     * @throws NotContextException пользователь с указанным username отсутствует в базе.
      */
-    public UserEntity findUserContentByName(String username) {
+    public UserEntity findUserContentByName(String username) throws NotContextException {
         return userRepository.findByUsername(username).orElseThrow(
-                () -> new NoContentException("No content for user"));
+                () -> new NotContextException("No content for user"));
     }
 
     /**
@@ -73,9 +73,9 @@ public class UserService {
      *
      * @param user обновленные данные пользователя.
      * @return обновленный пользователь.
-     * @throws NoContentException пользователь с указанными параметрами отсутствует в базе.
+     *  пользователь с указанными параметрами отсутствует в базе.
      */
-    public UserEntity updateUser(UserEntity user) {
+    public UserEntity updateUser(UserEntity user) throws NotContextException {
         UserEntity userBD = findUserContentByName(user.getUsername());
         userBD.setFirstName(user.getFirstName());
         userBD.setLastName(user.getLastName());

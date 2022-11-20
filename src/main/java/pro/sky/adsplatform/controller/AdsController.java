@@ -22,6 +22,7 @@ import pro.sky.adsplatform.entity.UserEntity;
 import pro.sky.adsplatform.mapper.*;
 import pro.sky.adsplatform.service.*;
 
+import javax.naming.NotContextException;
 import java.io.IOException;
 import java.util.List;
 
@@ -174,7 +175,7 @@ public class AdsController {
             @PathVariable("ad_pk") String adPk,
             @Parameter(description = "ID отзыва")
             @PathVariable("id") Integer id
-    ) {
+    ) throws NotContextException {
         LOGGER.info("Удаление отзыва {}", id);
 
         UserEntity author = adsService.findAdsContent(Long.parseLong(adPk)).getAuthor();
@@ -320,7 +321,7 @@ public class AdsController {
             Authentication authentication,
             @Parameter(description = "ID объявления")
             @PathVariable("id") Integer id
-    ) {
+    ) throws NotContextException {
         LOGGER.info("Удаление объявления {}", id);
 
         UserEntity author = adsService.findAdsContent(id).getAuthor();
@@ -354,7 +355,7 @@ public class AdsController {
             @PathVariable("id") Integer id,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Параметры отзыва")
             @RequestBody AdsCommentDto adsCommentDto
-    ) {
+    ) throws NotContextException {
         LOGGER.info("Обновление отзыва {} : {}", id, adsCommentDto);
 
         AdsEntity ads = adsService.findAdsContent(Long.parseLong(adPk));
@@ -389,7 +390,7 @@ public class AdsController {
             @PathVariable("id") Integer id,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Параметры объявления")
             @RequestBody AdsDto adsDto
-    )  {
+    ) throws NotContextException {
         LOGGER.info("Обновление объявления {} : {}", id, adsDto);
 
         AdsEntity ads = adsService.findAdsContent(id);
@@ -443,7 +444,7 @@ public class AdsController {
             @PathVariable Integer ad,
             @Parameter(description = "Изображение")
             @RequestParam MultipartFile file
-    ) {
+    ) throws NotContextException {
         LOGGER.info("Добавление изображения для объявления {}", ad);
 
         AdsEntity ads = adsService.findAdsContent(ad);

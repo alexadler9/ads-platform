@@ -4,10 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import pro.sky.adsplatform.entity.AdsCommentEntity;
-import pro.sky.adsplatform.exception.NoContentException;
 import pro.sky.adsplatform.exception.NotFoundException;
 import pro.sky.adsplatform.repository.AdsCommentRepository;
 
+import javax.naming.NotContextException;
 import java.util.List;
 
 /**
@@ -42,11 +42,11 @@ public class AdsCommentService {
      * @param id ID отзыва.
      * @param idAds ID объявления.
      * @return отзыв.
-     * @throws NoContentException отзыв с указанным ID отсутствует в базе.
+     * @throws NotContextException отзыв с указанным ID отсутствует в базе.
      */
-    public AdsCommentEntity findAdsCommentContent(long id, long idAds) {
+    public AdsCommentEntity findAdsCommentContent(long id, long idAds) throws NotContextException {
         return adsCommentRepository.findFirstByIdAndAdsId(id, idAds).orElseThrow(
-                () -> new NoContentException("No content for comment"));
+                () -> new NotContextException("No content for comment"));
     }
 
     /**
@@ -77,9 +77,9 @@ public class AdsCommentService {
      * @param id ID отзыва.
      * @param idAds ID объявления.
      * @return обновленный отзыв.
-     * @throws NoContentException отзыв с указанными параметрами отсутствует в базе.
+     * @throws NotContextException отзыв с указанными параметрами отсутствует в базе.
      */
-    public AdsCommentEntity updateAdsComment(AdsCommentEntity adsComment, long id, long idAds) {
+    public AdsCommentEntity updateAdsComment(AdsCommentEntity adsComment, long id, long idAds) throws NotContextException {
         AdsCommentEntity adsCommentBD = findAdsCommentContent(id, idAds);
         adsCommentBD.setText(adsComment.getText());
 

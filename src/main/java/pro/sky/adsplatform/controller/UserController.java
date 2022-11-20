@@ -17,6 +17,7 @@ import pro.sky.adsplatform.mapper.UserMapper;
 import pro.sky.adsplatform.service.AuthService;
 import pro.sky.adsplatform.service.UserService;
 
+import javax.naming.NotContextException;
 import java.util.List;
 
 @CrossOrigin(value = "http://localhost:3000")
@@ -81,7 +82,7 @@ public class UserController {
             Authentication authentication,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Параметры пользователя")
             @RequestBody UserDto userDto
-    ) {
+    ) throws NotContextException {
         LOGGER.info("Обновление данных пользователя: {}", userDto);
 
         UserEntity user = userService.findUserContentByName(authentication.getName());
