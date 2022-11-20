@@ -73,8 +73,7 @@ public class UserService {
      * Обновляет данные пользователя (поля firstName, lastName, phone).
      *
      * @param user обновленные данные пользователя.
-     * @return обновленный пользователь.
-     *  пользователь с указанными параметрами отсутствует в базе.
+     * @return обновленный пользователь.k
      */
     public UserEntity updateUser(UserEntity user) {
         UserEntity userBD = findUserContentByName(user.getUsername());

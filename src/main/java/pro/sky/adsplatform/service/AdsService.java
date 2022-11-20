@@ -46,7 +46,7 @@ public class AdsService {
     @SneakyThrows
     public AdsEntity findAdsContent(long id)  {
         return adsRepository.findById(id).orElseThrow(
-                ()-> new NotContextException("No content"));
+                () -> new NotContextException("No content for ads"));
     }
 
     /**
