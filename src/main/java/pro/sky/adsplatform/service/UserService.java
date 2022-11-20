@@ -1,5 +1,6 @@
 package pro.sky.adsplatform.service;
 
+import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -52,9 +53,9 @@ public class UserService {
      *
      * @param username username пользователя.
      * @return пользователь.
-     * @throws NotContextException пользователь с указанным username отсутствует в базе.
      */
-    public UserEntity findUserContentByName(String username) throws NotContextException {
+    @SneakyThrows
+    public UserEntity findUserContentByName(String username) {
         return userRepository.findByUsername(username).orElseThrow(
                 () -> new NotContextException("No content for user"));
     }
@@ -75,7 +76,7 @@ public class UserService {
      * @return обновленный пользователь.
      *  пользователь с указанными параметрами отсутствует в базе.
      */
-    public UserEntity updateUser(UserEntity user) throws NotContextException {
+    public UserEntity updateUser(UserEntity user) {
         UserEntity userBD = findUserContentByName(user.getUsername());
         userBD.setFirstName(user.getFirstName());
         userBD.setLastName(user.getLastName());

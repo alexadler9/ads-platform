@@ -82,7 +82,7 @@ public class UserController {
             Authentication authentication,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Параметры пользователя")
             @RequestBody UserDto userDto
-    ) throws NotContextException {
+    )  {
         LOGGER.info("Обновление данных пользователя: {}", userDto);
 
         UserEntity user = userService.findUserContentByName(authentication.getName());

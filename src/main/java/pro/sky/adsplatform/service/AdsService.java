@@ -1,5 +1,6 @@
 package pro.sky.adsplatform.service;
 
+import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -41,9 +42,9 @@ public class AdsService {
      *
      * @param id ID объявления.
      * @return объявление.
-     * @throws NotContextException объявление с указанным ID отсутствует в базе.
      */
-    public AdsEntity findAdsContent(long id) throws NotContextException {
+    @SneakyThrows
+    public AdsEntity findAdsContent(long id)  {
         return adsRepository.findById(id).orElseThrow(
                 ()-> new NotContextException("No content"));
     }
@@ -95,7 +96,7 @@ public class AdsService {
      * @param id ID объявления.
      * @return обновленное объявление.
       */
-    public AdsEntity updateAds(AdsEntity ads, long id) throws NotContextException {
+    public AdsEntity updateAds(AdsEntity ads, long id)  {
         AdsEntity adsBD = findAdsContent(id);
         adsBD.setId(id);
         adsBD.setPrice(ads.getPrice());
