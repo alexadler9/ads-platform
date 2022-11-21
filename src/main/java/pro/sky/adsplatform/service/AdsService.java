@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import pro.sky.adsplatform.entity.AdsEntity;
 import pro.sky.adsplatform.entity.UserEntity;
+import pro.sky.adsplatform.exception.NoContentException;
 import pro.sky.adsplatform.exception.NotFoundException;
 import pro.sky.adsplatform.repository.AdsRepository;
 
@@ -43,10 +44,10 @@ public class AdsService {
      * @param id ID объявления.
      * @return объявление.
      */
-    @SneakyThrows
+
     public AdsEntity findAdsContent(long id)  {
         return adsRepository.findById(id).orElseThrow(
-                () -> new NotContextException("No content for ads"));
+                () -> new NoContentException("No content for ads"));
     }
 
     /**

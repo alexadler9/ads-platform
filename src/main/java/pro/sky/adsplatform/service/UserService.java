@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import pro.sky.adsplatform.entity.UserEntity;
+import pro.sky.adsplatform.exception.NoContentException;
 import pro.sky.adsplatform.exception.NotFoundException;
 import pro.sky.adsplatform.repository.UserRepository;
 
@@ -54,10 +55,10 @@ public class UserService {
      * @param username username пользователя.
      * @return пользователь.
      */
-    @SneakyThrows
+
     public UserEntity findUserContentByName(String username) {
         return userRepository.findByUsername(username).orElseThrow(
-                () -> new NotContextException("No content for user"));
+                () -> new NoContentException("No content for user"));
     }
 
     /**

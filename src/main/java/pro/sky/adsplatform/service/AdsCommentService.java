@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import pro.sky.adsplatform.entity.AdsCommentEntity;
+import pro.sky.adsplatform.exception.NoContentException;
 import pro.sky.adsplatform.exception.NotFoundException;
 import pro.sky.adsplatform.repository.AdsCommentRepository;
 
@@ -44,10 +45,10 @@ public class AdsCommentService {
      * @param idAds ID объявления.
      * @return отзыв.
      */
-    @SneakyThrows
+
     public AdsCommentEntity findAdsCommentContent(long id, long idAds) {
         return adsCommentRepository.findFirstByIdAndAdsId(id, idAds).orElseThrow(
-                () -> new NotContextException("No content for comment"));
+                () -> new NoContentException("No content for comment"));
     }
 
     /**
@@ -79,7 +80,7 @@ public class AdsCommentService {
      * @param idAds ID объявления.
      * @return обновленный отзыв.
      */
-    @SneakyThrows
+
     public AdsCommentEntity updateAdsComment(AdsCommentEntity adsComment, long id, long idAds) {
         AdsCommentEntity adsCommentBD = findAdsCommentContent(id, idAds);
         adsCommentBD.setText(adsComment.getText());
