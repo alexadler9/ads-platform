@@ -1,6 +1,5 @@
 package pro.sky.adsplatform.service;
 
-import lombok.SneakyThrows;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -10,7 +9,6 @@ import pro.sky.adsplatform.exception.NoContentException;
 import pro.sky.adsplatform.exception.NotFoundException;
 import pro.sky.adsplatform.repository.AdsRepository;
 
-import javax.naming.NotContextException;
 import java.util.List;
 
 /**
@@ -43,8 +41,8 @@ public class AdsService {
      *
      * @param id ID объявления.
      * @return объявление.
+     * @throws NoContentException объявление с указанным ID отсутствует в базе.
      */
-
     public AdsEntity findAdsContent(long id)  {
         return adsRepository.findById(id).orElseThrow(
                 () -> new NoContentException("No content for ads"));
@@ -96,6 +94,7 @@ public class AdsService {
      * @param ads обновленные данные объявления.
      * @param id ID объявления.
      * @return обновленное объявление.
+     * @throws NoContentException объявление с указанными параметрами отсутствует в базе.
       */
     public AdsEntity updateAds(AdsEntity ads, long id)  {
         AdsEntity adsBD = findAdsContent(id);
