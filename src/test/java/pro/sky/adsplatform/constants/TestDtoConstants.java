@@ -32,7 +32,7 @@ public class TestDtoConstants {
 
         ADS_DTO = new AdsDto();
         ADS_DTO.setAuthor(1);
-        ADS_DTO.setImage("ads/image/1");
+        ADS_DTO.setImage("/ads/image/1");
         ADS_DTO.setPk(1);
         ADS_DTO.setPrice(1000);
         ADS_DTO.setTitle("title");
@@ -42,7 +42,7 @@ public class TestDtoConstants {
         FULL_ADS_DTO.setAuthorLastName("lastName");
         FULL_ADS_DTO.setDescription("description");
         FULL_ADS_DTO.setEmail("user@gmail.com");
-        FULL_ADS_DTO.setImage("ads/image/1");
+        FULL_ADS_DTO.setImage("/ads/image/1");
         FULL_ADS_DTO.setPhone("phone");
         FULL_ADS_DTO.setPk(1);
         FULL_ADS_DTO.setPrice(1000);
@@ -50,7 +50,7 @@ public class TestDtoConstants {
 
         CREATE_ADS_DTO = new CreateAdsDto();
         CREATE_ADS_DTO.setDescription("description");
-        CREATE_ADS_DTO.setImage("ads/image/1");
+        CREATE_ADS_DTO.setImage("/ads/image/1");
         CREATE_ADS_DTO.setPk(1);
         CREATE_ADS_DTO.setPrice(1000);
         CREATE_ADS_DTO.setTitle("title");

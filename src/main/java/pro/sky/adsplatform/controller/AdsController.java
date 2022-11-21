@@ -22,6 +22,7 @@ import pro.sky.adsplatform.entity.UserEntity;
 import pro.sky.adsplatform.mapper.*;
 import pro.sky.adsplatform.service.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @CrossOrigin(value = "http://localhost:3000")
@@ -95,7 +96,7 @@ public class AdsController {
 
         String imageId = adsImageService.createImage(adsCreated, file);
         AdsDto adsDto = adsMapper.adsToAdsDto(adsCreated);
-        adsDto.setImage("ads/image/" + imageId);
+        adsDto.setImage("/ads/image/" + imageId);
 
         return ResponseEntity.ok(adsDto);
     }
@@ -111,7 +112,7 @@ public class AdsController {
             }
     )
     @PreAuthorize("hasAuthority('ROLE_USER')")
-    @PostMapping("{ad_pk}/comment")
+    @PostMapping("{ad_pk}/comments")
     public ResponseEntity<AdsCommentDto> addAdsComments(
             Authentication authentication,
             @Parameter(description = "ID объявления")
@@ -126,6 +127,7 @@ public class AdsController {
         AdsCommentEntity adsComment = adsCommentMapper.adsCommentDtoToAdsComment(adsCommentDto);
         adsComment.setAuthor(author);
         adsComment.setAds(ads);
+        adsComment.setDateTime(LocalDateTime.now());
         AdsCommentEntity adsCommentCreated = adsCommentService.createAdsComment(adsComment);
 
         return ResponseEntity.ok(adsCommentMapper.adsCommentToAdsCommentDto(adsCommentCreated));
@@ -166,7 +168,7 @@ public class AdsController {
             }
     )
     @PreAuthorize("hasAuthority('ROLE_USER')")
-    @DeleteMapping("{ad_pk}/comment/{id}")
+    @DeleteMapping("{ad_pk}/comments/{id}")
     public ResponseEntity<Void> deleteAdsComment(
             Authentication authentication,
             @Parameter(description = "ID объявления")
@@ -216,7 +218,7 @@ public class AdsController {
                     @ApiResponse(responseCode = "404", description = "Отзыв не найден")
             }
     )
-    @GetMapping("{ad_pk}/comment/{id}")
+    @GetMapping("{ad_pk}/comments/{id}")
     public ResponseEntity<AdsCommentDto> getAdsComment(
             @Parameter(description = "ID объявления")
             @PathVariable("ad_pk") String adPk,
@@ -239,7 +241,7 @@ public class AdsController {
                     @ApiResponse(responseCode = "403", description = "Доступ запрещен")
             }
     )
-    @GetMapping("{ad_pk}/comment")
+    @GetMapping("{ad_pk}/comments")
     public ResponseEntity<ResponseWrapperAdsCommentDto> getAllAdsComments(
             @Parameter(description = "ID объявления")
             @PathVariable("ad_pk") String adPk
@@ -344,7 +346,7 @@ public class AdsController {
             }
     )
     @PreAuthorize("hasAuthority('ROLE_USER')")
-    @PatchMapping("{ad_pk}/comment/{id}")
+    @PatchMapping("{ad_pk}/comments/{id}")
     public ResponseEntity<AdsCommentDto> updateAdsComment(
             Authentication authentication,
             @Parameter(description = "ID объявления")

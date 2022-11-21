@@ -26,7 +26,7 @@ class ResponseWrapperAdsMapperTest {
         Assertions.assertEquals(1, responseWrapperAdsDto.getCount());
         Assertions.assertEquals(1, responseWrapperAdsDto.getResults().size());
         Assertions.assertEquals(ADS.getAuthor().getId(), responseWrapperAdsDto.getResults().get(0).getAuthor().longValue());
-        Assertions.assertEquals("ads/image/" + ADS.getLastImage().getId().toString(), responseWrapperAdsDto.getResults().get(0).getImage());
+        Assertions.assertEquals("/ads/image/" + ADS.getLastImage().getId().toString(), responseWrapperAdsDto.getResults().get(0).getImage());
         Assertions.assertEquals(ADS.getId(), responseWrapperAdsDto.getResults().get(0).getPk().longValue());
         Assertions.assertEquals(ADS.getPrice(), new BigDecimal(responseWrapperAdsDto.getResults().get(0).getPrice()));
         Assertions.assertEquals(ADS.getTitle(), responseWrapperAdsDto.getResults().get(0).getTitle());

@@ -20,7 +20,7 @@ class FullAdsMapperTest {
         Assertions.assertEquals(ADS.getAuthor().getLastName(), fullAdsDto.getAuthorLastName());
         Assertions.assertEquals(ADS.getDescription(), fullAdsDto.getDescription());
         Assertions.assertEquals(ADS.getAuthor().getUsername(), fullAdsDto.getEmail());
-        Assertions.assertEquals("ads/image/" + ADS.getLastImage().getId().toString(), fullAdsDto.getImage());
+        Assertions.assertEquals("/ads/image/" + ADS.getLastImage().getId().toString(), fullAdsDto.getImage());
         Assertions.assertEquals(ADS.getAuthor().getPhone(), fullAdsDto.getPhone());
         Assertions.assertEquals(ADS.getId(), fullAdsDto.getPk().longValue());
         Assertions.assertEquals(ADS.getPrice(), new BigDecimal(fullAdsDto.getPrice()));

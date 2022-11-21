@@ -518,7 +518,7 @@ class AdsControllerTest {
         when(adsRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(ADS));
         when(adsCommentRepository.save(any(AdsCommentEntity.class))).thenReturn(ADS_COMMENT);
 
-        mockMvc.perform(post("http://localhost:3000/ads/{ad_pk}/comment", adPk)
+        mockMvc.perform(post("http://localhost:3000/ads/{ad_pk}/comments", adPk)
                         .content(objectMapper.writeValueAsString(ADS_COMMENT_DTO))
                         .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -534,7 +534,7 @@ class AdsControllerTest {
         when(adsRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(ADS));
         when(adsCommentRepository.save(any(AdsCommentEntity.class))).thenReturn(ADS_COMMENT);
 
-        mockMvc.perform(post("http://localhost:3000/ads/{ad_pk}/comment", adPk)
+        mockMvc.perform(post("http://localhost:3000/ads/{ad_pk}/comments", adPk)
                         .content(objectMapper.writeValueAsString(ADS_COMMENT_DTO))
                         .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -550,7 +550,7 @@ class AdsControllerTest {
         when(adsRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(ADS));
         when(adsCommentRepository.save(any(AdsCommentEntity.class))).thenReturn(ADS_COMMENT);
 
-        mockMvc.perform(post("http://localhost:3000/ads/{ad_pk}/comment", adPk)
+        mockMvc.perform(post("http://localhost:3000/ads/{ad_pk}/comments", adPk)
                         .content(objectMapper.writeValueAsString(ADS_COMMENT_DTO))
                         .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -566,7 +566,7 @@ class AdsControllerTest {
         when(adsRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
         when(adsCommentRepository.save(any(AdsCommentEntity.class))).thenReturn(ADS_COMMENT);
 
-        mockMvc.perform(post("http://localhost:3000/ads/{ad_pk}/comment", adPk)
+        mockMvc.perform(post("http://localhost:3000/ads/{ad_pk}/comments", adPk)
                         .content(objectMapper.writeValueAsString(ADS_COMMENT_DTO))
                         .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -584,7 +584,7 @@ class AdsControllerTest {
         when(adsCommentRepository.findFirstByIdAndAdsId(any(Long.class), any(Long.class))).thenReturn(Optional.of(ADS_COMMENT));
         when(adsCommentRepository.save(any(AdsCommentEntity.class))).thenReturn(ADS_COMMENT);
 
-        mockMvc.perform(patch("http://localhost:3000/ads/{ad_pk}/comment/{id}", adPk, id)
+        mockMvc.perform(patch("http://localhost:3000/ads/{ad_pk}/comments/{id}", adPk, id)
                 .content(objectMapper.writeValueAsString(ADS_COMMENT_DTO))
                 .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -606,7 +606,7 @@ class AdsControllerTest {
         when(adsCommentRepository.findFirstByIdAndAdsId(any(Long.class), any(Long.class))).thenReturn(Optional.of(ADS_COMMENT));
         when(adsCommentRepository.save(any(AdsCommentEntity.class))).thenReturn(ADS_COMMENT);
 
-        mockMvc.perform(patch("http://localhost:3000/ads/{ad_pk}/comment/{id}", adPk, id)
+        mockMvc.perform(patch("http://localhost:3000/ads/{ad_pk}/comments/{id}", adPk, id)
                         .content(objectMapper.writeValueAsString(ADS_COMMENT_DTO))
                         .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -627,7 +627,7 @@ class AdsControllerTest {
         when(adsCommentRepository.findFirstByIdAndAdsId(any(Long.class), any(Long.class))).thenReturn(Optional.of(ADS_COMMENT));
         when(adsCommentRepository.save(any(AdsCommentEntity.class))).thenReturn(ADS_COMMENT);
 
-        mockMvc.perform(patch("http://localhost:3000/ads/{ad_pk}/comment/{id}", adPk, id)
+        mockMvc.perform(patch("http://localhost:3000/ads/{ad_pk}/comments/{id}", adPk, id)
                         .content(objectMapper.writeValueAsString(ADS_COMMENT_DTO))
                         .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -643,7 +643,7 @@ class AdsControllerTest {
         when(adsCommentRepository.findFirstByIdAndAdsId(any(Long.class), any(Long.class))).thenReturn(Optional.of(ADS_COMMENT));
         when(adsCommentRepository.save(any(AdsCommentEntity.class))).thenReturn(ADS_COMMENT);
 
-        mockMvc.perform(patch("http://localhost:3000/ads/{ad_pk}/comment/{id}", adPk, id)
+        mockMvc.perform(patch("http://localhost:3000/ads/{ad_pk}/comments/{id}", adPk, id)
                         .content(objectMapper.writeValueAsString(ADS_COMMENT_DTO))
                         .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -660,7 +660,7 @@ class AdsControllerTest {
         when(adsCommentRepository.findFirstByIdAndAdsId(any(Long.class), any(Long.class))).thenReturn(Optional.of(ADS_COMMENT));
         when(adsCommentRepository.save(any(AdsCommentEntity.class))).thenReturn(ADS_COMMENT);
 
-        mockMvc.perform(patch("http://localhost:3000/ads/{ad_pk}/comment/{id}", adPk, id)
+        mockMvc.perform(patch("http://localhost:3000/ads/{ad_pk}/comments/{id}", adPk, id)
                         .content(objectMapper.writeValueAsString(ADS_COMMENT_DTO))
                         .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -677,7 +677,7 @@ class AdsControllerTest {
         when(adsCommentRepository.findFirstByIdAndAdsId(any(Long.class), any(Long.class))).thenReturn(Optional.empty());
         when(adsCommentRepository.save(any(AdsCommentEntity.class))).thenReturn(ADS_COMMENT);
 
-        mockMvc.perform(patch("http://localhost:3000/ads/{ad_pk}/comment/{id}", adPk, id)
+        mockMvc.perform(patch("http://localhost:3000/ads/{ad_pk}/comments/{id}", adPk, id)
                         .content(objectMapper.writeValueAsString(ADS_COMMENT_DTO))
                         .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -694,7 +694,7 @@ class AdsControllerTest {
         when(adsCommentRepository.findFirstByIdAndAdsId(any(Long.class), any(Long.class))).thenReturn(Optional.of(ADS_COMMENT));
         doNothing().when(adsCommentRepository).delete(any(AdsCommentEntity.class));
 
-        mockMvc.perform(delete("http://localhost:3000/ads/{ad_pk}/comment/{id}", adPk, id))
+        mockMvc.perform(delete("http://localhost:3000/ads/{ad_pk}/comments/{id}", adPk, id))
                 .andExpect(status().isOk());
     }
 
@@ -708,7 +708,7 @@ class AdsControllerTest {
         when(adsCommentRepository.findFirstByIdAndAdsId(any(Long.class), any(Long.class))).thenReturn(Optional.of(ADS_COMMENT));
         doNothing().when(adsCommentRepository).delete(any(AdsCommentEntity.class));
 
-        mockMvc.perform(delete("http://localhost:3000/ads/{ad_pk}/comment/{id}", adPk, id))
+        mockMvc.perform(delete("http://localhost:3000/ads/{ad_pk}/comments/{id}", adPk, id))
                 .andExpect(status().isOk());
     }
 
@@ -722,7 +722,7 @@ class AdsControllerTest {
         when(adsCommentRepository.findFirstByIdAndAdsId(any(Long.class), any(Long.class))).thenReturn(Optional.of(ADS_COMMENT));
         doNothing().when(adsCommentRepository).delete(any(AdsCommentEntity.class));
 
-        mockMvc.perform(delete("http://localhost:3000/ads/{ad_pk}/comment/{id}", adPk, id))
+        mockMvc.perform(delete("http://localhost:3000/ads/{ad_pk}/comments/{id}", adPk, id))
                 .andExpect(status().isForbidden());
     }
 
@@ -735,7 +735,7 @@ class AdsControllerTest {
         when(adsCommentRepository.findFirstByIdAndAdsId(any(Long.class), any(Long.class))).thenReturn(Optional.of(ADS_COMMENT));
         doNothing().when(adsCommentRepository).delete(any(AdsCommentEntity.class));
 
-        mockMvc.perform(delete("http://localhost:3000/ads/{ad_pk}/comment/{id}", adPk, id))
+        mockMvc.perform(delete("http://localhost:3000/ads/{ad_pk}/comments/{id}", adPk, id))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -749,7 +749,7 @@ class AdsControllerTest {
         when(adsCommentRepository.findFirstByIdAndAdsId(any(Long.class), any(Long.class))).thenReturn(Optional.of(ADS_COMMENT));
         doNothing().when(adsCommentRepository).delete(any(AdsCommentEntity.class));
 
-        mockMvc.perform(delete("http://localhost:3000/ads/{ad_pk}/comment/{id}", adPk, id))
+        mockMvc.perform(delete("http://localhost:3000/ads/{ad_pk}/comments/{id}", adPk, id))
                 .andExpect(status().isNoContent());
     }
 
@@ -761,7 +761,7 @@ class AdsControllerTest {
 
         when(adsCommentRepository.findFirstByIdAndAdsId(any(Long.class), any(Long.class))).thenReturn(Optional.of(ADS_COMMENT));
 
-        mockMvc.perform(get("http://localhost:3000/ads/{ad_pk}/comment/{id}", adPk, id))
+        mockMvc.perform(get("http://localhost:3000/ads/{ad_pk}/comments/{id}", adPk, id))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.pk").value(ADS_COMMENT_DTO.getPk()))
                 .andExpect(jsonPath("$.text").value(ADS_COMMENT_DTO.getText()))
@@ -776,7 +776,7 @@ class AdsControllerTest {
 
         when(adsCommentRepository.findFirstByIdAndAdsId(any(Long.class), any(Long.class))).thenReturn(Optional.empty());
 
-        mockMvc.perform(get("http://localhost:3000/ads/{ad_pk}/comment/{id}", adPk, id))
+        mockMvc.perform(get("http://localhost:3000/ads/{ad_pk}/comments/{id}", adPk, id))
                 .andExpect(status().isNotFound());
     }
 
@@ -789,7 +789,7 @@ class AdsControllerTest {
 
         when(adsCommentRepository.findAllByAdsId(any(Long.class))).thenReturn(adsCommentList);
 
-        mockMvc.perform(get("http://localhost:3000/ads/{ad_pk}/comment", adPk))
+        mockMvc.perform(get("http://localhost:3000/ads/{ad_pk}/comments", adPk))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.count").value(adsCommentList.size()))
                 .andExpect(jsonPath("$.results[0].pk").value(ADS_COMMENT_DTO.getPk()))
