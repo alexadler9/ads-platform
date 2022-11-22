@@ -177,7 +177,7 @@ public class AdsController {
             @PathVariable("id") Integer id
     ) {
         LOGGER.info("Удаление отзыва {}", id);
-
+        adsCommentService.findAdsCommentContent(id, Long.parseLong(adPk));
         UserEntity author = adsService.findAdsContent(Long.parseLong(adPk)).getAuthor();
         if (!authService.hasRole(authentication.getName(), UserEntity.UserRole.ADMIN.name()) &&
                 !authentication.getName().equals(author.getUsername())) {

@@ -130,7 +130,7 @@ public class AuthService {
         manager.updateUser(User.withDefaultPasswordEncoder()
                 .password(newPassword)
                 .username(username)
-                .roles("USER")
+                .authorities(authentication.getAuthorities())
                 .build());
     }
 

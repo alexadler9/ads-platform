@@ -12,7 +12,7 @@ import javax.naming.NotContextException;
 @RestControllerAdvice
 public class ContentException extends RuntimeException {
 
-    @ExceptionHandler(RuntimeException.class)
+    @ExceptionHandler(NoContentException.class)
     public ResponseEntity<ErrorMessage> handleException(NoContentException exception) {
         return ResponseEntity
                 .status(HttpStatus.NO_CONTENT)
