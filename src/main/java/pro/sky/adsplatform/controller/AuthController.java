@@ -65,20 +65,6 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
-    @Operation(
-            summary = "meUser",
-            tags = {"Авторизация"},
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "OK")
-            }
-    )
-    @PreAuthorize("hasAuthority('ROLE_USER')")
-    @GetMapping("/meuser")
-    public ResponseEntity<?> meUser(Authentication authentication) {
-        LOGGER.info("Endpoint meUser() is called");
-
-        return ResponseEntity.ok(authentication);
-    }
 }
 
 
