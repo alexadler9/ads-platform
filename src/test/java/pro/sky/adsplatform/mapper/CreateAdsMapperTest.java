@@ -14,7 +14,6 @@ class CreateAdsMapperTest {
         AdsEntity ads = createAdsMapper.createAdsDtoToAds(CREATE_ADS_DTO);
 
         Assertions.assertNotNull(ads);
-        Assertions.assertEquals(CREATE_ADS_DTO.getPk(), ads.getId().intValue());
         Assertions.assertEquals(CREATE_ADS_DTO.getTitle(), ads.getTitle());
         Assertions.assertEquals(CREATE_ADS_DTO.getDescription(), ads.getDescription());
         Assertions.assertEquals(CREATE_ADS_DTO.getPrice(), ads.getPrice().intValue());

@@ -50,8 +50,6 @@ public class TestDtoConstants {
 
         CREATE_ADS_DTO = new CreateAdsDto();
         CREATE_ADS_DTO.setDescription("description");
-        CREATE_ADS_DTO.setImage("/ads/image/1");
-        CREATE_ADS_DTO.setPk(1);
         CREATE_ADS_DTO.setPrice(1000);
         CREATE_ADS_DTO.setTitle("title");
 

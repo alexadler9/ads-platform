@@ -12,10 +12,7 @@ import java.nio.charset.StandardCharsets;
 
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface CreateAdsMapper {
-
     AdsEntity createAdsDtoToAds(CreateAdsDto dto);
 
     CreateAdsDto adsToCreateAdsDto(AdsEntity entity);
-
-
 }
