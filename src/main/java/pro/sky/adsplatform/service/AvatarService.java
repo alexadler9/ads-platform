@@ -47,7 +47,7 @@ public class AvatarService {
     public void updateAvatar(UserEntity user, MultipartFile file) {
         byte[] imageContent;
         try {
-            imageContent = ImageUtility.getImageContent(file);
+            imageContent = ImageUtility.getThumbnailImageContent(file);
         } catch (IOException e) {
             throw new NotFoundException("Failed to extract avatar contents");
         }
