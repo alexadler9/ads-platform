@@ -178,9 +178,11 @@ public class AdsController {
     ) {
         LOGGER.info("Удаление отзыва {}", id);
         adsCommentService.findAdsCommentContent(id, Long.parseLong(adPk));
-        UserEntity author = adsService.findAdsContent(Long.parseLong(adPk)).getAuthor();
+
+        UserEntity authorComment = adsCommentService.findAdsComment(id, Long.parseLong(adPk)).getAuthor();
+
         if (!authService.hasRole(authentication.getName(), UserEntity.UserRole.ADMIN.name()) &&
-                !authentication.getName().equals(author.getUsername())) {
+                !authentication.getName().equals(authorComment.getUsername())) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
@@ -358,11 +360,10 @@ public class AdsController {
     ) {
         LOGGER.info("Обновление отзыва {} : {}", id, adsCommentDto);
 
-        AdsEntity ads = adsService.findAdsContent(Long.parseLong(adPk));
+        UserEntity authorComment = adsCommentService.findAdsComment(id, Long.parseLong(adPk)).getAuthor();
 
-        UserEntity author = ads.getAuthor();
         if (!authService.hasRole(authentication.getName(), UserEntity.UserRole.ADMIN.name()) &&
-                !authentication.getName().equals(author.getUsername())) {
+                !authentication.getName().equals(authorComment.getUsername())) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
