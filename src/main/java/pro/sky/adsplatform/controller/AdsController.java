@@ -399,7 +399,7 @@ public class AdsController {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
-        AdsEntity adsUpdated = adsService.updateAds2(adsMapper.adsDtoToAds(adsDto), id);
+        AdsEntity adsUpdated = adsService.updateAds(adsMapper.adsDtoToAds(adsDto), id);
 
         return ResponseEntity.ok(adsMapper.adsToAdsDto(adsUpdated));
     }

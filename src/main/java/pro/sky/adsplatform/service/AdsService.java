@@ -83,7 +83,7 @@ public class AdsService {
      * @return обновленное объявление.
      * @throws NotFoundException объявление с указанными параметрами отсутствует в базе.
       */
-    public AdsEntity updateAds2(AdsEntity ads, long id)  {
+    public AdsEntity updateAds(AdsEntity ads, long id)  {
         AdsEntity adsBD = findAds(id);
         adsBD.setId(id);
         adsBD.setPrice(ads.getPrice());
