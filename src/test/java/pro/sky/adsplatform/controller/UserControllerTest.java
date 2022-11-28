@@ -17,8 +17,6 @@ import pro.sky.adsplatform.entity.UserEntity;
 
 import pro.sky.adsplatform.repository.UserRepository;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -49,28 +47,21 @@ class UserControllerTest {
 
     @Test
     @WithMockUser(username = SECURITY_USER_NAME, password = SECURITY_USER_PASSWORD, roles = SECURITY_USER_ROLE)
-    void shouldReturnOkWhenGetAllUsers() throws Exception {
-        final List<UserEntity> userList = new ArrayList<>();
-        userList.add(USER);
-
-        when(userRepository.findAll()).thenReturn(userList);
+    void shouldReturnOkWhenGetMe() throws Exception {
+        when(userRepository.findByUsername(any(String.class))).thenReturn(Optional.of(USER));
 
         mockMvc.perform(get("http://localhost:3000/users/me"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.count").value(userList.size()))
-                .andExpect(jsonPath("$.results[0].firstName").value(USER_DTO.getFirstName()))
-                .andExpect(jsonPath("$.results[0].lastName").value(USER_DTO.getLastName()))
-                .andExpect(jsonPath("$.results[0].id").value(USER_DTO.getId()))
-                .andExpect(jsonPath("$.results[0].email").value(USER_DTO.getEmail()))
-                .andExpect(jsonPath("$.results[0].phone").value(USER_DTO.getPhone()));
+                .andExpect(jsonPath("$.firstName").value(USER_DTO.getFirstName()))
+                .andExpect(jsonPath("$.lastName").value(USER_DTO.getLastName()))
+                .andExpect(jsonPath("$.id").value(USER_DTO.getId()))
+                .andExpect(jsonPath("$.email").value(USER_DTO.getEmail()))
+                .andExpect(jsonPath("$.phone").value(USER_DTO.getPhone()));
     }
 
     @Test
-    void shouldReturnUnauthorizedWhenGetAllUsers() throws Exception {
-        final List<UserEntity> userList = new ArrayList<>();
-        userList.add(USER);
-
-        when(userRepository.findAll()).thenReturn(userList);
+    void shouldReturnUnauthorizedWhenGetMe() throws Exception {
+        when(userRepository.findByUsername(any(String.class))).thenReturn(Optional.empty());
 
         mockMvc.perform(get("http://localhost:3000/users/me"))
                 .andExpect(status().isUnauthorized());
