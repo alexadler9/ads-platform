@@ -414,7 +414,7 @@ class AdsControllerTest {
     @WithMockUser(username = SECURITY_USER_NAME, password = SECURITY_USER_PASSWORD, roles = SECURITY_USER_ROLE)
     void shouldReturnOkWhenUpdateImage() throws Exception {
         final Long ad = 1L;
-        final MockMultipartFile file = new MockMultipartFile("file", "image.jpeg", "image/jpeg", new byte[] { 0x00 });
+        final MockMultipartFile file = new MockMultipartFile("image", "image.jpeg", "image/jpeg", new byte[] { 0x00 });
 
         when(adsRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(ADS));
         when(adsImageRepository.save(any(AdsImageEntity.class))).thenReturn(ADS_IMAGE);
@@ -429,13 +429,13 @@ class AdsControllerTest {
     @Test
     @WithMockUser(username = SECURITY_USER_NAME, password = SECURITY_USER_PASSWORD, roles = SECURITY_USER_ROLE)
     void shouldReturnOkWhenAuthorUpdateImage() throws Exception {
-        final Long ad = 1L;
-        final MockMultipartFile file = new MockMultipartFile("file", "image.jpeg", "image/jpeg", new byte[] { 0x00 });
+        final Long id = 1L;
+        final MockMultipartFile file = new MockMultipartFile("image", "image.jpeg", "image/jpeg", new byte[] { 0x00 });
 
         when(adsRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(ADS));
         when(adsImageRepository.save(any(AdsImageEntity.class))).thenReturn(ADS_IMAGE);
 
-        MockMultipartHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart("http://localhost:3000/ads/{ad}/image", ad);
+        MockMultipartHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart("http://localhost:3000/ads/{id}/image", id);
         builder.with(request -> { request.setMethod("PATCH"); return request; });
 
         mockMvc.perform(builder.file(file))
@@ -445,13 +445,13 @@ class AdsControllerTest {
     @Test
     @WithMockUser(username = SECURITY_ADMIN_NAME, password = SECURITY_ADMIN_PASSWORD, roles = { SECURITY_ADMIN_ROLE, SECURITY_USER_ROLE })
     void shouldReturnOkWhenAdminUpdateImage() throws Exception {
-        final Long ad = 1L;
-        final MockMultipartFile file = new MockMultipartFile("file", "image.jpeg", "image/jpeg", new byte[] { 0x00 });
+        final Long id = 1L;
+        final MockMultipartFile file = new MockMultipartFile("image", "image.jpeg", "image/jpeg", new byte[] { 0x00 });
 
         when(adsRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(ADS));
         when(adsImageRepository.save(any(AdsImageEntity.class))).thenReturn(ADS_IMAGE);
 
-        MockMultipartHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart("http://localhost:3000/ads/{ad}/image", ad);
+        MockMultipartHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart("http://localhost:3000/ads/{id}/image", id);
         builder.with(request -> { request.setMethod("PATCH"); return request; });
 
         mockMvc.perform(builder.file(file))
@@ -461,13 +461,13 @@ class AdsControllerTest {
     @Test
     @WithMockUser(username = "undefined", password = SECURITY_USER_PASSWORD, roles = SECURITY_USER_ROLE)
     void shouldReturnForbiddenWhenUndefinedUpdateImage() throws Exception {
-        final Long ad = 1L;
-        final MockMultipartFile file = new MockMultipartFile("file", "image.jpeg", "image/jpeg", new byte[] { 0x00 });
+        final Long id = 1L;
+        final MockMultipartFile file = new MockMultipartFile("image", "image.jpeg", "image/jpeg", new byte[] { 0x00 });
 
         when(adsRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(ADS));
         when(adsImageRepository.save(any(AdsImageEntity.class))).thenReturn(ADS_IMAGE);
 
-        MockMultipartHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart("http://localhost:3000/ads/{ad}/image", ad);
+        MockMultipartHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart("http://localhost:3000/ads/{id}/image", id);
         builder.with(request -> { request.setMethod("PATCH"); return request; });
 
         mockMvc.perform(builder.file(file))
@@ -476,13 +476,13 @@ class AdsControllerTest {
 
     @Test
     void shouldReturnUnauthorizedWhenUpdateImage() throws Exception {
-        final Long ad = 1L;
-        final MockMultipartFile file = new MockMultipartFile("file", "image.jpeg", "image/jpeg", new byte[] { 0x00 });
+        final Long id = 1L;
+        final MockMultipartFile file = new MockMultipartFile("image", "image.jpeg", "image/jpeg", new byte[] { 0x00 });
 
         when(adsRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(ADS));
         when(adsImageRepository.save(any(AdsImageEntity.class))).thenReturn(ADS_IMAGE);
 
-        MockMultipartHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart("http://localhost:3000/ads/{ad}/image", ad);
+        MockMultipartHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart("http://localhost:3000/ads/{id}/image", id);
         builder.with(request -> { request.setMethod("PATCH"); return request; });
 
         mockMvc.perform(builder.file(file))
@@ -492,13 +492,13 @@ class AdsControllerTest {
     @Test
     @WithMockUser(username = SECURITY_USER_NAME, password = SECURITY_USER_PASSWORD, roles = SECURITY_USER_ROLE)
     void shouldReturnNoContentWhenUpdateImageForMissingAds() throws Exception {
-        final Long ad = 1L;
-        final MockMultipartFile file = new MockMultipartFile("file", "image.jpeg", "image/jpeg", new byte[] { 0x00 });
+        final Long id = 1L;
+        final MockMultipartFile file = new MockMultipartFile("image", "image.jpeg", "image/jpeg", new byte[] { 0x00 });
 
         when(adsRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
         when(adsImageRepository.save(any(AdsImageEntity.class))).thenReturn(ADS_IMAGE);
 
-        MockMultipartHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart("http://localhost:3000/ads/{ad}/image", ad);
+        MockMultipartHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart("http://localhost:3000/ads/{id}/image", id);
         builder.with(request -> { request.setMethod("PATCH"); return request; });
 
         mockMvc.perform(builder.file(file))
@@ -580,7 +580,6 @@ class AdsControllerTest {
         final Long adPk = 1L;
         final Long id = 1L;
 
-        when(adsRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(ADS));
         when(adsCommentRepository.findFirstByIdAndAdsId(any(Long.class), any(Long.class))).thenReturn(Optional.of(ADS_COMMENT));
         when(adsCommentRepository.save(any(AdsCommentEntity.class))).thenReturn(ADS_COMMENT);
 
@@ -602,7 +601,6 @@ class AdsControllerTest {
         final Long adPk = 1L;
         final Long id = 1L;
 
-        when(adsRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(ADS));
         when(adsCommentRepository.findFirstByIdAndAdsId(any(Long.class), any(Long.class))).thenReturn(Optional.of(ADS_COMMENT));
         when(adsCommentRepository.save(any(AdsCommentEntity.class))).thenReturn(ADS_COMMENT);
 
@@ -623,7 +621,6 @@ class AdsControllerTest {
         final Long adPk = 1L;
         final Long id = 1L;
 
-        when(adsRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(ADS));
         when(adsCommentRepository.findFirstByIdAndAdsId(any(Long.class), any(Long.class))).thenReturn(Optional.of(ADS_COMMENT));
         when(adsCommentRepository.save(any(AdsCommentEntity.class))).thenReturn(ADS_COMMENT);
 
@@ -639,7 +636,6 @@ class AdsControllerTest {
         final Long adPk = 1L;
         final Long id = 1L;
 
-        when(adsRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(ADS));
         when(adsCommentRepository.findFirstByIdAndAdsId(any(Long.class), any(Long.class))).thenReturn(Optional.of(ADS_COMMENT));
         when(adsCommentRepository.save(any(AdsCommentEntity.class))).thenReturn(ADS_COMMENT);
 
@@ -652,28 +648,10 @@ class AdsControllerTest {
 
     @Test
     @WithMockUser(username = SECURITY_USER_NAME, password = SECURITY_USER_PASSWORD, roles = SECURITY_USER_ROLE)
-    void shouldReturnNoContentWhenUpdateCommentForMissingAds() throws Exception {
-        final Long adPk = 1L;
-        final Long id = 1L;
-
-        when(adsRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
-        when(adsCommentRepository.findFirstByIdAndAdsId(any(Long.class), any(Long.class))).thenReturn(Optional.of(ADS_COMMENT));
-        when(adsCommentRepository.save(any(AdsCommentEntity.class))).thenReturn(ADS_COMMENT);
-
-        mockMvc.perform(patch("http://localhost:3000/ads/{ad_pk}/comments/{id}", adPk, id)
-                        .content(objectMapper.writeValueAsString(ADS_COMMENT_DTO))
-                        .contentType(MediaType.APPLICATION_JSON)
-                )
-                .andExpect(status().isNoContent());
-    }
-
-    @Test
-    @WithMockUser(username = SECURITY_USER_NAME, password = SECURITY_USER_PASSWORD, roles = SECURITY_USER_ROLE)
     void shouldReturnNoContentWhenUpdateCommentForMissingComment() throws Exception {
         final Long adPk = 1L;
         final Long id = 1L;
 
-        when(adsRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(ADS));
         when(adsCommentRepository.findFirstByIdAndAdsId(any(Long.class), any(Long.class))).thenReturn(Optional.empty());
         when(adsCommentRepository.save(any(AdsCommentEntity.class))).thenReturn(ADS_COMMENT);
 
@@ -690,7 +668,6 @@ class AdsControllerTest {
         final Long adPk = 1L;
         final Long id = 1L;
 
-        when(adsRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(ADS));
         when(adsCommentRepository.findFirstByIdAndAdsId(any(Long.class), any(Long.class))).thenReturn(Optional.of(ADS_COMMENT));
         doNothing().when(adsCommentRepository).delete(any(AdsCommentEntity.class));
 
@@ -704,7 +681,6 @@ class AdsControllerTest {
         final Long adPk = 1L;
         final Long id = 1L;
 
-        when(adsRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(ADS));
         when(adsCommentRepository.findFirstByIdAndAdsId(any(Long.class), any(Long.class))).thenReturn(Optional.of(ADS_COMMENT));
         doNothing().when(adsCommentRepository).delete(any(AdsCommentEntity.class));
 
@@ -718,7 +694,6 @@ class AdsControllerTest {
         final Long adPk = 1L;
         final Long id = 1L;
 
-        when(adsRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(ADS));
         when(adsCommentRepository.findFirstByIdAndAdsId(any(Long.class), any(Long.class))).thenReturn(Optional.of(ADS_COMMENT));
         doNothing().when(adsCommentRepository).delete(any(AdsCommentEntity.class));
 
@@ -731,26 +706,11 @@ class AdsControllerTest {
         final Long adPk = 1L;
         final Long id = 1L;
 
-        when(adsRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(ADS));
         when(adsCommentRepository.findFirstByIdAndAdsId(any(Long.class), any(Long.class))).thenReturn(Optional.of(ADS_COMMENT));
         doNothing().when(adsCommentRepository).delete(any(AdsCommentEntity.class));
 
         mockMvc.perform(delete("http://localhost:3000/ads/{ad_pk}/comments/{id}", adPk, id))
                 .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    @WithMockUser(username = SECURITY_USER_NAME, password = SECURITY_USER_PASSWORD, roles = SECURITY_USER_ROLE)
-    void shouldReturnNoContentWhenDeleteCommentForMissingAds() throws Exception {
-        final Long adPk = 1L;
-        final Long id = 1L;
-
-        when(adsRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
-        when(adsCommentRepository.findFirstByIdAndAdsId(any(Long.class), any(Long.class))).thenReturn(Optional.of(ADS_COMMENT));
-        doNothing().when(adsCommentRepository).delete(any(AdsCommentEntity.class));
-
-        mockMvc.perform(delete("http://localhost:3000/ads/{ad_pk}/comments/{id}", adPk, id))
-                .andExpect(status().isNoContent());
     }
 
     @Test
