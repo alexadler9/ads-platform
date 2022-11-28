@@ -437,17 +437,17 @@ public class AdsController {
             }
     )
     @PreAuthorize("hasAuthority('ROLE_USER')")
-    @PatchMapping(value = "{ad}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PatchMapping(value = "{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> updateAdsImage(
             Authentication authentication,
             @Parameter(description = "ID объявления")
-            @PathVariable Integer ad,
+            @PathVariable Integer id,
             @Parameter(description = "Изображение")
-            @RequestParam MultipartFile file
+            @RequestParam MultipartFile image
     ) {
-        LOGGER.info("Добавление изображения для объявления {}", ad);
+        LOGGER.info("Добавление изображения для объявления {}", id);
 
-        AdsEntity ads = adsService.findAdsContent(ad);
+        AdsEntity ads = adsService.findAdsContent(id);
 
         UserEntity author = ads.getAuthor();
         if (!authService.hasRole(authentication.getName(), UserEntity.UserRole.ADMIN.name()) &&
@@ -455,7 +455,7 @@ public class AdsController {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
-        adsImageService.createImage(ads, file);
+        adsImageService.createImage(ads, image);
 
         return ResponseEntity.ok(null);
     }
