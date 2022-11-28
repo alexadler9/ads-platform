@@ -115,3 +115,12 @@ alter table ads
 alter table ads
     add foreign key (id_author) references users
         on delete cascade;
+
+-- changeSet alexadler:5
+
+-- создать таблицу "Аватары"
+CREATE TABLE avatars
+(
+    id_user     bigint      PRIMARY KEY REFERENCES users (id) ON DELETE CASCADE,
+    image       bytea
+);

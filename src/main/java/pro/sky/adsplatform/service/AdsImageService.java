@@ -8,15 +8,9 @@ import pro.sky.adsplatform.entity.AdsEntity;
 import pro.sky.adsplatform.entity.AdsImageEntity;
 import pro.sky.adsplatform.exception.NotFoundException;
 import pro.sky.adsplatform.repository.AdsImageRepository;
+import pro.sky.adsplatform.utility.ImageUtility;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-
-import static com.datical.liquibase.ext.init.InitProjectUtil.getExtension;
 
 /**
  * Сервис для работы с изображениями.
@@ -32,6 +26,18 @@ public class AdsImageService {
     }
 
     /**
+     * Возвращает изображение по указанному ID.
+     *
+     * @param id ID изображения.
+     * @return изображение.
+     * @throws NotFoundException изображение с указанным ID отсутствует в базе.
+     */
+    public AdsImageEntity findImage(Long id) {
+        return adsImageRepository.findById(id).orElseThrow(
+                () -> new NotFoundException("Image not found"));
+    }
+
+    /**
      * Создает новое изображение для объявления.
      *
      * @param ads объявление.
@@ -42,7 +48,7 @@ public class AdsImageService {
     public String createImage(AdsEntity ads, MultipartFile file) {
         byte[] imageContent;
         try {
-            imageContent = getImageContent(file);
+            imageContent = ImageUtility.getImageContent(file);
         } catch (IOException e) {
             throw new NotFoundException("Failed to extract image contents");
         }
@@ -52,48 +58,5 @@ public class AdsImageService {
         adsImage.setImage(imageContent);
 
         return adsImageRepository.save(adsImage).getId().toString();
-    }
-
-    /**
-     * Возвращает содержимое изображения.
-     *
-     * @param file файл изображения.
-     * @return содержимое изображения.
-     */
-    private byte[] getImageContent(MultipartFile file) throws IOException {
-        String contentType = file.getContentType();
-        String fileNameOriginal = file.getOriginalFilename();
-        String ext = getExtension(fileNameOriginal);
-
-        byte[] imageByte = file.getBytes();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ByteArrayInputStream bais = new ByteArrayInputStream(imageByte);
-
-        BufferedImage imgIn = ImageIO.read(bais);
-        if (imgIn == null) {
-            return null;
-        }
-
-        double height = imgIn.getHeight() / (imgIn.getWidth() / 250d);
-        BufferedImage imgOut = new BufferedImage(250, (int) height, imgIn.getType());
-        Graphics2D graphics = imgOut.createGraphics();
-        graphics.drawImage((Image) imgIn, 0, 0, 250, (int) height, null);
-        graphics.dispose();
-
-        ImageIO.write(imgOut, ext, baos);
-
-        return baos.toByteArray();
-    }
-
-    /**
-     * Возвращает изображение по указанному ID.
-     *
-     * @param id ID изображения.
-     * @return изображение.
-     * @throws NotFoundException изображение с указанным ID отсутствует в базе.
-     */
-    public AdsImageEntity findImage(Long id) {
-        return adsImageRepository.findById(id).orElseThrow(
-                () -> new NotFoundException("Image not found"));
     }
 }
