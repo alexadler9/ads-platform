@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import pro.sky.adsplatform.entity.AdsCommentEntity;
-import pro.sky.adsplatform.exception.NoContentException;
 import pro.sky.adsplatform.exception.NotFoundException;
 import pro.sky.adsplatform.repository.AdsCommentRepository;
 
@@ -37,19 +36,6 @@ public class AdsCommentService {
     }
 
     /**
-     * Возвращает отзыв для объявления по указанному ID.
-     *
-     * @param id ID отзыва.
-     * @param idAds ID объявления.
-     * @return отзыв.
-     * @throws NoContentException отзыв с указанным ID отсутствует в базе.
-     */
-    public AdsCommentEntity findAdsCommentContent(long id, long idAds) {
-        return adsCommentRepository.findFirstByIdAndAdsId(id, idAds).orElseThrow(
-                () -> new NoContentException("No content for comment"));
-    }
-
-    /**
      * Возвращает все отзывы для объявления.
      *
      * @param idAds ID объявления.
@@ -77,10 +63,10 @@ public class AdsCommentService {
      * @param id ID отзыва.
      * @param idAds ID объявления.
      * @return обновленный отзыв.
-     * @throws NoContentException отзыв с указанными параметрами отсутствует в базе.
+     * @throws NotFoundException отзыв с указанными параметрами отсутствует в базе.
      */
     public AdsCommentEntity updateAdsComment(AdsCommentEntity adsComment, long id, long idAds) {
-        AdsCommentEntity adsCommentBD = findAdsCommentContent(id, idAds);
+        AdsCommentEntity adsCommentBD = findAdsComment(id, idAds);
         adsCommentBD.setText(adsComment.getText());
 
         return adsCommentRepository.save(adsCommentBD);

@@ -50,14 +50,15 @@ public class UserController {
             responses = {
                     @ApiResponse(responseCode = "200", description = "Список успешно получен"),
                     @ApiResponse(responseCode = "401", description = "Требуется авторизация"),
-                    @ApiResponse(responseCode = "403", description = "Доступ запрещен")
+                    @ApiResponse(responseCode = "403", description = "Доступ запрещен"),
+                    @ApiResponse(responseCode = "404", description = "Пользователь не найден")
             }
     )
     @GetMapping("/me")
     public ResponseEntity<UserDto> meUser(Authentication authentication) {
         LOGGER.info("Получить текущего пользователя: {}", authentication.getName());
 
-        return ResponseEntity.ok(userMapper.userToUserDto(userService.findUserContentByName(authentication.getName())));
+        return ResponseEntity.ok(userMapper.userToUserDto(userService.findUserByName(authentication.getName())));
     }
 
     /**
@@ -68,9 +69,9 @@ public class UserController {
             tags = {"Пользователи"},
             responses = {
                     @ApiResponse(responseCode = "200", description = "Данные пользователя успешно обновлены"),
-                    @ApiResponse(responseCode = "204", description = "Пользователь не найден"),
                     @ApiResponse(responseCode = "401", description = "Требуется авторизация"),
-                    @ApiResponse(responseCode = "403", description = "Доступ запрещен")
+                    @ApiResponse(responseCode = "403", description = "Доступ запрещен"),
+                    @ApiResponse(responseCode = "404", description = "Пользователь не найден"),
             }
     )
     @PatchMapping("/me")
@@ -81,7 +82,7 @@ public class UserController {
     ) {
         LOGGER.info("Обновление данных пользователя: {}", userDto);
 
-        UserEntity user = userService.findUserContentByName(authentication.getName());
+        UserEntity user = userService.findUserByName(authentication.getName());
         userDto.setEmail(authentication.getName());
         userDto.setId(Math.toIntExact(user.getId()));
 

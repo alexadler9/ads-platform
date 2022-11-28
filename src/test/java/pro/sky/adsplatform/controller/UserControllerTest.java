@@ -103,7 +103,7 @@ class UserControllerTest {
 
     @Test
     @WithMockUser(username = SECURITY_USER_NAME, password = SECURITY_USER_PASSWORD, roles = SECURITY_USER_ROLE)
-    void shouldReturnNoContentWhenUpdateUserData() throws Exception {
+    void shouldReturnNotFoundWhenUpdateUserData() throws Exception {
         final Long id = 1L;
 
         when(userRepository.findByUsername(any(String.class))).thenReturn(Optional.empty());
@@ -113,7 +113,7 @@ class UserControllerTest {
                         .content(objectMapper.writeValueAsString(USER_DTO))
                         .contentType(MediaType.APPLICATION_JSON)
                 )
-                .andExpect(status().isNoContent());
+                .andExpect(status().isNotFound());
     }
 
     @Test

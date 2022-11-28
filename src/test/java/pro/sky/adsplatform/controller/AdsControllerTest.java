@@ -206,7 +206,7 @@ class AdsControllerTest {
 
     @Test
     @WithMockUser(username = SECURITY_USER_NAME, password = SECURITY_USER_PASSWORD, roles = SECURITY_USER_ROLE)
-    void shouldReturnNoContentWhenUpdateAdsForMissingAds() throws Exception {
+    void shouldReturnNotFoundWhenUpdateAdsForMissingAds() throws Exception {
         final Long id = 1L;
 
         when(adsRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
@@ -216,7 +216,7 @@ class AdsControllerTest {
                         .content(objectMapper.writeValueAsString(ADS_DTO))
                         .contentType(MediaType.APPLICATION_JSON)
                 )
-                .andExpect(status().isNoContent());
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -376,14 +376,14 @@ class AdsControllerTest {
 
     @Test
     @WithMockUser(username = SECURITY_USER_NAME, password = SECURITY_USER_PASSWORD, roles = SECURITY_USER_ROLE)
-    void shouldReturnNoContentWhenDeleteAdsForMissingAds() throws Exception {
+    void shouldReturnNotFoundWhenDeleteAdsForMissingAds() throws Exception {
         final Long id = 1L;
 
         when(adsRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
         doNothing().when(adsRepository).delete(any(AdsEntity.class));
 
         mockMvc.perform(delete("http://localhost:3000/ads/{id}", id))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isNotFound());
     }
 
     /**
@@ -491,7 +491,7 @@ class AdsControllerTest {
 
     @Test
     @WithMockUser(username = SECURITY_USER_NAME, password = SECURITY_USER_PASSWORD, roles = SECURITY_USER_ROLE)
-    void shouldReturnNoContentWhenUpdateImageForMissingAds() throws Exception {
+    void shouldReturnNotFoundWhenUpdateImageForMissingAds() throws Exception {
         final Long id = 1L;
         final MockMultipartFile file = new MockMultipartFile("image", "image.jpeg", "image/jpeg", new byte[] { 0x00 });
 
@@ -502,7 +502,7 @@ class AdsControllerTest {
         builder.with(request -> { request.setMethod("PATCH"); return request; });
 
         mockMvc.perform(builder.file(file))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isNotFound());
     }
 
     /**
@@ -648,7 +648,7 @@ class AdsControllerTest {
 
     @Test
     @WithMockUser(username = SECURITY_USER_NAME, password = SECURITY_USER_PASSWORD, roles = SECURITY_USER_ROLE)
-    void shouldReturnNoContentWhenUpdateCommentForMissingComment() throws Exception {
+    void shouldReturnNotFoundWhenUpdateCommentForMissingComment() throws Exception {
         final Long adPk = 1L;
         final Long id = 1L;
 
@@ -659,7 +659,7 @@ class AdsControllerTest {
                         .content(objectMapper.writeValueAsString(ADS_COMMENT_DTO))
                         .contentType(MediaType.APPLICATION_JSON)
                 )
-                .andExpect(status().isNoContent());
+                .andExpect(status().isNotFound());
     }
 
     @Test

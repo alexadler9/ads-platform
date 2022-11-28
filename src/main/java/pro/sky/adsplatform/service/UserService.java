@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import pro.sky.adsplatform.entity.UserEntity;
-import pro.sky.adsplatform.exception.NoContentException;
 import pro.sky.adsplatform.exception.NotFoundException;
 import pro.sky.adsplatform.repository.UserRepository;
 
@@ -48,18 +47,6 @@ public class UserService {
     }
 
     /**
-     * Возвращает пользователя по указанному username.
-     *
-     * @param username username пользователя.
-     * @return пользователь.
-     * @throws NoContentException пользователь с указанным username отсутствует в базе.
-     */
-    public UserEntity findUserContentByName(String username) {
-        return userRepository.findByUsername(username).orElseThrow(
-                () -> new NoContentException("No content for user"));
-    }
-
-    /**
      * Возвращает всех пользователей.
      *
      * @return список всех пользователей.
@@ -73,10 +60,10 @@ public class UserService {
      *
      * @param user обновленные данные пользователя.
      * @return обновленный пользователь.
-     * @throws NoContentException пользователь с указанными параметрами отсутствует в базе.
+     * @throws NotFoundException пользователь с указанными параметрами отсутствует в базе.
      */
     public UserEntity updateUser(UserEntity user) {
-        UserEntity userBD = findUserContentByName(user.getUsername());
+        UserEntity userBD = findUserByName(user.getUsername());
         userBD.setFirstName(user.getFirstName());
         userBD.setLastName(user.getLastName());
         userBD.setPhone(user.getPhone());

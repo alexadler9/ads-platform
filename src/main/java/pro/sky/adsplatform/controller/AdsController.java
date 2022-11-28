@@ -75,7 +75,7 @@ public class AdsController {
                     @ApiResponse(responseCode = "200", description = "Объявление успешно добавлено"),
                     @ApiResponse(responseCode = "401", description = "Требуется авторизация"),
                     @ApiResponse(responseCode = "403", description = "Доступ запрещен"),
-                    @ApiResponse(responseCode = "404", description = "Автор не найден")
+                    @ApiResponse(responseCode = "404", description = "Автор и/или содержимое изображения не найдено")
             }
     )
     @PreAuthorize("hasAuthority('ROLE_USER')")
@@ -162,9 +162,9 @@ public class AdsController {
             tags = {"Объявления"},
             responses = {
                     @ApiResponse(responseCode = "200", description = "Отзыв успешно удален"),
-                    @ApiResponse(responseCode = "204", description = "Объявление не найдено"),
                     @ApiResponse(responseCode = "401", description = "Требуется авторизация"),
-                    @ApiResponse(responseCode = "403", description = "Доступ запрещен")
+                    @ApiResponse(responseCode = "403", description = "Доступ запрещен"),
+                    @ApiResponse(responseCode = "404", description = "Объявление не найдено"),
             }
     )
     @PreAuthorize("hasAuthority('ROLE_USER')")
@@ -178,7 +178,7 @@ public class AdsController {
     ) {
         LOGGER.info("Удаление отзыва {}", id);
 
-        UserEntity authorComment = adsCommentService.findAdsCommentContent(id, Long.parseLong(adPk)).getAuthor();
+        UserEntity authorComment = adsCommentService.findAdsComment(id, Long.parseLong(adPk)).getAuthor();
         if (!authService.hasRole(authentication.getName(), UserEntity.UserRole.ADMIN.name()) &&
                 !authentication.getName().equals(authorComment.getUsername())) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
@@ -310,9 +310,9 @@ public class AdsController {
             tags = {"Объявления"},
             responses = {
                     @ApiResponse(responseCode = "200", description = "Объявление успешно удалено"),
-                    @ApiResponse(responseCode = "204", description = "Объявление не найдено"),
                     @ApiResponse(responseCode = "401", description = "Требуется авторизация"),
-                    @ApiResponse(responseCode = "403", description = "Доступ запрещен")
+                    @ApiResponse(responseCode = "403", description = "Доступ запрещен"),
+                    @ApiResponse(responseCode = "404", description = "Объявление не найдено"),
             }
     )
     @PreAuthorize("hasAuthority('ROLE_USER')")
@@ -324,7 +324,7 @@ public class AdsController {
     ) {
         LOGGER.info("Удаление объявления {}", id);
 
-        UserEntity author = adsService.findAdsContent(id).getAuthor();
+        UserEntity author = adsService.findAds(id).getAuthor();
         if (!authService.hasRole(authentication.getName(), UserEntity.UserRole.ADMIN.name()) &&
                 !authentication.getName().equals(author.getUsername())) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
@@ -340,9 +340,9 @@ public class AdsController {
             tags = {"Объявления"},
             responses = {
                     @ApiResponse(responseCode = "200", description = "Отзыв успешно обновлен"),
-                    @ApiResponse(responseCode = "204", description = "Отзыв не найден"),
                     @ApiResponse(responseCode = "401", description = "Требуется авторизация"),
-                    @ApiResponse(responseCode = "403", description = "Доступ запрещен")
+                    @ApiResponse(responseCode = "403", description = "Доступ запрещен"),
+                    @ApiResponse(responseCode = "404", description = "Отзыв не найден")
             }
     )
     @PreAuthorize("hasAuthority('ROLE_USER')")
@@ -358,7 +358,7 @@ public class AdsController {
     ) {
         LOGGER.info("Обновление отзыва {} : {}", id, adsCommentDto);
 
-        UserEntity authorComment = adsCommentService.findAdsCommentContent(id, Long.parseLong(adPk)).getAuthor();
+        UserEntity authorComment = adsCommentService.findAdsComment(id, Long.parseLong(adPk)).getAuthor();
         if (!authService.hasRole(authentication.getName(), UserEntity.UserRole.ADMIN.name()) &&
                 !authentication.getName().equals(authorComment.getUsername())) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
@@ -375,9 +375,9 @@ public class AdsController {
             tags = {"Объявления"},
             responses = {
                     @ApiResponse(responseCode = "200", description = "Объявление успешно обновлено"),
-                    @ApiResponse(responseCode = "204", description = "Объявление не найдено"),
                     @ApiResponse(responseCode = "401", description = "Требуется авторизация"),
-                    @ApiResponse(responseCode = "403", description = "Доступ запрещен")
+                    @ApiResponse(responseCode = "403", description = "Доступ запрещен"),
+                    @ApiResponse(responseCode = "404", description = "Объявление не найдено"),
             }
     )
     @PreAuthorize("hasAuthority('ROLE_USER')")
@@ -391,7 +391,7 @@ public class AdsController {
     ) {
         LOGGER.info("Обновление объявления {} : {}", id, adsDto);
 
-        AdsEntity ads = adsService.findAdsContent(id);
+        AdsEntity ads = adsService.findAds(id);
 
         UserEntity author = ads.getAuthor();
         if (!authService.hasRole(authentication.getName(), UserEntity.UserRole.ADMIN.name()) &&
@@ -399,7 +399,7 @@ public class AdsController {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
-        AdsEntity adsUpdated = adsService.updateAds(adsMapper.adsDtoToAds(adsDto), id);
+        AdsEntity adsUpdated = adsService.updateAds2(adsMapper.adsDtoToAds(adsDto), id);
 
         return ResponseEntity.ok(adsMapper.adsToAdsDto(adsUpdated));
     }
@@ -429,9 +429,9 @@ public class AdsController {
             tags = {"Объявления"},
             responses = {
                     @ApiResponse(responseCode = "200", description = "Изображение успешно добавлено"),
-                    @ApiResponse(responseCode = "204", description = "Объявление и/или содержимое изображения не найдено"),
                     @ApiResponse(responseCode = "401", description = "Требуется авторизация"),
-                    @ApiResponse(responseCode = "403", description = "Доступ запрещен")
+                    @ApiResponse(responseCode = "403", description = "Доступ запрещен"),
+                    @ApiResponse(responseCode = "404", description = "Объявление и/или содержимое изображения не найдено"),
             }
     )
     @PreAuthorize("hasAuthority('ROLE_USER')")
@@ -445,7 +445,7 @@ public class AdsController {
     ) {
         LOGGER.info("Добавление изображения для объявления {}", id);
 
-        AdsEntity ads = adsService.findAdsContent(id);
+        AdsEntity ads = adsService.findAds(id);
 
         UserEntity author = ads.getAuthor();
         if (!authService.hasRole(authentication.getName(), UserEntity.UserRole.ADMIN.name()) &&
