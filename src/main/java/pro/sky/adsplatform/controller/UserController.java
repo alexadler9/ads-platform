@@ -45,7 +45,7 @@ public class UserController {
      * Возвращает список всех пользователей.
      */
     @Operation(
-            summary = "Получить список пользователей",
+            summary = "Получить пользователя",
             tags = {"Пользователи"},
             responses = {
                     @ApiResponse(responseCode = "200", description = "Список успешно получен"),
@@ -54,13 +54,8 @@ public class UserController {
             }
     )
     @GetMapping("/me")
-    public ResponseEntity<ResponseWrapperUserDto> getUsers() {
-        LOGGER.info("Получение списка пользователей");
-
-        List<UserEntity> userList = userService.findAllUsers();
-
-        return ResponseEntity.ok(responseWrapperUserMapper
-                .userListToResponseWrapperUserDto(userList.size(), userList));
+    public ResponseEntity<UserDto> meUser(Authentication authentication) {
+        return ResponseEntity.ok(userMapper.userToUserDto(userService.findUserContentByName(authentication.getName())));
     }
 
     /**
