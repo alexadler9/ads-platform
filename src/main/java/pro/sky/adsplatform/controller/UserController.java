@@ -42,10 +42,10 @@ public class UserController {
     }
 
     /**
-     * Возвращает список всех пользователей.
+     * Возвращает текущего пользователя.
      */
     @Operation(
-            summary = "Получить пользователя",
+            summary = "Получить текущего пользователя",
             tags = {"Пользователи"},
             responses = {
                     @ApiResponse(responseCode = "200", description = "Список успешно получен"),
@@ -55,6 +55,8 @@ public class UserController {
     )
     @GetMapping("/me")
     public ResponseEntity<UserDto> meUser(Authentication authentication) {
+        LOGGER.info("Получить текущего пользователя: {}", authentication.getName());
+
         return ResponseEntity.ok(userMapper.userToUserDto(userService.findUserContentByName(authentication.getName())));
     }
 
