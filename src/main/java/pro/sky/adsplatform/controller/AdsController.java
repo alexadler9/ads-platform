@@ -177,10 +177,8 @@ public class AdsController {
             @PathVariable("id") Integer id
     ) {
         LOGGER.info("Удаление отзыва {}", id);
-        adsCommentService.findAdsCommentContent(id, Long.parseLong(adPk));
 
-        UserEntity authorComment = adsCommentService.findAdsComment(id, Long.parseLong(adPk)).getAuthor();
-
+        UserEntity authorComment = adsCommentService.findAdsCommentContent(id, Long.parseLong(adPk)).getAuthor();
         if (!authService.hasRole(authentication.getName(), UserEntity.UserRole.ADMIN.name()) &&
                 !authentication.getName().equals(authorComment.getUsername())) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
@@ -342,7 +340,7 @@ public class AdsController {
             tags = {"Объявления"},
             responses = {
                     @ApiResponse(responseCode = "200", description = "Отзыв успешно обновлен"),
-                    @ApiResponse(responseCode = "204", description = "Объявление и/или отзыв не найдены"),
+                    @ApiResponse(responseCode = "204", description = "Отзыв не найден"),
                     @ApiResponse(responseCode = "401", description = "Требуется авторизация"),
                     @ApiResponse(responseCode = "403", description = "Доступ запрещен")
             }
@@ -360,8 +358,7 @@ public class AdsController {
     ) {
         LOGGER.info("Обновление отзыва {} : {}", id, adsCommentDto);
 
-        UserEntity authorComment = adsCommentService.findAdsComment(id, Long.parseLong(adPk)).getAuthor();
-
+        UserEntity authorComment = adsCommentService.findAdsCommentContent(id, Long.parseLong(adPk)).getAuthor();
         if (!authService.hasRole(authentication.getName(), UserEntity.UserRole.ADMIN.name()) &&
                 !authentication.getName().equals(authorComment.getUsername())) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
