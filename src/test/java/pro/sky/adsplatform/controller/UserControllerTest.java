@@ -2,19 +2,24 @@ package pro.sky.adsplatform.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMultipartHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import pro.sky.adsplatform.dto.NewPasswordDto;
+import pro.sky.adsplatform.entity.AvatarEntity;
 import pro.sky.adsplatform.entity.UserEntity;
 
+import pro.sky.adsplatform.repository.AvatarRepository;
 import pro.sky.adsplatform.repository.UserRepository;
 
 import java.util.Optional;
@@ -41,6 +46,9 @@ class UserControllerTest {
 
     @MockBean
     UserRepository userRepository;
+
+    @MockBean
+    AvatarRepository avatarRepository;
 
     @MockBean
     UserDetailsManager manager;
@@ -113,6 +121,79 @@ class UserControllerTest {
                         .content(objectMapper.writeValueAsString(USER_DTO))
                         .contentType(MediaType.APPLICATION_JSON)
                 )
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(username = SECURITY_USER_NAME, password = SECURITY_USER_PASSWORD, roles = SECURITY_USER_ROLE)
+    void shouldReturnOkWhenUpdateUserImage() throws Exception {
+        final MockMultipartFile file = new MockMultipartFile("image", "image.jpeg", "image/jpeg", new byte[] { 0x00 });
+
+        when(userRepository.findByUsername(any(String.class))).thenReturn(Optional.of(USER));
+        when(avatarRepository.save(any(AvatarEntity.class))).thenReturn(AVATAR_IMAGE);
+
+        MockMultipartHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart("http://localhost:3000/users/me/image");
+        builder.with(request -> { request.setMethod("PATCH"); return request; });
+
+        mockMvc.perform(builder.file(file))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void shouldReturnUnauthorizedWhenUpdateUserImage() throws Exception {
+        final MockMultipartFile file = new MockMultipartFile("image", "image.jpeg", "image/jpeg", new byte[] { 0x00 });
+
+        when(userRepository.findByUsername(any(String.class))).thenReturn(Optional.of(USER));
+        when(avatarRepository.save(any(AvatarEntity.class))).thenReturn(AVATAR_IMAGE);
+
+        MockMultipartHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart("http://localhost:3000/users/me/image");
+        builder.with(request -> { request.setMethod("PATCH"); return request; });
+
+        mockMvc.perform(builder.file(file))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser(username = SECURITY_USER_NAME, password = SECURITY_USER_PASSWORD, roles = SECURITY_USER_ROLE)
+    void shouldReturnNotFoundWhenUpdateUserImage() throws Exception {
+        final MockMultipartFile file = new MockMultipartFile("image", "image.jpeg", "image/jpeg", new byte[] { 0x00 });
+
+        when(userRepository.findByUsername(any(String.class))).thenReturn(Optional.empty());
+        when(avatarRepository.save(any(AvatarEntity.class))).thenReturn(AVATAR_IMAGE);
+
+        MockMultipartHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart("http://localhost:3000/users/me/image");
+        builder.with(request -> { request.setMethod("PATCH"); return request; });
+
+        mockMvc.perform(builder.file(file))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(username = SECURITY_USER_NAME, password = SECURITY_USER_PASSWORD, roles = SECURITY_USER_ROLE)
+    void shouldReturnOkWhenGetUserImage() throws Exception {
+        when(userRepository.findByUsername(any(String.class))).thenReturn(Optional.of(USER));
+        when(avatarRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(AVATAR_IMAGE));
+
+        mockMvc.perform(get("http://localhost:3000/users/me/image"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void shouldReturnUnauthorizedWhenGetUserImage() throws Exception {
+        when(userRepository.findByUsername(any(String.class))).thenReturn(Optional.of(USER));
+        when(avatarRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(AVATAR_IMAGE));
+
+        mockMvc.perform(get("http://localhost:3000/users/me/image"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @WithMockUser(username = SECURITY_USER_NAME, password = SECURITY_USER_PASSWORD, roles = SECURITY_USER_ROLE)
+    void shouldReturnNotFoundWhenGetUserImage() throws Exception {
+        when(userRepository.findByUsername(any(String.class))).thenReturn(Optional.of(USER));
+        when(avatarRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("http://localhost:3000/users/me/image"))
                 .andExpect(status().isNotFound());
     }
 

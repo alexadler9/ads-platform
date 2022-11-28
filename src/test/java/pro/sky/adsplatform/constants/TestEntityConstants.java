@@ -1,9 +1,6 @@
 package pro.sky.adsplatform.constants;
 
-import pro.sky.adsplatform.entity.AdsCommentEntity;
-import pro.sky.adsplatform.entity.AdsEntity;
-import pro.sky.adsplatform.entity.AdsImageEntity;
-import pro.sky.adsplatform.entity.UserEntity;
+import pro.sky.adsplatform.entity.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -19,6 +16,8 @@ public class TestEntityConstants {
     public static final AdsCommentEntity ADS_COMMENT;
 
     public static final AdsImageEntity ADS_IMAGE;
+
+    public static final AvatarEntity AVATAR_IMAGE;
 
     static {
         USER = new UserEntity();
@@ -53,5 +52,9 @@ public class TestEntityConstants {
         ADS_IMAGE.setId(1L);
         ADS_IMAGE.setImage(imageBytes);
         ADS_IMAGE.setAds(ADS);
+
+        AVATAR_IMAGE = new AvatarEntity();
+        AVATAR_IMAGE.setUser(USER);
+        AVATAR_IMAGE.setImage(imageBytes);
     }
 }
