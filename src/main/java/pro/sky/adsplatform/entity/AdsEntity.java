@@ -1,7 +1,9 @@
 package pro.sky.adsplatform.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.hibernate.annotations.DynamicInsert;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -11,7 +13,9 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "ads")
-@DynamicInsert
+@Getter
+@Setter
+@NoArgsConstructor
 public class AdsEntity {
     @Id
     @Column(columnDefinition = "bigserial")
@@ -34,57 +38,6 @@ public class AdsEntity {
     @JsonIgnore
     @OneToMany(mappedBy = "ads", fetch = FetchType.EAGER)
     private List<AdsImageEntity> images;
-
-    public AdsEntity() {
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public UserEntity getAuthor() {
-        return author;
-    }
-
-    public void setAuthor(UserEntity author) {
-        this.author = author;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
-
-    public List<AdsImageEntity> getImages() {
-        return images;
-    }
-
-    public void setImages(List<AdsImageEntity> images) {
-        this.images = images;
-    }
 
     public AdsImageEntity getLastImage() {
         return ((images == null) || (images.size()) == 0) ? null : images.get(images.size() - 1);

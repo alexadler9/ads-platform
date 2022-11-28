@@ -1,6 +1,8 @@
 package pro.sky.adsplatform.entity;
 
-import org.hibernate.annotations.DynamicInsert;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.Arrays;
@@ -8,7 +10,9 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "ads_images")
-@DynamicInsert
+@Getter
+@Setter
+@NoArgsConstructor
 public class AdsImageEntity {
     @Id
     @Column(columnDefinition = "bigserial")
@@ -20,33 +24,6 @@ public class AdsImageEntity {
     private AdsEntity ads;
 
     private byte[] image;
-
-    public AdsImageEntity() {
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public AdsEntity getAds() {
-        return ads;
-    }
-
-    public void setAds(AdsEntity ads) {
-        this.ads = ads;
-    }
-
-    public byte[] getImage() {
-        return image;
-    }
-
-    public void setImage(byte[] image) {
-        this.image = image;
-    }
 
     @Override
     public boolean equals(Object o) {
