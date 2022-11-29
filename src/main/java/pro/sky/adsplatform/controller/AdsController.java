@@ -383,9 +383,9 @@ public class AdsController {
             @Parameter(description = "ID объявления")
             @PathVariable("id") Integer id,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Параметры объявления")
-            @RequestBody AdsDto adsDto
+            @RequestBody CreateAdsDto createAdsDto
     ) {
-        LOGGER.info("Обновление объявления {} : {}", id, adsDto);
+        LOGGER.info("Обновление объявления {} : {}", id, createAdsDto);
 
         AdsEntity ads = adsService.findAds(id);
 
@@ -395,8 +395,7 @@ public class AdsController {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
-        AdsEntity adsUpdated = adsService.updateAds(adsMapper.adsDtoToAds(adsDto), id);
-
+        AdsEntity adsUpdated = adsService.updateAds(createAdsMapper.createAdsDtoToAds(createAdsDto), id);
         return ResponseEntity.ok(adsMapper.adsToAdsDto(adsUpdated));
     }
 

@@ -88,6 +88,7 @@ public class AdsService {
         adsBD.setId(id);
         adsBD.setPrice(ads.getPrice());
         adsBD.setTitle(ads.getTitle());
+        adsBD.setDescription(ads.getDescription());
 
         return adsRepository.save(adsBD);
     }
