@@ -150,11 +150,7 @@ public class AdsController {
 
         AdsImageEntity adsImage = adsImageService.findImage(Long.valueOf(pk));
 
-        HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setContentType(MediaType.parseMediaType("image/jpeg"));
-        httpHeaders.setContentLength(adsImage.getImage().length);
-
-        return ResponseEntity.status(HttpStatus.OK).headers(httpHeaders).body(adsImage.getImage());
+        return ResponseEntity.status(HttpStatus.OK).body(adsImage.getImage());
     }
 
     @Operation(
