@@ -43,26 +43,4 @@ public class AdsEntity {
         return ((images == null) || (images.size()) == 0) ? null : images.get(images.size() - 1);
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        AdsEntity adsEntity = (AdsEntity) o;
-        return id.equals(adsEntity.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
-
-    @Override
-    public String toString() {
-        return "AdsEntity{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
-                ", description='" + description + '\'' +
-                ", price=" + price +
-                '}';
-    }
 }

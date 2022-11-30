@@ -15,7 +15,7 @@ import java.util.Objects;
 @NoArgsConstructor
 public class AvatarEntity {
     @Id
-    @Column(name="id_user")
+    @Column(name = "id_user")
     private Long id;
 
     @MapsId
@@ -25,25 +25,4 @@ public class AvatarEntity {
 
     private byte[] image;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        AvatarEntity that = (AvatarEntity) o;
-        return id.equals(that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
-
-    @Override
-    public String toString() {
-        return "AvatarEntity{" +
-                "id=" + id +
-                ", user=" + user +
-                ", image=" + Arrays.toString(image) +
-                '}';
-    }
 }

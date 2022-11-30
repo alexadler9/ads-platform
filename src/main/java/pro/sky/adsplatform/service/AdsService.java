@@ -79,11 +79,11 @@ public class AdsService {
      * Обновляет содержание объявления (поля price и title).
      *
      * @param ads обновленные данные объявления.
-     * @param id ID объявления.
+     * @param id  ID объявления.
      * @return обновленное объявление.
      * @throws NotFoundException объявление с указанными параметрами отсутствует в базе.
-      */
-    public AdsEntity updateAds(AdsEntity ads, long id)  {
+     */
+    public AdsEntity updateAds(AdsEntity ads, long id) {
         AdsEntity adsBD = findAds(id);
         adsBD.setId(id);
         adsBD.setPrice(ads.getPrice());

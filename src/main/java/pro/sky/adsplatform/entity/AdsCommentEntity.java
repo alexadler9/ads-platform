@@ -35,27 +35,4 @@ public class AdsCommentEntity {
     @NotNull
     private String text;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        AdsCommentEntity that = (AdsCommentEntity) o;
-        return id.equals(that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
-
-    @Override
-    public String toString() {
-        return "AdsCommentEntity{" +
-                "id=" + id +
-                ", author=" + author +
-                ", ads=" + ads +
-                ", dateTime=" + dateTime +
-                ", text='" + text + '\'' +
-                '}';
-    }
 }

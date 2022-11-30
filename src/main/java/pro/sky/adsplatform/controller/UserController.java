@@ -109,7 +109,7 @@ public class UserController {
             }
     )
     @PatchMapping(value = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Void> updateUserImage (
+    public ResponseEntity<Void> updateUserImage(
             Authentication authentication,
             @Parameter(description = "Изображение")
             @RequestParam MultipartFile image
@@ -136,7 +136,7 @@ public class UserController {
             }
     )
     @GetMapping(value = "/me/image")
-    public ResponseEntity<byte[]> getUserImage (
+    public ResponseEntity<byte[]> getUserImage(
             Authentication authentication
     ) {
         LOGGER.info("Получение изображения пользователя {}", authentication.getName());

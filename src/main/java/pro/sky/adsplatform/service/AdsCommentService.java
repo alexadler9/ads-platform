@@ -25,7 +25,7 @@ public class AdsCommentService {
     /**
      * Возвращает отзыв для объявления по указанному ID.
      *
-     * @param id ID отзыва.
+     * @param id    ID отзыва.
      * @param idAds ID объявления.
      * @return отзыв.
      * @throws NotFoundException отзыв с указанным ID отсутствует в базе.
@@ -60,8 +60,8 @@ public class AdsCommentService {
      * Обновляет содержание отзыва (поле text).
      *
      * @param adsComment обновленные данные отзыва.
-     * @param id ID отзыва.
-     * @param idAds ID объявления.
+     * @param id         ID отзыва.
+     * @param idAds      ID объявления.
      * @return обновленный отзыв.
      * @throws NotFoundException отзыв с указанными параметрами отсутствует в базе.
      */

@@ -40,7 +40,7 @@ public class AdsImageService {
     /**
      * Создает новое изображение для объявления.
      *
-     * @param ads объявление.
+     * @param ads  объявление.
      * @param file файл изображения.
      * @return ID созданного изображения.
      * @throws NotFoundException не удалось извлечь содержимое изображения.

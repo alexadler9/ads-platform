@@ -78,7 +78,7 @@ public class AuthService {
      * Регистрирует нового пользователя.
      *
      * @param registerReq данные для регистрации пользователя.
-     * @param role роль пользователя.
+     * @param role        роль пользователя.
      * @throws BadRequestException пользователь уже зарегистрирован.
      * @throws BadRequestException пользователь отсутствует в базе данных после регистрации.
      */
@@ -97,7 +97,7 @@ public class AuthService {
         );
 
         UserEntity userBD = userRepository.findByUsername(registerReq.getUsername()).orElseThrow(
-                ()-> new BadRequestException("User not found"));
+                () -> new BadRequestException("User not found"));
 
         UserEntity user = registerReqMapper.registerReqDtoToUser(registerReq);
         user.setId(userBD.getId());
@@ -138,7 +138,7 @@ public class AuthService {
      * Определяет, относится ли пользователь к указанной роли.
      *
      * @param username имя пользователя.
-     * @param role роль.
+     * @param role     роль.
      * @return true, если пользователь относится к указанной роли, иначе false.
      */
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
