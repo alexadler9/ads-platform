@@ -22,6 +22,7 @@ import pro.sky.adsplatform.entity.UserEntity;
 import pro.sky.adsplatform.mapper.*;
 import pro.sky.adsplatform.service.*;
 
+import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -83,7 +84,7 @@ public class AdsController {
     public ResponseEntity<AdsDto> addAds(
             Authentication authentication,
             @Parameter(description = "Параметры объявления")
-            @RequestPart("properties") CreateAdsDto createAdsDto,
+            @RequestPart("properties") @Valid CreateAdsDto createAdsDto,
             @Parameter(description = "Изображение")
             @RequestPart("image") MultipartFile file
     ) {
@@ -383,7 +384,7 @@ public class AdsController {
             @Parameter(description = "ID объявления")
             @PathVariable("id") Integer id,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Параметры объявления")
-            @RequestBody CreateAdsDto createAdsDto
+            @RequestBody @Valid CreateAdsDto createAdsDto
     ) {
         LOGGER.info("Обновление объявления {} : {}", id, createAdsDto);
 

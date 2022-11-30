@@ -22,6 +22,8 @@ import pro.sky.adsplatform.service.AuthService;
 import pro.sky.adsplatform.service.AvatarService;
 import pro.sky.adsplatform.service.UserService;
 
+import javax.validation.Valid;
+
 
 @CrossOrigin(value = "http://localhost:3000")
 @RestController
@@ -82,7 +84,7 @@ public class UserController {
     public ResponseEntity<UserDto> updateUser(
             Authentication authentication,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Параметры пользователя")
-            @RequestBody UserDto userDto
+            @RequestBody @Valid UserDto userDto
     ) {
         LOGGER.info("Обновление данных пользователя {}: {}", authentication.getName(), userDto);
 
@@ -167,7 +169,7 @@ public class UserController {
     public ResponseEntity<NewPasswordDto> setPassword(
             Authentication authentication,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Параметры пароля")
-            @RequestBody NewPasswordDto newPasswordDto
+            @RequestBody @Valid NewPasswordDto newPasswordDto
     ) {
         LOGGER.info("Обновление пароля пользователя {}: {}", authentication.getName(), newPasswordDto);
 
